@@ -21,3 +21,14 @@ def tela_cadastro(request: Request):
 def tela_login(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
+# Criar o usuario no banco - cadastrar usuario
+@router.post("/cadastro")
+def cadastrar_usuario(
+    request: Request,
+    nome: str = Form(...),
+    email: str = Form(...),
+    senha: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    
+
