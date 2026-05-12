@@ -77,3 +77,15 @@ def deshboard(request: Request, usuario = Depends(get_usuario_logado)):
         "dashboard.html",
         {"request": request, "usuario": usuario}
     )
+
+# rotas para adiministradores
+@router.get("/usuarios")
+def listar_usuarios(request: Request, usuario = Depends(get_usuario_logado), db: Session = Depends(get_db)):
+    if usuario.get("role") != "admin":
+        return RedirectResponse(url="/auth/login", status_code=302)
+
+    usuarios = db.query(Usuario).all()
+    return templates.TemplateResponse(
+        "admin/usuarios.html",
+        {"request": request, "usuario": usuario, "usuarios": usuarios}
+    )
