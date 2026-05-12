@@ -5,7 +5,7 @@
 from datetime import datetime, timedelta, timezone
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Request, HTTPException, status
+from fastapi import Request, HTTPException, status, Depends
 from dotenv import load_dotenv
 import os
 
@@ -70,3 +70,13 @@ def get_usuario_opcional(request: Request):
         return get_usuario_logado(request)
     except HTTPException:
         return None
+    
+def exigir_role(role_necessaria: str):
+    def verificar(usuario = Depends(get_usuario_logado)):
+        if usuario.get("role") != role_necessaria:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Permissao negada"
+            )
+    return verificar
+
