@@ -6,7 +6,7 @@ import bcrypt
 
 from app.database import get_db
 from app.models.usuario import Usuario
-from app.auth import hash_senha, verificar_senha, criar_token
+from app.auth import hash_senha, verificar_senha, criar_token, get_usuario_logado
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
@@ -70,3 +70,10 @@ def logout():
     response.delete_cookie("access_token")
     return response
 
+# rota para qualquer usuario logado
+@router.get("/dashboard")
+def deshboard(request: Request, usuario = Depends(get_usuario_logado)):
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {"request": request, "usuario": usuario}
+    )
