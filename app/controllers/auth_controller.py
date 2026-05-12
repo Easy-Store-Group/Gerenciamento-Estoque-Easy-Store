@@ -32,3 +32,20 @@ def cadastrar_usuario(
 ):
     
 
+ #Verificar se o e-mail está cadastrado
+    usuario_existente = db.query(Usuario).filter_by(email=email).first()
+
+    if usuario_existente:
+        return templates.TemplateResponse(
+            request,
+            "auth/cadastro.html",
+            {"request": request, "erro": "Este e-mail já está cadastrado"}
+        )
+    #Criar o novo usuario com senha hash
+    novo_usuario = Usuario(nome=nome, email=email, senha_hash=hash_senha(senha))  
+
+    db.add(novo_usuario)
+    db.commit()
+
+    # Redirecionar para login após cadastro
+    return  RedirectResponse(url="/auth/login?cadastro=ok",status_code=302)
