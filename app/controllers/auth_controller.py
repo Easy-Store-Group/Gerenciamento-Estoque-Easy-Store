@@ -6,7 +6,7 @@ import bcrypt
 
 from app.database import get_db
 from app.models.usuario import Usuario
-from app.auth import hash_senha, verificar_senha, criar_token, get_usuario_logado
+from app.auth import hash_senha, verificar_senha, criar_token, get_usuario_logado, exigir_role
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
@@ -88,4 +88,12 @@ def listar_usuarios(request: Request, usuario = Depends(get_usuario_logado), db:
     return templates.TemplateResponse(
         "admin/usuarios.html",
         {"request": request, "usuario": usuario, "usuarios": usuarios}
+    )
+
+# rota para funcionarios
+@router.get("/funcionarios")
+def funcionario(request: Request, usuario = Depends(exigir_role("funcionario"))):
+    return templates.TemplateResponse(
+        "funcionario/dashboard.html",
+        {"request": request, "usuario": usuario}
     )
