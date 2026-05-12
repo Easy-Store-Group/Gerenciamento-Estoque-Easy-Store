@@ -62,3 +62,10 @@ def fazer_login(
  
     # redirecionar para a pagina inicial
     return response 
+
+
+@router.get("/logout")
+def logout():
+    response = RedirectResponse(url="/auth/login", status_code=302)
+    response.delete_cookie("access_token")
+    return response
