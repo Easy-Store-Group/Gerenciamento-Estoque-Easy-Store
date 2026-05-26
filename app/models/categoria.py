@@ -10,6 +10,8 @@ class Categoria(Base):
     
     nome = Column(String(167), nullable=False, unique=True)
 
+    descricao = Column(String(255), nullable=True)
+
     ativo = Column(Boolean, default=True)
 
     # relacionamento

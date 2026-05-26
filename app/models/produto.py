@@ -13,6 +13,8 @@ class Produto(Base):
 
     preco = Column(Float, nullable=False, default=0.0)
 
+    descricao = Column(String(255), nullable=True)
+
     estoque_atual = Column(Integer, nullable=False, default=0)
 
     ativo = Column(Boolean, default=True)
