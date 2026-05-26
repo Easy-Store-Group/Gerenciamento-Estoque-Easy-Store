@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}">
     <title>EasyStore</title>
 </head>
 <body>
@@ -17,7 +17,7 @@
 
     <div class="brand-content">
       <div class="logo-row">
-        <img class="logo-icon" src="/static/img/logo.png" alt="EasyStore logo" width="500">
+        <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore logo" width="500">
         <span class="brand-name" id="brandName">EasyStore</span>
       </div>
       <p class="tagline" id="tagline">PCs, consoles e jogos<br>em um só lugar</p>
@@ -30,22 +30,23 @@
     <div class="login-box">
       <h2>Entrar</h2>
       {% if erro %}
-            <p style="color: red;">{{ error }}</p>
-        {% endif %}
-      <div class="input-group">
-        <form action="/auth/login">
-        <label>E-mail</label>
-        <input type="email" placeholder="Digite seu e-mail">
-      </div>
-      <div class="input-group">
-        <label>Senha</label>
-        <input type="password" placeholder="••••••••">
-      </div>
-      <button type="submit" class="btn-confirm">✦ Confirmar</button>
-      <p class="footer-text">Não tem uma conta? <a href="auth/cadastro">Cadastrar-se</a></p>
-    </div></form>
+        <p style="color: red;">{{ erro }}</p>
+      {% endif %}
+      <form action="/auth/login" method="post">
+        <div class="input-group">
+          <label>E-mail</label>
+          <input type="email" name="email" placeholder="Digite seu e-mail">
+        </div>
+        <div class="input-group">
+          <label>Senha</label>
+          <input type="password" name="senha" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn-confirm">✦ Confirmar</button>
+        <p class="footer-text">Não tem uma conta? <a href="/auth/cadastro">Cadastrar-se</a></p>
+      </form>
+    </div>
   </div>
 </div>
-<script src="/static/js/stars.js"></script>
+<script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
 </body>
 </html>
