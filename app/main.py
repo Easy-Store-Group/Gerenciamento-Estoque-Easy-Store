@@ -41,3 +41,10 @@ def home(request: Request,
         {"request": request, "usuario": usuario}
     )
 
+@app.get("/sobre", response_class=HTMLResponse)
+def sobre(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "sobre-nos/index.html",
+        {"request": request}
+    )
