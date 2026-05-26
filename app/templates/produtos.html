@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EasyStore - Loja</title>
+    <link rel="stylesheet" href="./static/css/produtos.css" />
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <header class="navbar">
+        <div class="logo">
+            <img src="./static/img/easy-store-logo.png" alt="EasyStore logo" class="logo-img" />
+            EasyStore
+        </div>
+
+        <div class="nav-actions">
+            <button class="btn-outline">Categorias</button>
+            <button class="btn-primary">Minha Conta</button>
+        </div>
+    </header>
+
+    <div class="layout">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <h3>Categorias</h3>
+            <nav aria-label="Categorias de produtos">
+                <ul class="sidebar-list">
+                    <li><button class="side-item active" aria-pressed="true">Todos</button></li>
+                    <li><button class="side-item" aria-pressed="false">PC</button></li>
+                    <li><button class="side-item" aria-pressed="false">PlayStation</button></li>
+                    <li><button class="side-item" aria-pressed="false">Xbox</button></li>
+                    <li><button class="side-item" aria-pressed="false">Nintendo</button></li>
+                </ul>
+            </nav>
+
+            <hr />
+
+            <h3>Conta</h3>
+            <nav aria-label="Menu da conta">
+                <ul class="sidebar-list">
+                    <li><button class="side-item" aria-pressed="false">Lista de desejos</button></li>
+                    <li><button class="side-item" aria-pressed="false">Em destaque</button></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- MAIN -->
+        <main class="content">
+
+            <!-- HERO -->
+            <section class="hero">
+                <h1>Descubra novos jogos todos os dias</h1>
+                <p>A EasyStore reúne jogos de PC e consoles em um só lugar.</p>
+
+                <div class="hero-actions">
+                    <button class="btn-primary">Explorar catálogo</button>
+                    <button class="btn-outline">Ver lista de desejos</button>
+                </div>
+            </section>
+
+            <!-- FEATURED -->
+            <section class="featured">
+                <h2>Em destaque</h2>
+
+                <div class="featured-card">
+                    <div class="featured-info">
+                        <h3>Catálogo em atualização</h3>
+                        <p>Novos jogos serão adicionados em breve. Enquanto isso, explore categorias e monte sua lista
+                            de desejos.</p>
+                    </div>
+
+                    <button class="btn-primary">Explorar agora</button>
+                </div>
+            </section>
+
+            <!-- WISHLIST -->
+            <section class="wishlist">
+                <h2>Lista de desejos</h2>
+                <div class="empty-box">
+                    <div class="icon-container">
+                        <i data-lucide="heart"></i>
+                    </div>
+                    <h3>Sua lista está vazia</h3>
+                    <p>Explore as categorias para encontrar seus jogos favoritos e adicioná-los aqui.</p>
+                    <button class="btn-outline">Procurar Jogos</button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="produtos.js"></script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
