@@ -1,0 +1,315 @@
+/* RESET E BASE */
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    min-height: 100vh;
+    background: #eaf3ff;
+    overflow: hidden;
+}
+
+.page {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: none;
+    background: #fff;
+}
+
+/* LADO ESQUERDO: CATÁLOGO */
+.branding { 
+    flex: 1.3; position: relative; overflow-y: auto; 
+    display: flex; flex-direction: column; padding: 40px; 
+}
+
+.bg-layer.crystal { 
+    position: absolute; inset: 0; 
+    background: linear-gradient(135deg, #00cfff 0%, #0066cc 50%, #003d99 100%); 
+    z-index: 0;
+}
+
+.pdv-header { position: relative; z-index: 1; margin-bottom: 20px; text-align: center; }
+
+.brand-name.lit { 
+    font-size: 3rem; font-weight: 900; color: #aff7ff; 
+    text-shadow: 0 0 30px rgba(0,220,255,.9); 
+}
+
+/* ESTILO DAS CATEGORIAS */
+.categories-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 25px;
+    position: relative;
+    z-index: 2;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cat-btn {
+    padding: 10px 22px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.cat-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    border-color: #aff7ff;
+}
+
+.cat-btn.active {
+    background: #aff7ff;
+    color: #003d99;
+    border-color: #aff7ff;
+    box-shadow: 0 0 15px rgba(175, 247, 255, 0.5);
+}
+
+/* GRADE DE PRODUTOS */
+.products-grid { 
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+    gap: 20px; position: relative; z-index: 1; 
+}
+
+.product-card { 
+    background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); 
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; 
+    padding: 25px; cursor: pointer; color: white; transition: 0.3s; 
+    text-align: center;
+}
+
+.product-card:hover { transform: translateY(-5px); background: rgba(255,255,255,0.25); }
+
+.price { display: block; margin-top: 10px; font-weight: 700; color: #aff7ff; font-size: 1.2rem; }
+
+/* LADO DIREITO: CARRINHO */
+.form-side { flex: 1; background: #f4f7fc; display: flex; justify-content: center; align-items: center; padding: 20px; }
+
+.cart-box { width: 100%; height: 100%; display: flex; flex-direction: column; }
+
+.brand-name-mini { font-size: 1.8rem; font-weight: 700; color: #111; margin-bottom: 15px; }
+
+.cart-table-header {
+    display: flex; justify-content: space-between;
+    padding: 12px; background: #eef2f7; border-radius: 12px 12px 0 0;
+    font-weight: 700; font-size: 0.85rem; color: #555;
+}
+
+.col-item { flex: 2; }
+.col-qtd { flex: 0.5; text-align: center; }
+.col-total { flex: 1; text-align: right; }
+
+.cart-items {
+    flex: 1; background: white; border: 1px solid #e0e0e0; border-top: none;
+    border-radius: 0 0 12px 12px; margin-bottom: 20px; overflow-y: auto; padding: 10px;
+}
+
+.total-display-box {
+    background: #003d99; color: white; padding: 20px;
+    border-radius: 15px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.total-value { font-size: 2.2rem; font-weight: 800; color: #aff7ff; }
+
+.cart-footer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+.btn-action { height: 60px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+.btn-cancel { background: #ff4b5c; color: white; }
+.btn-confirm { background: linear-gradient(135deg, #2575fc, #1a5fd4); color: white; }
+
+.btn-action:hover { transform: translateY(-3px); filter: brightness(1.1); }
+/* Ajuste do cabeçalho da tabela */
+.cart-table-header {
+    display: flex;
+    padding: 12px 15px;
+    background: #eef2f7;
+    border-radius: 12px 12px 0 0;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+/* Alinhamento das colunas (IGUAL para cabeçalho e itens) */
+.col-item { flex: 3; text-align: left; }      /* Nome ganha mais espaço */
+.col-qtd  { flex: 1; text-align: center; }    /* Qtd centralizada */
+.col-total { flex: 1; text-align: right; }     /* Preço à direita */
+
+/* Estilo da linha do produto que o JS vai criar */
+.cart-row {
+    display: flex;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #333;
+    align-items: center;
+}
+
+/* Garante que o container de itens não tenha padding interno que desalinhe */
+.cart-items {
+    flex: 1;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    margin-bottom: 20px;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.total-display-box {
+    background: #003d99; color: white; padding: 20px;
+    border-radius: 15px; margin-bottom: 20px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+
+.total-value { font-size: 2.2rem; font-weight: 800; color: #aff7ff; }
+
+.cart-footer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+.btn-action { height: 60px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+.btn-cancel { background: #ff4b5c; color: white; }
+.btn-confirm { background: linear-gradient(135deg, #2575fc, #1a5fd4); color: white; }
+
+.btn-action:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+/* Ajuste do cabeçalho da tabela */
+.cart-table-header {
+    display: flex;
+    padding: 12px 15px;
+    background: #eef2f7;
+    border-radius: 12px 12px 0 0;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+/* Alinhamento das colunas (IGUAL para cabeçalho e itens) */
+.col-item { flex: 3; text-align: left; }
+.col-qtd  { flex: 1; text-align: center; }
+.col-total { flex: 1; text-align: right; }
+
+/* Estilo da linha do produto que o JS vai criar */
+.cart-row {
+    display: flex;
+    padding: 12px 15px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #333;
+    align-items: center;
+}
+
+/* Container da Imagem no Card */
+.product-img-container {
+    width: 100%;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.product-img-container img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-img-container img {
+    transform: scale(1.1);
+}
+
+.product-card { padding: 15px; }
+
+.btn-add-new {
+    position: relative;
+    z-index: 2;
+    background: #aff7ff;
+    color: #003d99;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: 0.3s;
+}
+
+.btn-add-new:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(175,247,255,0.4); }
+
+.status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #4cd137;
+    color: white;
+    font-size: 0.65rem;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.product-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 10px;
+}
+
+.action-btn {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 18px;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+}
+
+.product-card:hover .action-btn,
+.action-btn:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.35);
+    box-shadow: 0 18px 30px rgba(0,0,0,0.12);
+}
+
+.action-btn.delete:hover { background: #ff4b5c; color: white; }
+.action-btn.edit:hover { background: #f1c40f; color: #111; }
+.action-btn.toggle:hover { background: rgba(9, 216, 9, 0.45); color: #111; }
+
+.product-card.inactive {
+    opacity: 0.5;
+    filter: grayscale(0.8);
+}
+
+.product-card.inactive .status-badge { background: #7f8c8d; }
