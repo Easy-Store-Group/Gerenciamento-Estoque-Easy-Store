@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/login.css">
+    <title>EasyStore</title>
+</head>
+<body>
+<div class="page" id="page">
+  <!-- BRANDING -->
+  <div class="branding" id="branding">
+    <div class="bg-layer" id="bgLayer"></div>
+    <div class="stars" id="stars"></div>
+
+    <!-- Text content -->
+
+    <div class="brand-content">
+      <div class="logo-row">
+        <img class="logo-icon" src="/static/img/logo.png" alt="EasyStore logo">
+        <span class="brand-name" id="brandName">EasyStore</span>
+      </div>
+      <p class="tagline" id="tagline">PCs, consoles e jogos<br>em um só lugar</p>
+      <p class="sub">Seu universo gamer começa aqui ✦</p>
+    </div>
+  </div>
+
+  <!-- FORM SIDE -->
+  <div class="form-side">
+    <div class="login-box">
+      <h2>Criar Conta</h2>
+      {% if erro %}
+            <p style="color: red;">{{ error }}</p>
+        {% endif %}
+      <div class="input-group">
+        <form action="/auth/login">
+        <label>E-mail</label>
+        <input type="email" placeholder="Digite seu e-mail">
+      </div>
+      <div class="input-group">
+        <label>Senha</label>
+        <input type="password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn-confirm">✦ Confirmar</button>
+      <p class="footer-text">Já tem uma conta? <a href="#">Entrar</a></p>
+    </div></form>
+  </div>
+</div>
+<script src="/static/js/script.js"></script>
+</body>
+</html>
