@@ -80,3 +80,12 @@ def exigir_role(role_necessaria: str):
             )
     return verificar
 
+
+def get_admin(request : Request):
+    usuario = get_usuario_logado(request)
+    if usuario.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso restrito para administradores"
+        )
+    return usuario

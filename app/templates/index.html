@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EasyStore - Sua Loja de Jogos PC e Consoles</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}">
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -14,8 +14,8 @@
                 <span class="logo-text">EasyStore</span>
             </div>
             <div class="navbar-buttons">
-                <a href="#login" class="nav-btn nav-login">Login</a>
-                <a href="#signup" class="nav-btn nav-signup">Cadastro</a>
+                <a href="/auth/login" class="nav-btn nav-login">Login</a>
+                <a href="/auth/cadastro" class="nav-btn nav-signup">Cadastro</a>
             </div>
         </div>
     </nav>
