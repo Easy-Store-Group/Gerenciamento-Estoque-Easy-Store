@@ -14,6 +14,7 @@
             
             <div class="pdv-header">
                 <h1 class="brand-name lit">EasyStore</h1>
+                <button class="btn-add-new" onclick="abrirModal()">+ Adicionar Produto</button>
                 <p style="color: white; opacity: 0.8; position: relative; z-index: 1;">Vendas Online - Catálogo de Itens</p>
             </div>
 
@@ -26,18 +27,35 @@
             </div>
             
             <div class="products-grid">
-                <div class="product-card" onclick="adicionarAoCarrinho('DualSense PS5', 450.00)">
+                <div class="product-card" id="prod-1" onclick="adicionarAoCarrinho('DualSense PS5', 450.00)">
+                    <div class="status-badge">Ativo</div>
                     <div class="product-info">
+                        <div class="product-img-container">
+                            <img src="static/images/ps5.png" alt="DualSense">
+                        </div>
                         <h3>DualSense PS5</h3>
-                        <img src="static/images/ps5.png" alt="Console PS5">
                         <span class="price">R$ 450,00</span>
                     </div>
+                    <div class="product-actions">
+                        <button class="action-btn edit" onclick="event.stopPropagation(); editarProduto(1)">✏️</button>
+                        <button class="action-btn toggle" onclick="event.stopPropagation(); alternarStatus('prod-1')">🚫</button>
+                        <button class="action-btn delete" onclick="event.stopPropagation(); deletarProduto('prod-1')">🗑️</button>
+                    </div>
                 </div>
-                <div class="product-card" onclick="adicionarAoCarrinho('Console PS5', 3999.90)">
+
+                <div class="product-card" id="prod-2" onclick="adicionarAoCarrinho('Console PS5', 3999.90)">
+                    <div class="status-badge">Ativo</div>
                     <div class="product-info">
-                        <img src="static/images/ps5.png" alt="Console PS5">
+                        <div class="product-img-container">
+                            <img src="static/images/ps5.png" alt="Console PS5">
+                        </div>
                         <h3>Console PS5</h3>
                         <span class="price">R$ 3.999,90</span>
+                    </div>
+                    <div class="product-actions">
+                        <button class="action-btn edit" onclick="event.stopPropagation(); editarProduto(2)">✏️</button>
+                        <button class="action-btn toggle" onclick="event.stopPropagation(); alternarStatus('prod-2')">✍️</button>
+                        <button class="action-btn delete" onclick="event.stopPropagation(); deletarProduto('prod-2')">🗑️</button>
                     </div>
                 </div>
             </div>
@@ -48,22 +66,18 @@
                 <div class="cart-header">
                     <h2 class="brand-name-mini">Venda Atual</h2>
                 </div>
-
                 <div class="cart-table-header">
                     <span class="col-item">Item</span>
                     <span class="col-qtd">Qtd</span>
                     <span class="col-total">Total</span>
                 </div>
-
                 <div class="cart-items" id="lista-carrinho">
                     <p class="sub-placeholder">Caixa Livre</p>
                 </div>
-                
                 <div class="total-display-box">
                     <span class="total-label">VALOR TOTAL</span>
                     <span class="total-value" id="total-venda">R$ 0,00</span>
                 </div>
-
                 <div class="cart-footer-actions">
                     <button class="btn-action btn-cancel" onclick="limparCarrinho()">Cancelar</button>
                     <button class="btn-action btn-confirm">Receber e Finalizar</button>
@@ -71,7 +85,6 @@
             </div>
         </div>
     </div>
-
     <script src="static/js/produtos.js"></script>
 </body>
 </html>

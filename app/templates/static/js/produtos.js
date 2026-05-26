@@ -73,7 +73,26 @@ function atualizarInterface() {
     `).join('');
     // ... resto da função ...
 }
+function alternarStatus(id) {
+    const card = document.getElementById(id);
+    card.classList.toggle('inactive');
+    const badge = card.querySelector('.status-badge');
+    badge.innerText = card.classList.contains('inactive') ? 'Inativo' : 'Ativo';
+}
 
+function deletarProduto(id) {
+    if(confirm("Deseja realmente excluir este produto?")) {
+        document.getElementById(id).remove();
+    }
+}
+
+function editarProduto(id) {
+    alert("Editar produto ID: " + id);
+}
+
+function abrirModal() {
+    alert("Abrir tela de cadastro de novo produto");
+}
 
 }
 }
