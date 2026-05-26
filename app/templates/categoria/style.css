@@ -1,0 +1,199 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
+
+body{
+    background:linear-gradient(135deg,#0f172a,#1d4ed8,#2563eb);
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+}
+
+/* PONTINHOS BRANCOS */
+
+body::before{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+
+    background-image:
+        radial-gradient(white 1px, transparent 1px),
+        radial-gradient(white 1px, transparent 1px);
+
+    background-size:60px 60px;
+    background-position:0 0, 30px 30px;
+
+    opacity:0.20;
+    pointer-events:none;
+}
+
+/* HEADER */
+
+header{
+    width:100%;
+    padding:25px 60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:relative;
+    z-index:1;
+}
+
+.logo{
+    font-size:40px;
+    font-weight:bold;
+    color:white;
+    letter-spacing:2px;
+    text-shadow:0 0 15px rgba(255,255,255,0.3);
+}
+
+.menu{
+    display:flex;
+    gap:30px;
+}
+
+.menu a{
+    color:white;
+    text-decoration:none;
+    font-size:18px;
+    transition:0.3s;
+}
+
+.menu a:hover{
+    color:#93c5fd;
+}
+
+/* HERO */
+
+.hero{
+    text-align:center;
+    padding:80px 20px 50px;
+    position:relative;
+    z-index:1;
+}
+
+.hero h1{
+    color:white;
+    font-size:65px;
+    margin-bottom:20px;
+    text-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+
+.hero p{
+    color:#dbeafe;
+    font-size:22px;
+}
+
+/* CATEGORIAS */
+
+.categorias{
+    padding:60px;
+    position:relative;
+    z-index:1;
+}
+
+.titulo{
+    text-align:center;
+    color:white;
+    font-size:45px;
+    margin-bottom:50px;
+    font-weight:bold;
+}
+
+.cards{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:35px;
+}
+
+.card{
+    background:rgba(255,255,255,0.10);
+    backdrop-filter:blur(12px);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:25px;
+    padding:35px 25px;
+    transition:0.4s;
+    box-shadow:0 0 20px rgba(0,0,0,0.25);
+}
+
+.card:hover{
+    transform:translateY(-10px) scale(1.02);
+    box-shadow:0 0 30px rgba(255,255,255,0.25);
+}
+
+.icone{
+    font-size:55px;
+    margin-bottom:20px;
+}
+
+.card h2{
+    color:white;
+    font-size:30px;
+    margin-bottom:15px;
+}
+
+.card p{
+    color:#dbeafe;
+    font-size:17px;
+    line-height:1.5;
+    margin-bottom:25px;
+}
+
+.card button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:14px;
+    background:white;
+    color:#1d4ed8;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.card button:hover{
+    background:#dbeafe;
+    transform:scale(1.03);
+}
+
+/* FOOTER */
+
+footer{
+    margin-top:60px;
+    padding:25px;
+    text-align:center;
+    color:#dbeafe;
+    font-size:16px;
+    position:relative;
+    z-index:1;
+}
+
+/* RESPONSIVO */
+
+@media(max-width:768px){
+
+    header{
+        flex-direction:column;
+        gap:20px;
+    }
+
+    .hero h1{
+        font-size:45px;
+    }
+
+    .hero p{
+        font-size:18px;
+    }
+
+    .titulo{
+        font-size:35px;
+    }
+
+}

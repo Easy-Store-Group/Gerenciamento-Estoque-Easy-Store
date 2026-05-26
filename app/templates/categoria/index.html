@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EasyStore</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI', sans-serif;
+}
+
+body{
+    display:flex;
+    min-height:100vh;
+    background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+    overflow:hidden;
+    position:relative;
+}
+
+/* PONTINHOS */
+
+body::before{
+    content:"";
+    position:absolute;
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+
+    background-image:
+    radial-gradient(white 1px, transparent 1px);
+
+    background-size:45px 45px;
+
+    opacity:0.15;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:280px;
+    background:rgba(0,0,0,0.25);
+    backdrop-filter:blur(12px);
+    border-right:1px solid rgba(255,255,255,0.1);
+    padding:30px 20px;
+    position:relative;
+    z-index:1;
+}
+
+.logo{
+    color:white;
+    font-size:38px;
+    font-weight:bold;
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.menu{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+.menu button{
+    background:rgba(255,255,255,0.08);
+    border:none;
+    color:white;
+    padding:18px;
+    border-radius:16px;
+    font-size:17px;
+    cursor:pointer;
+    transition:0.3s;
+    text-align:left;
+}
+
+.menu button:hover{
+    background:#2563eb;
+    transform:translateX(5px);
+}
+
+/* CONTEUDO */
+
+.conteudo{
+    flex:1;
+    padding:40px;
+    overflow-y:auto;
+    position:relative;
+    z-index:1;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+}
+
+/* TOPO */
+
+.topo{
+    text-align:center;
+    margin-bottom:40px;
+}
+
+.topo h1{
+    color:white;
+    font-size:65px;
+    margin-bottom:10px;
+}
+
+.topo p{
+    color:#dbeafe;
+    font-size:22px;
+}
+
+/* CARDS */
+
+.card{
+    display:none;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.12);
+    backdrop-filter:blur(10px);
+    border-radius:24px;
+    padding:35px;
+    box-shadow:0 0 25px rgba(0,0,0,0.3);
+
+    width:100%;
+    max-width:750px;
+}
+
+.card.active{
+    display:block;
+}
+
+.card h2{
+    color:white;
+    font-size:40px;
+    margin-bottom:15px;
+}
+
+.card p{
+    color:#dbeafe;
+    margin-bottom:20px;
+    font-size:18px;
+}
+
+/* INPUT */
+
+.card input{
+    width:100%;
+    padding:18px;
+    border:none;
+    border-radius:14px;
+    margin-bottom:18px;
+    font-size:17px;
+    outline:none;
+}
+
+/* SELECT */
+
+.card select{
+    width:100%;
+    padding:18px;
+    border:none;
+    border-radius:14px;
+    margin-bottom:18px;
+    font-size:17px;
+    outline:none;
+}
+
+/* STATUS */
+
+.status{
+    margin-bottom:20px;
+}
+
+.status label{
+    color:white;
+    display:block;
+    margin-bottom:8px;
+    font-size:18px;
+}
+
+/* BOTÕES */
+
+.botoes{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+}
+
+.botoes button{
+    border:none;
+    border-radius:14px;
+    padding:16px;
+    color:white;
+    font-weight:bold;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.botoes button:hover{
+    transform:scale(1.03);
+}
+
+.add{
+    background:#22c55e;
+}
+
+.edit{
+    background:#f59e0b;
+}
+
+.delete{
+    background:#ef4444;
+}
+
+.active-btn{
+    background:#3b82f6;
+}
+
+/* RESPONSIVO */
+
+@media(max-width:900px){
+
+    body{
+        flex-direction:column;
+    }
+
+    .sidebar{
+        width:100%;
+    }
+
+    .topo h1{
+        font-size:45px;
+    }
+
+}
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+    <div class="logo">
+        EasyStore
+    </div>
+
+    <div class="menu">
+
+        <button onclick="mostrarCategoria('jogos')">
+            🎮 Jogos
+        </button>
+
+        <button onclick="mostrarCategoria('headsets')">
+            🎧 Headsets
+        </button>
+
+        <button onclick="mostrarCategoria('teclados')">
+            ⌨️ Teclados
+        </button>
+
+        <button onclick="mostrarCategoria('mouse')">
+            🖱️ Mouse Gamer
+        </button>
+
+        <button onclick="mostrarCategoria('console')">
+            🕹️ Consoles
+        </button>
+
+        <button onclick="mostrarCategoria('pc')">
+            🖥️ PC Gamer
+        </button>
+
+    </div>
+
+</div>
+
+<!-- CONTEUDO -->
+
+<div class="conteudo">
+
+    <div class="topo">
+
+        <h1>Painel Gamer</h1>
+
+        <p>
+            Clique em uma categoria na sidebar
+        </p>
+
+    </div>
+
+    <!-- JOGOS -->
+
+    <div class="card active" id="jogos">
+
+        <h2>🎮 Jogos</h2>
+
+        <p>Gerencie os jogos da loja.</p>
+
+        <input type="text" placeholder="Nome do jogo">
+
+        <select>
+            <option>Selecionar Produto</option>
+            <option>GTA V</option>
+            <option>Minecraft</option>
+            <option>EA FC 26</option>
+            <option>Call of Duty</option>
+        </select>
+
+        <div class="status">
+
+            <label>Status</label>
+
+            <select>
+                <option>🟢 Ativado</option>
+                <option>🔴 Desativado</option>
+            </select>
+
+        </div>
+
+        <div class="botoes">
+
+            <button class="add">Adicionar</button>
+
+            <button class="edit">Editar</button>
+
+            <button class="delete">Excluir</button>
+
+            <button class="active-btn">Ativar</button>
+
+        </div>
+
+    </div>
+
+    <!-- HEADSETS -->
+
+    <div class="card" id="headsets">
+
+        <h2>🎧 Headsets</h2>
+
+        <p>Gerencie os headsets gamers.</p>
+
+        <input type="text" placeholder="Nome do headset">
+
+        <select>
+            <option>Selecionar Produto</option>
+            <option>HyperX</option>
+            <option>Razer</option>
+            <option>Redragon</option>
+        </select>
+
+        <div class="status">
+
+            <label>Status</label>
+
+            <select>
+                <option>🟢 Ativado</option>
+                <option>🔴 Desativado</option>
+            </select>
+
+        </div>
+
+        <div class="botoes">
+
+            <button class="add">Adicionar</button>
+
+            <button class="edit">Editar</button>
+
+            <button class="delete">Excluir</button>
+
+            <button class="active-btn">Ativar</button>
+
+        </div>
+
+    </div>
+
+    <!-- TECLADOS -->
+
+    <div class="card" id="teclados">
+
+        <h2>⌨️ Teclados Gamer</h2>
+
+        <p>Gerencie os teclados gamers.</p>
+
+        <input type="text" placeholder="Nome do teclado">
+
+        <select>
+            <option>Selecionar Produto</option>
+            <option>Redragon Kumara</option>
+            <option>HyperX Alloy</option>
+            <option>Razer Huntsman</option>
+        </select>
+
+        <div class="status">
+
+            <label>Status</label>
+
+            <select>
+                <option>🟢 Ativado</option>
+                <option>🔴 Desativado</option>
+            </select>
+
+        </div>
+
+        <div class="botoes">
+
+            <button class="add">Adicionar</button>
+
+            <button class="edit">Editar</button>
+
+            <button class="delete">Excluir</button>
+
+            <button class="active-btn">Ativar</button>
+
+        </div>
+
+    </div>
+
+    <!-- MOUSE -->
+
+    <div class="card" id="mouse">
+
+        <h2>🖱️ Mouse Gamer</h2>
+
+        <p>Gerencie os mouses gamers.</p>
+
+        <input type="text" placeholder="Nome do mouse">
+
+        <select>
+            <option>Selecionar Produto</option>
+            <option>Logitech G502</option>
+            <option>Razer DeathAdder</option>
+        </select>
+
+        <div class="status">
+
+            <label>Status</label>
+
+            <select>
+                <option>🟢 Ativado</option>
+                <option>🔴 Desativado</option>
+            </select>
+
+        </div>
+
+        <div class="botoes">
+
+            <button class="add">Adicionar</button>
+
+            <button class="edit">Editar</button>
+
+            <button class="delete">Excluir</button>
+
+            <button class="active-btn">Ativar</button>
+
+        </div>
+
+    </div>
+
+    <!-- CONSOLES -->
+
+    <div class="card" id="console">
+
+        <h2>🕹️ Consoles</h2>
+
+        <p>Gerencie os consoles.</p>
+
+        <input type="text" placeholder="Nome do console">
+
+        <select>
+            <option>Selecionar Produto</option>
+            <option>PlayStation 5</option>
+            <option>Xbox Series X</option>
+            <option>Nintendo Switch</option>
+        </select>
+
+        <div class="status">
+
+            <label>Status</label>
+
+            <select>
+                <option>🟢 Ativado</option>
+                <option>🔴 Desativado</option>
+            </select>
+
+        </div>
+
+        <div class="botoes">
+
+            <button class="add">Adicionar</button>
+
+            <button class="edit">Editar</button>
+
+            <button class="delete">Excluir</button>
+
+            <button class="active-btn">Ativar</button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+function mostrarCategoria(id){
+
+    let cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        card.classList.remove('active');
+    });
+
+    document.getElementById(id).classList.add('active');
+}
+
+</script>
+
+</body>
+</html>
