@@ -35,3 +35,9 @@ class Produto(Base):
             return "static/img/produto-placeholder.png"
         
 
+
+from sqlalchemy import Column, String, Boolean, Integer, Float, ForeignKey
+from sqlalchemy.orm import relationship
+from app.database import Base
+
+
