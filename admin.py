@@ -2,6 +2,8 @@ from app.database import Session, engine, Base
 from app.models.usuario import Usuario
 from app.auth import hash_senha
 
+
+#usuario exemplo
 usuarios = [
     {
         "nome": "Zamboni",
