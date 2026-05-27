@@ -1,4 +1,3 @@
-<<<<<<< HEAD:app/static/css/login.css
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
 html, body{min-height:100%;width:100%;overflow:hidden;background:#eaf3ff;}
@@ -56,7 +55,6 @@ body{display:flex;align-items:center;justify-content:center;min-height:100vh;wid
   .tagline{font-size:1.5rem;}
 }
 
-=======
 * {
     margin: 0;
     padding: 0;
@@ -209,4 +207,3 @@ body {
     text-decoration: none;
     font-weight: 600;
 }
->>>>>>> pagina-apresentacao:app/templates/static/css/login.css
