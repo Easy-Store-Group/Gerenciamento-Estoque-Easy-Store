@@ -20,8 +20,6 @@ def tela_login(request: Request):
         {'request': request}
     )
 
-
-# rota de login
 @router.post("/login")
 def fazer_login(
     request: Request,
@@ -29,16 +27,15 @@ def fazer_login(
     senha: str = Form(...),
     db: Session = Depends(get_db)
 ):
-    # buscar o usuario pelo email
+
     usuario = db.query(Usuario).filter_by(email=email).first()
 
-    # verificar a senha com bcrypt
-    senha_correta = ( usuario is not None and (senha, usuario.senha_hash) )
+    senha_correta = usuario is not None and verificar_senha(senha, usuario.senha_hash)
     if not senha_correta:
         return templates.TemplateResponse(
             request,
             "auth/login.html",
-            {"request": request, "erro": "email ou senha incorretos"}
+            {"request": request, "erro": "E-mail ou senha incorretos.(Somente para administradores)"}
         )
     
     if not usuario.ativo:
@@ -48,8 +45,6 @@ def fazer_login(
             {"request": request, "erro": "usuario inativo!"}
         )
 
-
-    # Gere o token JWT
     token_data = {
         "sub": usuario.email,
         "nome": usuario.nome,
@@ -58,23 +53,21 @@ def fazer_login(
         }
 
     token = criar_token(token_data)
-    # salvar o token em cookie HTTPOnly
-    response = RedirectResponse(url="/admin", status_code=302)
+
+    response = RedirectResponse(url="/", status_code=302)
 
     response.set_cookie(
-        key="acess_token",
+        key="access_token",
         value=token,
         httponly=True,
         max_age=3600,
         samesite="lax"
     )
- 
-    # redirecionar para a pagina inicial
+
     return response 
 
-# rota de sair - logout
 @router.get("/logout")
 def sair():
     response = RedirectResponse(url="/auth/login", status_code=302)
-    response.delete_cookie("acess_token")
+    response.delete_cookie("access_token")
     return response

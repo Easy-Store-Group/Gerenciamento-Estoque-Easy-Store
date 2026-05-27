@@ -1,0 +1,13 @@
+@import url('admin_base.css');
+
+.home-links .btn { min-width: 180px; }
+
+.welcome-card { padding: 32px; }
+
+@media (max-width: 980px) {
+  .metric-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 640px) {
+  .metric-grid { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="page-actions">
+  <form class="search-bar" action="/produtos" method="get">
+    <input type="text" name="busca" placeholder="Buscar produto..." value="{{ busca }}">
+    <select name="categoria_id">
+      <option value="0">Todas as categorias</option>
+      {% for categoria in categorias %}
+      <option value="{{ categoria.id }}" {% if categoria.id == categoria_id %}selected{% endif %}>{{ categoria.nome }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-primary">Buscar</button>
+  </form>
+  <span class="detail-pill">{{ produtos|length }} produto(s)</span>
+</div>
+
+{% if produtos %}
+<div class="table-card">
+  <div class="table-row header">
+    <div>Produto</div>
+    <div>Categoria</div>
+    <div>Estoque</div>
+    <div>Ações</div>
+  </div>
+  {% for produto in produtos %}
+  <div class="table-row">
+    <div class="product-info">
+      <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
+      <div>
+        <strong>{{ produto.nome }}</strong>
+        <span class="status-badge {% if produto.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativo' if produto.ativo else 'Inativo' }}</span>
+      </div>
+    </div>
+    <div>{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</div>
+    <div>{{ produto.estoque_atual }}</div>
+    <div class="actions">
+      <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
+      <form action="/produtos/{{ produto.id }}/desativar" method="post"><button type="submit" class="btn btn-warning">Desativar</button></form>
+      <form action="/produtos/{{ produto.id }}/deletar" method="post"><button type="submit" class="btn btn-danger">Excluir</button></form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">Nenhum produto encontrado. Cadastre um novo produto para começar.</div>
+{% endif %}
+{% endblock %}

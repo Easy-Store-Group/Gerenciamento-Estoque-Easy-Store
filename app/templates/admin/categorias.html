@@ -1,0 +1,28 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="table-actions">
+  <div class="detail-pill">Total de categorias: <strong>{{ categorias|length }}</strong></div>
+  <a href="/categorias/nova" class="btn btn-primary">Nova categoria</a>
+</div>
+
+<div class="table-card">
+  <div class="table-row header">
+    <div>Categoria</div>
+    <div>Status</div>
+    <div>Produtos</div>
+    <div>Ações</div>
+  </div>
+  {% for categoria in categorias %}
+  <div class="table-row">
+    <div>{{ categoria.nome }}</div>
+    <div><span class="status-badge {% if categoria.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativa' if categoria.ativo else 'Inativa' }}</span></div>
+    <div>{{ categoria.produtos|length }}</div>
+    <div class="actions">
+      <a href="/categorias/{{ categoria.id }}/editar" class="btn btn-secondary">Editar</a>
+      <form action="/categorias/{{ categoria.id }}/toggle-ativo" method="post"><button type="submit" class="btn btn-warning">{% if categoria.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,9 @@
+@import url('admin_base.css');
+
+.form-card { max-width: 920px; }
+
+.field-preview img { width: 220px; }
+
+@media (max-width: 820px) {
+  .form-card { padding: 24px; }
+}

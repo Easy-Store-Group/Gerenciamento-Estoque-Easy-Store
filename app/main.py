@@ -2,7 +2,12 @@ from fastapi import FastAPI, Request, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
-from app.auth import get_usuario_opcional
+from sqlalchemy.orm import Session
+from app.auth import get_usuario_opcional, get_admin
+from app.database import get_db
+from app.models.produto import Produto
+from app.models.categoria import Categoria
+from app.models.usuario import Usuario
 
 from app.controllers import auth_controller
 from app.controllers import admin_controller
@@ -27,19 +32,54 @@ app.include_router(produto_controller.router)
 def home(request: Request,
          usuario =  Depends(get_usuario_opcional)
          ):
-    if usuario is None:
-        return templates.TemplateResponse(
-            request,
-            "index.html",
-            {"request": request}
-        )
-    
-    # logado - exibir a tela principal com os dados do usuario
     return templates.TemplateResponse(
         request,
-        "home.html",
+        "index.html",
         {"request": request, "usuario": usuario}
     )
+
+@app.get("/admin")
+def admin_dashboard(request: Request,
+                    db: Session = Depends(get_db),
+                    admin = Depends(get_admin)):
+    total_produtos = db.query(Produto).count()
+    total_categorias = db.query(Categoria).count()
+    total_usuarios = db.query(Usuario).count()
+    ativos_produtos = db.query(Produto).filter(Produto.ativo == True).count()
+
+    return templates.TemplateResponse(
+        request,
+        "admin/index.html",
+        {
+            "request": request,
+            "admin": admin,
+            "page_title": "Dashboard",
+            "page_subtitle": "Visão geral rápida do painel EasyStore",
+            "css_path": "css/admin_home.css",
+            "active": "home",
+            "total_produtos": total_produtos,
+            "total_categorias": total_categorias,
+            "total_usuarios": total_usuarios,
+            "ativos_produtos": ativos_produtos,
+        }
+    )
+
+
+@app.get("/admin/pos")
+def admin_pos(request: Request, admin = Depends(get_admin)):
+    return templates.TemplateResponse(
+        request,
+        "admin/pos.html",
+        {
+            "request": request,
+            "admin": admin,
+            "page_title": "Ponto de Venda",
+            "page_subtitle": "Venda rápida com layout otimizado",
+            "css_path": "css/admin_pos.css",
+            "active": "pos",
+        }
+    )
+
 
 @app.get("/sobre", response_class=HTMLResponse)
 def sobre(request: Request):

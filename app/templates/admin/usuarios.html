@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="table-actions">
+  <div class="detail-pill">Total de usuários: <strong>{{ usuarios|length }}</strong></div>
+  <a href="/usuarios/novo" class="btn btn-primary">Novo usuário</a>
+</div>
+
+<div class="table-card">
+  <div class="table-row header">
+    <div>Nome</div>
+    <div>E-mail</div>
+    <div>Perfil</div>
+    <div>Status</div>
+    <div>Ações</div>
+  </div>
+  {% for usuario in usuarios %}
+  <div class="table-row">
+    <div>{{ usuario.nome }}</div>
+    <div>{{ usuario.email }}</div>
+    <div>{{ usuario.role }}</div>
+    <div><span class="status-badge {% if usuario.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativo' if usuario.ativo else 'Inativo' }}</span></div>
+    <div class="actions">
+      <a href="/usuarios/{{ usuario.id }}/editar" class="btn btn-secondary">Editar</a>
+      <form action="/usuarios/{{ usuario.id }}/toggle-ativo" method="post"><button type="submit" class="btn btn-warning">{% if usuario.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

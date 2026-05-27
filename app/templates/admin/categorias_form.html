@@ -1,0 +1,19 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="form-card">
+  <h2>{% if editando %}Editar categoria{% else %}Nova categoria{% endif %}</h2>
+  {% if erro %}
+  <div class="alert alert-error">{{ erro }}</div>
+  {% endif %}
+  <form action="{% if editando %}/categorias/{{ editando.id }}/editar{% else %}/categorias/nova{% endif %}" method="post">
+    <div class="form-grid single-column">
+      <div class="input-group">
+        <label>Nome da categoria</label>
+        <input type="text" name="nome" value="{{ editando.nome if editando else valores.nome if valores else '' }}" required>
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">{% if editando %}Salvar categoria{% else %}Criar categoria{% endif %}</button>
+  </form>
+</div>
+{% endblock %}

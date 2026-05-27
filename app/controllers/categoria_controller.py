@@ -35,11 +35,15 @@ def listar_categorias(
 
     return templates.TemplateResponse(
         request,
-        "categorias/index.html",
+        "admin/categorias.html",
         {
-            "request":    request,
-            "usuario":    admin,
-            "categorias": categorias,
+            "request":      request,
+            "usuario":      admin,
+            "categorias":   categorias,
+            "page_title":   "Categorias",
+            "page_subtitle":"Gerencie as categorias do estoque",
+            "css_path":     "css/admin_categorias.css",
+            "active":       "categorias",
         }
     )
 
@@ -56,11 +60,15 @@ def form_nova_categoria(
     """Exibe o formulário de cadastro de categoria."""
     return templates.TemplateResponse(
         request,
-        "categorias/form.html",
+        "admin/categorias_form.html",
         {
-            "request":  request,
-            "usuario":  admin,
-            "editando": None,
+            "request":      request,
+            "usuario":      admin,
+            "editando":     None,
+            "page_title":   "Nova categoria",
+            "page_subtitle":"Crie uma nova categoria para o estoque",
+            "css_path":     "css/admin_categorias.css",
+            "active":       "categorias",
         }
     )
 
@@ -81,13 +89,17 @@ def criar_categoria(
     if existente:
         return templates.TemplateResponse(
             request,
-            "categorias/form.html",
+            "admin/categorias_form.html",
             {
-                "request":  request,
-                "usuario":  admin,
-                "editando": None,
-                "erro":     "Já existe uma categoria com este nome.",
-                "valores":  {"nome": nome},
+                "request":      request,
+                "usuario":      admin,
+                "editando":     None,
+                "erro":         "Já existe uma categoria com este nome.",
+                "valores":      {"nome": nome},
+                "page_title":   "Nova categoria",
+                "page_subtitle":"Crie uma nova categoria para o estoque",
+                "css_path":     "css/admin_categorias.css",
+                "active":       "categorias",
             },
             status_code=400
         )
@@ -119,11 +131,15 @@ def form_editar_categoria(
 
     return templates.TemplateResponse(
         request,
-        "categorias/form.html",
+        "admin/categorias_form.html",
         {
-            "request":  request,
-            "usuario":  admin,
-            "editando": editando,
+            "request":      request,
+            "usuario":      admin,
+            "editando":     editando,
+            "page_title":   "Editar categoria",
+            "page_subtitle":"Ajuste o nome desta categoria",
+            "css_path":     "css/admin_categorias.css",
+            "active":       "categorias",
         }
     )
 
@@ -153,12 +169,16 @@ def editar_categoria(
     if conflito:
         return templates.TemplateResponse(
             request,
-            "categorias/form.html",
+            "admin/categorias_form.html",
             {
-                "request":  request,
-                "usuario":  admin,
-                "editando": editando,
-                "erro":     "Já existe outra categoria com este nome.",
+                "request":      request,
+                "usuario":      admin,
+                "editando":     editando,
+                "erro":         "Já existe outra categoria com este nome.",
+                "page_title":   "Editar categoria",
+                "page_subtitle":"Ajuste o nome desta categoria",
+                "css_path":     "css/admin_categorias.css",
+                "active":       "categorias",
             },
             status_code=400
         )

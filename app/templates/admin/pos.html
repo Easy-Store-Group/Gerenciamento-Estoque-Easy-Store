@@ -1,0 +1,61 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="pos-grid">
+  <section class="sales-panel">
+    <div class="pos-header">
+      <div>
+        <h2>Caixa rápido</h2>
+        <p class="subtitle">Selecione produtos, veja o carrinho e finalize a venda.</p>
+      </div>
+      <span class="status-pill">PDV Online</span>
+    </div>
+
+    <div class="product-cards">
+      <article class="product-card">
+        <div>
+          <span class="status-pill">Ativo</span>
+          <h3>Console PS5</h3>
+          <p>R$ 3.999,90</p>
+        </div>
+        <button class="btn btn-secondary">Adicionar</button>
+      </article>
+      <article class="product-card">
+        <div>
+          <span class="status-pill">Ativo</span>
+          <h3>DualSense PS5</h3>
+          <p>R$ 450,00</p>
+        </div>
+        <button class="btn btn-secondary">Adicionar</button>
+      </article>
+      <article class="product-card">
+        <div>
+          <span class="status-pill">Ativo</span>
+          <h3>Fone Gamer</h3>
+          <p>R$ 289,90</p>
+        </div>
+        <button class="btn btn-secondary">Adicionar</button>
+      </article>
+    </div>
+  </section>
+
+  <aside class="cart-panel">
+    <div class="pos-header">
+      <div>
+        <h2>Venda atual</h2>
+        <span class="subtitle">Resumo de itens e pagamento.</span>
+      </div>
+    </div>
+    <div class="cart-empty">
+      <p>Selecione produtos à esquerda para começar a venda.</p>
+    </div>
+    <div class="cart-summary">
+      <div>
+        <span>Total</span>
+        <strong>R$ 0,00</strong>
+      </div>
+      <button class="btn btn-primary">Finalizar venda</button>
+    </div>
+  </aside>
+</div>
+{% endblock %}

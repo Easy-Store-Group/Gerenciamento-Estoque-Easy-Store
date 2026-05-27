@@ -1,0 +1,40 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="form-card">
+  <h2>Adicionar produto</h2>
+  {% if erro %}
+  <div class="alert alert-error">{{ erro }}</div>
+  {% endif %}
+  <form action="/produtos/novo" method="post" enctype="multipart/form-data">
+    <div class="form-grid">
+      <div class="input-group">
+        <label>Nome do produto</label>
+        <input type="text" name="nome" value="{{ valores.nome if valores else '' }}" required>
+      </div>
+      <div class="input-group">
+        <label>Preço</label>
+        <input type="number" step="0.01" name="preco" value="{{ valores.preco if valores else '' }}" required>
+      </div>
+      <div class="input-group">
+        <label>Estoque atual</label>
+        <input type="number" name="estoque_atual" value="{{ valores.estoque_atual if valores else '' }}" required>
+      </div>
+      <div class="input-group">
+        <label>Categoria</label>
+        <select name="categoria_id">
+          <option value="0">Sem categoria</option>
+          {% for categoria in categorias %}
+          <option value="{{ categoria.id }}" {% if valores and categoria.id == valores.categoria_id %}selected{% endif %}>{{ categoria.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Imagem do produto</label>
+        <input type="file" name="imagem" accept="image/png, image/jpeg, image/webp">
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Cadastrar produto</button>
+  </form>
+</div>
+{% endblock %}

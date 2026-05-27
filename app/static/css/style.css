@@ -88,6 +88,11 @@ button {
     gap: 10px;
 }
 
+.logo-image {
+    width: 42px;
+    height: 42px;
+}
+
 .logo-text {
     font-size: 48px;
     font-weight: 700;
@@ -239,6 +244,7 @@ button {
     transition: var(--transition);
     border: 2px solid transparent;
     cursor: pointer;
+    transform: none;
 }
 
 .btn-primary {
@@ -250,11 +256,12 @@ button {
 .btn-primary:hover {
     background-color: var(--color-primary-dark);
     box-shadow: 0 6px 20px rgba(21, 126, 211, 0.4);
-    transform: translateY(-2px);
 }
 
-.btn-primary:active {
-    transform: translateY(0);
+.btn-primary:active,
+.btn-secondary:active,
+.btn:active {
+    transform: none;
 }
 
 .btn-secondary {
@@ -351,7 +358,7 @@ button {
 
 .card-4 {
     top: 50%;
-    right: 0;
+    right: 0px;
     transform: translateY(-50%);
     animation-delay: 0.4s;
 }

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ title or 'EasyStore Admin' }}</title>
+  <link rel="stylesheet" href="{{ request.url_for('static', path=css_path) }}">
+</head>
+<body>
+  <div class="admin-layout">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore" class="brand-logo">
+        <div>
+          <strong>EasyStore</strong>
+          <span>Painel admin</span>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="/admin" class="{% if active == 'home' %}active{% endif %}"><span>🏠</span>Home</a>
+        <a href="/produtos" class="{% if active == 'produtos' %}active{% endif %}"><span>📦</span>Produtos</a>
+        <a href="/categorias" class="{% if active == 'categorias' %}active{% endif %}"><span>🗂️</span>Categorias</a>
+        <a href="/admin/pos" class="{% if active == 'pos' %}active{% endif %}"><span>🛒</span>Ponto de Venda</a>
+        <a href="/usuarios" class="{% if active == 'usuarios' %}active{% endif %}"><span>👥</span>Usuários</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="profile-card">
+          <span>Logado como</span>
+          <strong>{{ admin.nome if admin else 'Administrador' }}</strong>
+        </div>
+        <a href="/auth/logout" class="logout-btn">Sair</a>
+      </div>
+    </aside>
+
+    <main class="admin-content">
+      <header class="topbar">
+        <div>
+          <h1>{{ page_title }}</h1>
+          {% if page_subtitle %}
+          <p class="subtitle">{{ page_subtitle }}</p>
+          {% endif %}
+        </div>
+        {% if extra_button %}
+        <a href="{{ extra_button.href }}" class="btn btn-primary">{{ extra_button.label }}</a>
+        {% endif %}
+      </header>
+
+      <section class="page-body">
+        {% block content %}{% endblock %}
+      </section>
+    </main>
+  </div>
+</body>
+</html>

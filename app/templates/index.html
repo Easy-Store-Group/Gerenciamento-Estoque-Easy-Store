@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EasyStore - Sua Loja de Jogos PC e Consoles</title>
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
 </head>
 <body>
     <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="navbar-container">
             <div class="navbar-logo">
+                <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo" class="logo-image">
                 <span class="logo-text">EasyStore</span>
-            </div>
+            </div>  
             <div class="navbar-buttons">
-                <a href="/auth/login" class="nav-btn nav-login">Login</a>
-                <a href="/auth/cadastro" class="nav-btn nav-signup">Cadastro</a>
+                <a href="/auth/login" class="nav-btn nav-signup">Login</a>
             </div>
         </div>
     </nav>
@@ -28,19 +28,16 @@
                     Descubra a <span class="highlight">EasyStore</span>
                 </h1>
                 <p class="hero-subtitle">
-                    A plataforma mais inteligente e fácil para PC e consoles. Acesso a mais de 15 mil títulos exclusivos, ofertas incríveis, downloads rápidos e suporte 24/7. Sua melhor experiência de compra de jogos começa aqui.
+                    A loja mais barata e inovadora para PC e consoles. Acesso a mais de 100 títulos exclusivos, ofertas incríveis e suporte 24/7. Sua melhor experiência com jogos começa aqui.
                 </p>
                 
                 <div class="hero-buttons">
-                    <a href="#signup" class="btn btn-primary">
-                        <span>Comece Agora</span>
+                    <a href="/" class="btn btn-primary">
+                        <span>Explorar produtos</span>
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
                         </svg>
-                    </a>
-                    <a href="#login" class="btn btn-secondary">
-                        Entrar
                     </a>
                 </div>
 
@@ -62,37 +59,31 @@
 
             <div class="hero-visual">
                 <div class="floating-card card-1" style="animation-delay: 0s;">
-                    <div class="card-icon">🎮</div>
+                    <div class="card-icon">🖥️</div>
                     <p>PC Games</p>
                 </div>
                 <div class="floating-card card-2" style="animation-delay: 0.3s;">
-                    <div class="card-icon">🎯</div>
+                    <div class="card-icon">🎮</div>
                     <p>Consoles</p>
                 </div>
-                <div class="floating-card card-3" style="animation-delay: 0.6s;">
-                    <div class="card-icon">⚡</div>
-                    <p>Download Rápido</p>
-                </div>
-                <div class="floating-card card-4" style="animation-delay: 0.9s;">
-                    <div class="card-icon">🔒</div>
-                    <p>Segurança</p>
-                </div>
-                <div class="floating-card card-5" style="animation-delay: 1.2s;">
+
+                <div class="floating-card card-3" style="animation-delay: 1.2s;">
                     <div class="card-icon">💰</div>
                     <p>Melhor Preço</p>
                 </div>
+                <div class="floating-card card-5" style="animation-delay: 1.5s;">
+                    <div class="card-icon">🌟</div>
+                    <p>Inovaçao</p>
                 <div class="floating-card card-6" style="animation-delay: 1.5s;">
                     <div class="card-icon">🌟</div>
                     <p>Exclusivos</p>
+                </div>
                 </div>
                 <div class="floating-card card-7" style="animation-delay: 1.8s;">
                     <div class="card-icon">📱</div>
                     <p>Multi-Plataforma</p>
                 </div>
-                <div class="floating-card card-8" style="animation-delay: 2.1s;">
-                    <div class="card-icon">🚀</div>
-                    <p>Acesso Instantâneo</p>
-                </div>
+
             </div>
         </div>
     </section>
@@ -108,45 +99,23 @@
             <div class="services-grid">
                 <div class="service-card">
                     <div class="service-icon">🛒</div>
-                    <h3>Compras Simplificadas</h3>
-                    <p>Interface intuitiva e processamento rápido. Compre seus jogos favoritos em apenas 3 cliques, com checkout seguro e múltiplas formas de pagamento.</p>
-                    <div class="service-badge">Rápido</div>
+                    <h3>Compra segura</h3>
+                    <p>Produtos confiáveis com nosso selo de qualidade.</p>
+                    <div class="service-badge">Qualidade</div>
                 </div>
                 
                 <div class="service-card">
-                    <div class="service-icon">🔒</div>
-                    <h3>Segurança Avançada</h3>
-                    <p>Criptografia SSL/TLS, proteção contra fraude e autenticação de dois fatores. Seus dados e suas transações estão sempre protegidos com os padrões mais altos da indústria.</p>
-                    <div class="service-badge">Confiável</div>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">⚡</div>
-                    <h3>Downloads Ultrarrápidos</h3>
-                    <p>Tecnologia de CDN global com servidores distribuídos no mundo todo. Aproveite velocidades de até 100 MB/s e downloads simultâneos.</p>
-                    <div class="service-badge">Veloz</div>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">💳</div>
-                    <h3>Múltiplas Formas de Pagamento</h3>
-                    <p>Cartão de crédito, débito, e-wallet, boleto, PIX e criptomoedas. Escolha a opção que mais se adapta ao seu perfil e necessidade.</p>
+                    <div class="service-icon">🖥️</div>
+                    <h3>Diversas categorias</h3>
+                    <p>Temos jogos, consoles, PCs, etc. Tudo para se adequar ao seu gosto.</p>
                     <div class="service-badge">Flexível</div>
                 </div>
-                
-                
-                <div class="service-card">
-                    <div class="service-icon">📊</div>
-                    <h3>Programa de Fidelidade</h3>
-                    <p>Acumule pontos em cada compra, desbloqueie recompensas especiais e ganhe cashback exclusivo. Quanto mais compra, mais vantagens você ganha.</p>
-                    <div class="service-badge">Recompensas</div>
-                </div>
-                
+
                 <div class="service-card">
                     <div class="service-icon">💬</div>
-                    <h3>Suporte 24/7</h3>
-                    <p>Time de especialistas sempre disponível para ajudar. Chat ao vivo, e-mail, telefone e redes sociais. Resolvemos seus problemas em minutos.</p>
-                    <div class="service-badge">Pronto</div>
+                    <h3>Comunicaçao e Inovaçao</h3>
+                    <p>Somos uma equipe treinada na comunicao. Nossa empresa é inovadora.</p>
+                    <div class="service-badge">Social</div>
                 </div>
                 
             </div>
@@ -157,8 +126,8 @@
     <section class="cta-section">
         <div class="cta-container">
             <h2>Pronto para começar?</h2>
-            <p>Crie sua conta agora e desbloqueie acesso a milhares de jogos</p>
-            <a href="#signup" class="btn btn-primary btn-large">Criar Conta Gratuita</a>
+            <p>Começe a explorar nossos milhares de jogos e outros diversos produtos</p>
+            <a href="/produtos" class="btn btn-primary btn-large">Começar</a>
         </div>
     </section>
 
@@ -174,14 +143,13 @@
                     <h4>Links</h4>
                     <ul>
                         <li><a href="#">Sobre</a></li>
-                        <li><a href="#">Termos</a></li>
                         <li><a target="_blank" href="https://github.com/Easy-Store-Group/Gerenciamento-Estoque-Easy-Store">GitHub</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Contatos</h4>
                     <ul>
-                        <li><p>11 91572-4817</p></li>
+                        <li><p>11 94002-8922</p></li>
                         <li><p>EasyStore@gmail.com</p></li>
                     </ul>
                 </div>
@@ -192,6 +160,6 @@
         </div>
     </footer>
 
-    <script src="/static/script.js"></script>
+    <script src="{{ request.url_for('static', path='js/script.js') }}"></script>
 </body>
 </html>

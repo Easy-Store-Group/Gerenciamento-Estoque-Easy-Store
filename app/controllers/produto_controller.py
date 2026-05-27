@@ -46,7 +46,7 @@ def listar_produtos(
 
     return templates.TemplateResponse(
         request,
-        "produtos/index.html",
+        "admin/produtos.html",
         {
             "request":      request,
             "usuario":      usuario,
@@ -54,6 +54,11 @@ def listar_produtos(
             "categorias":   categorias,
             "busca":        busca,
             "categoria_id": categoria_id,
+            "page_title":   "Produtos",
+            "page_subtitle":"Gerencie o catálogo: editar, desativar ou excluir produtos",
+            "css_path":     "css/admin_produtos.css",
+            "active":       "produtos",
+            "extra_button": {"href": "/produtos/novo", "label": "+ Adicionar produto"},
         }
     )
 
@@ -72,12 +77,16 @@ def form_novo_produto(
 
     return templates.TemplateResponse(
         request,
-        "produtos/form.html",
+        "admin/novo.html",
         {
-            "request":    request,
-            "usuario":    admin,
-            "editando":   None,
-            "categorias": categorias
+            "request":      request,
+            "usuario":      admin,
+            "editando":     None,
+            "categorias":   categorias,
+            "page_title":   "Adicionar produto",
+            "page_subtitle":"Preencha os detalhes do novo item para o catálogo",
+            "css_path":     "css/admin_novo.css",
+            "active":       "produtos",
         }
     )
 
@@ -100,16 +109,20 @@ async def criar_produto(
     if db.query(Produto).filter(Produto.nome.ilike(nome)).first():
         return templates.TemplateResponse(
             request,
-            "produtos/form.html",
+            "admin/novo.html",
             {
-                "request":    request,
-                "usuario":    admin,
-                "editando":   None,
-                "categorias": categorias,
-                "erro":       "Já existe um produto com este nome.",
-                "valores":    {"nome": nome, "preco": preco,
-                               "estoque_atual": estoque_atual,
-                               "categoria_id": categoria_id}
+                "request":      request,
+                "usuario":      admin,
+                "editando":     None,
+                "categorias":   categorias,
+                "erro":         "Já existe um produto com este nome.",
+                "valores":      {"nome": nome, "preco": preco,
+                                   "estoque_atual": estoque_atual,
+                                   "categoria_id": categoria_id},
+                "page_title":   "Adicionar produto",
+                "page_subtitle":"Preencha os detalhes do novo item para o catálogo",
+                "css_path":     "css/admin_novo.css",
+                "active":       "produtos",
             },
             status_code=400
         )
@@ -171,12 +184,16 @@ def form_editar_produto(
 
     return templates.TemplateResponse(
         request,
-        "produtos/form.html",
+        "admin/form.html",
         {
-            "request":    request,
-            "usuario":    admin,
-            "editando":   editando,
-            "categorias": categorias
+            "request":      request,
+            "usuario":      admin,
+            "editando":     editando,
+            "categorias":   categorias,
+            "page_title":   "Editar produto",
+            "page_subtitle":"Atualize os detalhes do produto selecionado",
+            "css_path":     "css/admin_form.css",
+            "active":       "produtos",
         }
     )
 
@@ -208,13 +225,17 @@ async def editar_produto(
     if conflito:
         return templates.TemplateResponse(
             request,
-            "produtos/form.html",
+            "admin/form.html",
             {
-                "request":    request,
-                "usuario":    admin,
-                "editando":   editando,
-                "categorias": categorias,
-                "erro":       "Já existe outro produto com este nome.",
+                "request":      request,
+                "usuario":      admin,
+                "editando":     editando,
+                "categorias":   categorias,
+                "erro":         "Já existe outro produto com este nome.",
+                "page_title":   "Editar produto",
+                "page_subtitle":"Atualize os detalhes do produto selecionado",
+                "css_path":     "css/admin_form.css",
+                "active":       "produtos",
             },
             status_code=400
         )
@@ -253,6 +274,21 @@ def desativar_produto(
         db.commit()
 
     return RedirectResponse(url="/produtos?desativado=ok", status_code=302)
+
+
+@router.post("/{produto_id}/deletar")
+def deletar_produto(
+    produto_id: int,
+    db: Session = Depends(get_db),
+    admin = Depends(get_admin)
+):
+    produto = db.query(Produto).filter(Produto.id == produto_id).first()
+
+    if produto:
+        db.delete(produto)
+        db.commit()
+
+    return RedirectResponse(url="/produtos?deletado=ok", status_code=302)
 
 
 # ============================================================

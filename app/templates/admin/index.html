@@ -1,0 +1,36 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="metric-grid">
+  <div class="metric-card">
+    <span class="metric-label">Produtos cadastrados</span>
+    <strong class="metric-value">{{ total_produtos }}</strong>
+    <p class="metric-note">Produtos disponíveis e ativos no catálogo.</p>
+  </div>
+  <div class="metric-card">
+    <span class="metric-label">Categorias</span>
+    <strong class="metric-value">{{ total_categorias }}</strong>
+    <p class="metric-note">Categorias para organizar seu estoque.</p>
+  </div>
+  <div class="metric-card">
+    <span class="metric-label">Usuários</span>
+    <strong class="metric-value">{{ total_usuarios }}</strong>
+    <p class="metric-note">Operadores e administradores do painel.</p>
+  </div>
+  <div class="metric-card accent-card">
+    <span class="metric-label">Atalho rápido</span>
+    <strong class="metric-value">Ponto de venda</strong>
+    <p class="metric-note">Acesse o PDV para fechar vendas imediatas.</p>
+  </div>
+</div>
+
+<div class="welcome-card">
+  <h2>Bem-vindo ao EasyStore Admin</h2>
+  <p>Use a barra lateral para navegar entre produtos, categorias, ponto de venda e usuários. Aqui você pode editar, excluir, desativar e criar novos registros com um visual moderno.</p>
+  <div class="home-links">
+    <a href="/produtos" class="btn btn-secondary">Ver produtos</a>
+    <a href="/categorias" class="btn btn-secondary">Ver categorias</a>
+    <a href="/usuarios" class="btn btn-secondary">Gerenciar usuários</a>
+  </div>
+</div>
+{% endblock %}
