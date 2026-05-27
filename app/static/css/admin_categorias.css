@@ -1,8 +1,0 @@
-@import url('admin_base.css');
-
-.table-actions { justify-content: space-between; }
-
-@media (max-width: 820px) {
-  .table-row { grid-template-columns: 1fr; }
-  .table-row.header { display: none; }
-}

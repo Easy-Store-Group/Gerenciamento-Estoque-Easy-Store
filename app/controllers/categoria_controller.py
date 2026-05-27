@@ -42,7 +42,7 @@ def listar_categorias(
             "categorias":   categorias,
             "page_title":   "Categorias",
             "page_subtitle":"Gerencie as categorias do estoque",
-            "css_path":     "css/admin_categorias.css",
+            "css_path":     "css/admin.css",
             "active":       "categorias",
         }
     )
@@ -67,7 +67,7 @@ def form_nova_categoria(
             "editando":     None,
             "page_title":   "Nova categoria",
             "page_subtitle":"Crie uma nova categoria para o estoque",
-            "css_path":     "css/admin_categorias.css",
+            "css_path":     "css/admin.css",
             "active":       "categorias",
         }
     )
@@ -98,7 +98,7 @@ def criar_categoria(
                 "valores":      {"nome": nome},
                 "page_title":   "Nova categoria",
                 "page_subtitle":"Crie uma nova categoria para o estoque",
-                "css_path":     "css/admin_categorias.css",
+                "css_path":     "css/admin.css",
                 "active":       "categorias",
             },
             status_code=400
@@ -138,7 +138,7 @@ def form_editar_categoria(
             "editando":     editando,
             "page_title":   "Editar categoria",
             "page_subtitle":"Ajuste o nome desta categoria",
-            "css_path":     "css/admin_categorias.css",
+            "css_path":     "css/admin.css",
             "active":       "categorias",
         }
     )
@@ -177,7 +177,7 @@ def editar_categoria(
                 "erro":         "Já existe outra categoria com este nome.",
                 "page_title":   "Editar categoria",
                 "page_subtitle":"Ajuste o nome desta categoria",
-                "css_path":     "css/admin_categorias.css",
+                "css_path":     "css/admin.css",
                 "active":       "categorias",
             },
             status_code=400

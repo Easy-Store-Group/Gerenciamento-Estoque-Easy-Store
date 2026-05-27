@@ -25,7 +25,7 @@ def listar_usuarios(request: Request, db: Session = Depends(get_db), admin = Dep
             "usuarios": usuarios,
             "page_title": "Usuários",
             "page_subtitle": "Gerencie acessos e status dos usuários",
-            "css_path": "css/admin_usuarios.css",
+            "css_path": "css/admin.css",
             "active": "usuarios",
         }
     )
@@ -41,7 +41,7 @@ def tela_novo_usuario(request: Request, admin = Depends(get_admin)):
             "usuario": None,
             "page_title": "Novo usuário",
             "page_subtitle": "Crie um novo operador ou administrador",
-            "css_path": "css/admin_usuarios.css",
+            "css_path": "css/admin.css",
             "active": "usuarios",
         }
     )
@@ -68,7 +68,7 @@ def tela_editar_usuario(usuario_id: int, request: Request, db: Session = Depends
             "usuario": usuario,
             "page_title": "Editar usuário",
             "page_subtitle": "Atualize perfil e status do usuário",
-            "css_path": "css/admin_usuarios.css",
+            "css_path": "css/admin.css",
             "active": "usuarios",
         }
     )

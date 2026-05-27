@@ -56,7 +56,7 @@ def listar_produtos(
             "categoria_id": categoria_id,
             "page_title":   "Produtos",
             "page_subtitle":"Gerencie o catálogo: editar, desativar ou excluir produtos",
-            "css_path":     "css/admin_produtos.css",
+            "css_path":     "css/admin.css",
             "active":       "produtos",
             "extra_button": {"href": "/produtos/novo", "label": "+ Adicionar produto"},
         }
@@ -85,7 +85,7 @@ def form_novo_produto(
             "categorias":   categorias,
             "page_title":   "Adicionar produto",
             "page_subtitle":"Preencha os detalhes do novo item para o catálogo",
-            "css_path":     "css/admin_novo.css",
+            "css_path":     "css/admin.css",
             "active":       "produtos",
         }
     )
@@ -121,7 +121,7 @@ async def criar_produto(
                                    "categoria_id": categoria_id},
                 "page_title":   "Adicionar produto",
                 "page_subtitle":"Preencha os detalhes do novo item para o catálogo",
-                "css_path":     "css/admin_novo.css",
+                "css_path":     "css/admin.css",
                 "active":       "produtos",
             },
             status_code=400
@@ -192,7 +192,7 @@ def form_editar_produto(
             "categorias":   categorias,
             "page_title":   "Editar produto",
             "page_subtitle":"Atualize os detalhes do produto selecionado",
-            "css_path":     "css/admin_form.css",
+            "css_path":     "css/admin.css",
             "active":       "produtos",
         }
     )
@@ -234,7 +234,7 @@ async def editar_produto(
                 "erro":         "Já existe outro produto com este nome.",
                 "page_title":   "Editar produto",
                 "page_subtitle":"Atualize os detalhes do produto selecionado",
-                "css_path":     "css/admin_form.css",
+                "css_path":     "css/admin.css",
                 "active":       "produtos",
             },
             status_code=400

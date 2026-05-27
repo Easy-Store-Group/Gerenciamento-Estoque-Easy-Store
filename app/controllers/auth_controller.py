@@ -54,7 +54,7 @@ def fazer_login(
 
     token = criar_token(token_data)
 
-    response = RedirectResponse(url="/", status_code=302)
+    response = RedirectResponse(url="/admin", status_code=302)
 
     response.set_cookie(
         key="access_token",
