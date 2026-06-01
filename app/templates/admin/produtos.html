@@ -10,6 +10,9 @@
       <option value="{{ categoria.id }}" {% if categoria.id == categoria_id %}selected{% endif %}>{{ categoria.nome }}</option>
       {% endfor %}
     </select>
+    <label style="margin-left:8px; display:inline-flex; align-items:center;">
+      <input type="checkbox" name="mostrar_inativos" value="true" {% if mostrar_inativos %}checked{% endif %} style="margin-right:6px;"> Mostrar inativos
+    </label>
     <button type="submit" class="btn btn-primary">Buscar</button>
   </form>
   <span class="detail-pill">{{ produtos|length }} produto(s)</span>
@@ -36,7 +39,11 @@
     <div>{{ produto.estoque_atual }}</div>
     <div class="actions">
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
+      {% if produto.ativo %}
       <form action="/produtos/{{ produto.id }}/desativar" method="post"><button type="submit" class="btn btn-warning">Desativar</button></form>
+      {% else %}
+      <form action="/produtos/{{ produto.id }}/ativar" method="post"><button type="submit" class="btn btn-success">Ativar</button></form>
+      {% endif %}
       <form action="/produtos/{{ produto.id }}/deletar" method="post"><button type="submit" class="btn btn-danger">Excluir</button></form>
     </div>
   </div>

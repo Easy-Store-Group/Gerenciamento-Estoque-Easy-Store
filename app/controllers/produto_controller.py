@@ -30,10 +30,15 @@ def listar_produtos(
     request: Request,
     busca: str = "",
     categoria_id: int = 0,       # 0 = todas as categorias
+    mostrar_inativos: bool = False,  # toggle para exibir também produtos inativos
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_logado)
 ):
-    query = db.query(Produto).filter(Produto.ativo == True)
+    # Começa sem filtro de ativo e aplica só quando o toggle não está ativado
+    query = db.query(Produto)
+
+    if not mostrar_inativos:
+        query = query.filter(Produto.ativo == True)
 
     if busca:
         query = query.filter(Produto.nome.ilike(f"%{busca}%"))
@@ -54,6 +59,7 @@ def listar_produtos(
             "categorias":   categorias,
             "busca":        busca,
             "categoria_id": categoria_id,
+            "mostrar_inativos": mostrar_inativos,
             "page_title":   "Produtos",
             "page_subtitle":"Gerencie o catálogo: editar, desativar ou excluir produtos",
             "css_path":     "css/admin.css",
@@ -274,6 +280,22 @@ def desativar_produto(
         db.commit()
 
     return RedirectResponse(url="/produtos?desativado=ok", status_code=302)
+
+
+# Novo endpoint: reativar produto (tornar ativo novamente)
+@router.post("/{produto_id}/ativar")
+def ativar_produto(
+    produto_id: int,
+    db: Session = Depends(get_db),
+    admin = Depends(get_admin)
+):
+    produto = db.query(Produto).filter(Produto.id == produto_id).first()
+
+    if produto:
+        produto.ativo = True
+        db.commit()
+
+    return RedirectResponse(url="/produtos?ativado=ok", status_code=302)
 
 
 @router.post("/{produto_id}/deletar")
