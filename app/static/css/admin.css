@@ -56,8 +56,12 @@ button { font: inherit; cursor: pointer; }
   object-fit: contain;
 }
 .brand-block strong {
-  font-size: 1.15rem;
-}
+    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-primary) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.5px;}
+
 .brand-block span {
   color: #cbd5e1;
   font-size: 0.95rem;
@@ -66,6 +70,7 @@ button { font: inherit; cursor: pointer; }
   display: grid;
   gap: 10px;
 }
+
 .sidebar-nav a {
   display: flex;
   align-items: center;
@@ -204,9 +209,48 @@ button { font: inherit; cursor: pointer; }
 .cart-summary { display: grid; gap: 18px; margin-top: 24px; }
 .cart-summary div { display: flex; justify-content: space-between; align-items: center; }
 .cart-summary strong { font-size: 1.5rem; }
-.search-bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
-.search-bar input,
-.search-bar select { min-width: 200px; }
+.search-bar { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--surface); padding: 8px; border-radius: 14px; box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04); border: 1px solid #eef6ff; }
+
+.search-bar input[type="text"],
+.search-bar select {
+  min-width: 200px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid #e6eefb;
+  background: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+  transition: box-shadow var(--transition), outline var(--transition), transform var(--transition);
+}
+
+.search-bar input[type="text"]::placeholder { color: var(--muted); }
+
+.search-bar input[type="text"]:focus,
+.search-bar select:focus {
+  outline: 2px solid rgba(37, 99, 235, 0.12);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.06);
+  transform: translateY(-1px);
+}
+
+.search-bar label {
+  margin-left: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.search-bar input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.search-bar .btn-primary { padding: 10px 14px; border-radius: 12px; }
+
+.detail-pill { background: rgba(15, 23, 42, 0.03); padding: 8px 12px; border-radius: 999px; }
+
 @media (max-width: 1080px) {
   .metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
