@@ -168,7 +168,7 @@ def detalhe_produto(
 
     return templates.TemplateResponse(
         request,
-        "produtos/detalhe.html",
+        "admin/detalhe.html",
         {"request": request, "usuario": usuario, "produto": produto}
     )
 
