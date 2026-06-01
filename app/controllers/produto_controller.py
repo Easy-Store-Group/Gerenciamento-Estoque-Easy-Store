@@ -150,28 +150,6 @@ async def criar_produto(
     return RedirectResponse(url="/produtos?criado=ok", status_code=302)
 
 
-# DETALHE
-@router.get("/{produto_id}")
-def detalhe_produto(
-    produto_id: int,
-    request: Request,
-    db: Session = Depends(get_db),
-    usuario = Depends(get_usuario_logado)
-):
-    produto = db.query(Produto).filter(
-        Produto.id == produto_id,
-        Produto.ativo == True
-    ).first()
-
-    if not produto:
-        return RedirectResponse(url="/produtos", status_code=302)
-
-    return templates.TemplateResponse(
-        request,
-        "admin/detalhe.html",
-        {"request": request, "usuario": usuario, "produto": produto}
-    )
-
 
 
 # EDIÇÃO
@@ -260,7 +238,7 @@ async def editar_produto(
 
     db.commit()
 
-    return RedirectResponse(url=f"/produtos/{produto_id}?editado=ok", status_code=302)
+    return RedirectResponse(url=f"/produtos/", status_code=302)
 
 
 # ============================================================
