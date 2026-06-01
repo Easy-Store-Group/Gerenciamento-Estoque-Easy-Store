@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- ...novo template para detalhe de produto... -->
+{% extends "base.html" %}
+
+{% block content %}
+<main class="product-detail">
+  <div class="container">
+    <h1>{{ produto.nome }}</h1>
+    <p class="muted">Categoria: {{ produto.categoria.nome if produto.categoria else '—' }}</p>
+    <div class="product-grid">
+      <div class="product-media">
+        <img src="{{ produto.imagem_url or url_for('static', path='img/placeholder.png') }}" alt="{{ produto.nome }}">
+      </div>
+      <div class="product-info">
+        <h2>R$ {{ produto.preco }}</h2>
+        <p>{{ produto.descricao }}</p>
+
+        <div class="actions">
+          <a href="/produtos" class="btn btn-secondary">Voltar</a>
+          <a href="/produtos/{{ produto.id }}/editar" class="btn btn-primary">Editar</a>
+        </div>
+
+        {% if usuario %}
+        <p class="small">Logado como: {{ usuario.username }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

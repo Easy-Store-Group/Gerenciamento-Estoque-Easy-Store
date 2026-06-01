@@ -52,7 +52,7 @@ def admin_dashboard(request: Request,
         "admin/index.html",
         {
             "request": request,
-            "admin": admin,
+            "usuario": admin,
             "page_title": "Dashboard",
             "page_subtitle": "Visão geral rápida do painel EasyStore",
             "css_path": "css/admin.css",
@@ -72,7 +72,7 @@ def admin_pos(request: Request, admin = Depends(get_admin)):
         "admin/pos.html",
         {
             "request": request,
-            "admin": admin,
+            "usuario": admin,
             "page_title": "Ponto de Venda",
             "page_subtitle": "Venda rápida com layout otimizado",
             "css_path": "css/admin.css",

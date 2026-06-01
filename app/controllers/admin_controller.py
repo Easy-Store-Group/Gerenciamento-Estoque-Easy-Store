@@ -21,7 +21,7 @@ def listar_usuarios(request: Request, db: Session = Depends(get_db), admin = Dep
         "admin/usuarios.html",
         {
             "request": request,
-            "admin": admin,
+            "usuario": admin,
             "usuarios": usuarios,
             "page_title": "Usuários",
             "page_subtitle": "Gerencie acessos e status dos usuários",
@@ -64,7 +64,7 @@ def tela_editar_usuario(usuario_id: int, request: Request, db: Session = Depends
         "admin/usuarios_form.html",
         {
             "request": request,
-            "admin": admin,
+            "usuario": admin,
             "usuario": usuario,
             "page_title": "Editar usuário",
             "page_subtitle": "Atualize perfil e status do usuário",
