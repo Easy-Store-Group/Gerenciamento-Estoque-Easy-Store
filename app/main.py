@@ -81,7 +81,7 @@ def admin_pos(request: Request, admin = Depends(get_admin)):
     )
 
 
-@app.get("/sobre", response_class=HTMLResponse)
+@app.get("/sobre-nos", response_class=HTMLResponse)
 def sobre(request: Request):
     return templates.TemplateResponse(
         request,
