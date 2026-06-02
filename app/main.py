@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.orm import Session
-from app.auth import get_usuario_opcional, get_admin
+from app.auth import get_usuario_opcional, get_admin, get_operador
 from app.database import get_db
 from app.models.produto import Produto
 from app.models.categoria import Categoria
@@ -87,6 +87,25 @@ def admin_pos(request: Request, admin = Depends(get_admin)):
         "admin/pos.html",
         {
             "request": request,
+        }
+    )
+
+
+@app.get("/operador")
+def operador_dashboard(request: Request,
+                       db: Session = Depends(get_db),
+                       operador = Depends(get_operador)):
+    produtos = db.query(Produto).filter(Produto.ativo == True).order_by(Produto.nome).all()
+
+    return templates.TemplateResponse(
+        request,
+        "operador/index.html",
+        {
+            "request": request,
+            "usuario": operador,
+            "page_title": "Painel do Operador",
+            "page_subtitle": "Acompanhe produtos e mantenha o atendimento em dia.",
+            "produtos": produtos,
         }
     )
 

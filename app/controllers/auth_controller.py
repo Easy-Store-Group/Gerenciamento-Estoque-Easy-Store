@@ -100,14 +100,14 @@ def fazer_login(
         return templates.TemplateResponse(
             request,
             "auth/login.html",
-            {"request": request, "erro": "E-mail ou senha incorretos.(Somente para administradores)"}
+            {"request": request, "erro": "E-mail ou senha incorretos."}
         )
     
     if not usuario.ativo:
         return templates.TemplateResponse(
             request,
             "auth/login.html",
-            {"request": request, "erro": "usuario inativo!"}
+            {"request": request, "erro": "Usuário inativo."}
         )
 
     token_data = {
@@ -119,7 +119,14 @@ def fazer_login(
 
     token = criar_token(token_data)
 
-    response = RedirectResponse(url="/admin", status_code=302)
+    if usuario.role == "admin":
+        destino = "/admin"
+    elif usuario.role == "operador":
+        destino = "/operador"
+    else:
+        destino = "/perfil"
+
+    response = RedirectResponse(url=destino, status_code=302)
 
     response.set_cookie(
         key="access_token",

@@ -6,8 +6,8 @@ body{display:flex;align-items:center;justify-content:center;min-height:100vh;wid
 
 /* BRANDING */
 .branding{flex:1.3;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:40px;}
-.bg-layer{position:absolute;inset:0;background:linear-gradient(135deg,#1a8fe8 0%,#0b00a0 100%);transition:background 3s ease;}
-.bg-layer.crystal{background:linear-gradient(135deg,#00cfff 0%,#0066cc 50%,#003d99 100%);}
+.bg-layer{position:absolute;inset:0;background:linear-gradient(135deg,#7c3aed 0%,#10b981 60%,#0b00a0 100%);transition:background 3s ease;}
+.bg-layer.crystal{background:linear-gradient(135deg,#8b5cf6 0%,#34d399 50%,#0f766e 100%);}
 
 /* Stars */
 .stars{position:absolute;inset:0;pointer-events:none;}
@@ -34,13 +34,13 @@ body{display:flex;align-items:center;justify-content:center;min-height:100vh;wid
 .input-group input:focus{border-color:#2575fc;box-shadow:0 0 0 4px rgba(37,117,252,.12);}
 
 /* CONFIRM BUTTON - beefy */
-.btn-confirm{width:100%;padding:22px;background:linear-gradient(135deg,#2575fc,#1a5fd4);border:none;border-radius:14px;color:white;font-size:1.35rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:18px;box-shadow:0 10px 30px rgba(37,117,252,.45);letter-spacing:.3px;transition:all .25s;position:relative;overflow:hidden;}
+.btn-confirm{width:100%;padding:22px;background:linear-gradient(135deg,#7c3aed,#10b981);border:none;border-radius:14px;color:white;font-size:1.35rem;font-weight:700;font-family:'Poppins',sans-serif;cursor:pointer;margin-top:18px;box-shadow:0 10px 30px rgba(124,58,237,.45);letter-spacing:.3px;transition:all .25s;position:relative;overflow:hidden;}
 .btn-confirm::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);border-radius:14px;}
-.btn-confirm:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(37,117,252,.55);background:linear-gradient(135deg,#3385ff,#1e68e0);}
+.btn-confirm:hover{transform:translateY(-3px);box-shadow:0 12px 36px rgba(124,58,237,.55);background:linear-gradient(135deg,#8b5cf6,#059669);}
 .btn-confirm:active{transform:translateY(0);box-shadow:0 4px 14px rgba(37,117,252,.3);}
 
 .footer-text{margin-top:30px;font-size:1rem;text-align:center;color:#777;}
-.footer-text a{color:#2575fc;text-decoration:none;font-weight:600;}
+.footer-text a{color:#7c3aed;text-decoration:none;font-weight:600;}
 
 /* particles */
 .particle{position:absolute;border-radius:50%;pointer-events:none;z-index:20;}
