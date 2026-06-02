@@ -67,12 +67,21 @@ def fazer_login_json(dados: LoginRequest, db: Session = Depends(get_db)):
         "token": token
     }
 
-# exibir tela de login 
+# exibir tela de login
 @router.get("/login")
 def tela_login(request: Request):
     return templates.TemplateResponse(
         request,
         "auth/login.html",
+        {'request': request}
+    )
+
+# exibir tela de cadastro
+@router.get("/register")
+def tela_register(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "auth/register.html",
         {'request': request}
     )
 
