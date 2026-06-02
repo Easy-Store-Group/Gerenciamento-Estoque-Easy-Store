@@ -25,6 +25,7 @@ class FinalizarVendaRequest(BaseModel):
     itens: List[ItemCarrinho]
     metodos_pagamento: str
     usuario_id: Optional[int] = None
+    usuario_email: Optional[str] = None
 
 class VendaResponse(BaseModel):
     id: int
@@ -104,20 +105,24 @@ def finalizar_venda(dados: FinalizarVendaRequest, db: Session = Depends(get_db))
     conquista = None
     nivel_novo = None
 
+    # Buscar usuário por ID ou email
     if dados.usuario_id:
         usuario = db.query(Usuario).filter(Usuario.id == dados.usuario_id).first()
-        if usuario:
-            xp_anterior = usuario.xp_total
-            usuario.xp_total += xp_ganho
-            nivel_novo = calcular_nivel_from_xp(usuario.xp_total)
+    elif dados.usuario_email:
+        usuario = db.query(Usuario).filter(Usuario.email == dados.usuario_email).first()
 
-            if nivel_novo > usuario.nivel:
-                usuario.nivel = nivel_novo
-                desconto_nivel = calcular_desconto_por_nivel(nivel_novo)
+    if usuario:
+        xp_anterior = usuario.xp_total
+        usuario.xp_total += xp_ganho
+        nivel_novo = calcular_nivel_from_xp(usuario.xp_total)
 
-            conquista = verificar_nova_conquista(xp_anterior, usuario.xp_total)
-            if conquista:
-                desconto_nivel = max(desconto_nivel, conquista.get("desconto", 0))
+        if nivel_novo > usuario.nivel:
+            usuario.nivel = nivel_novo
+            desconto_nivel = calcular_desconto_por_nivel(nivel_novo)
+
+        conquista = verificar_nova_conquista(xp_anterior, usuario.xp_total)
+        if conquista:
+            desconto_nivel = max(desconto_nivel, conquista.get("desconto", 0))
 
     desconto_aplicado = desconto_nivel
     total_final = total - desconto_aplicado
@@ -195,6 +200,22 @@ def info_usuario(usuario_id: int, db: Session = Depends(get_db)):
     return {
         "id": usuario.id,
         "nome": usuario.nome,
+        "xp_total": usuario.xp_total,
+        "nivel": usuario.nivel,
+        "moedas_resgate": usuario.moedas_resgate,
+        "proximo_nivel_xp": 100 * usuario.nivel
+    }
+
+@router.get("/usuario-por-email")
+def info_usuario_por_email(email: str, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    return {
+        "id": usuario.id,
+        "nome": usuario.nome,
+        "email": usuario.email,
         "xp_total": usuario.xp_total,
         "nivel": usuario.nivel,
         "moedas_resgate": usuario.moedas_resgate,
