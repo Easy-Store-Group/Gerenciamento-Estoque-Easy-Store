@@ -8,6 +8,7 @@ from app.database import get_db
 from app.models.produto import Produto
 from app.models.categoria import Categoria
 from app.models.usuario import Usuario
+from app.models.cliente import Cliente
 
 
 from app.controllers import auth_controller
@@ -81,12 +82,28 @@ def admin_caixa(request: Request, admin = Depends(get_admin)):
 
 
 @app.get("/admin/pos")
-def admin_pos(request: Request, admin = Depends(get_admin)):
+def admin_pos(request: Request, db: Session = Depends(get_db), admin = Depends(get_admin)):
+    produtos = (
+        db.query(Produto)
+        .filter(Produto.ativo == True, Produto.estoque_atual > 0)
+        .order_by(Produto.nome)
+        .all()
+    )
+    clientes = (
+        db.query(Cliente)
+        .filter(Cliente.ativo == True)
+        .order_by(Cliente.nome)
+        .all()
+    )
     return templates.TemplateResponse(
         request,
         "admin/pos.html",
         {
             "request": request,
+            "usuario": admin,
+            "produtos": produtos,
+            "clientes": clientes,
+            "desconto_associado": 10.0,
         }
     )
 
