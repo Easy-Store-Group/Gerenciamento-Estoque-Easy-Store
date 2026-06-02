@@ -1,0 +1,44 @@
+
+{% extends "admin/base.html" %}
+{% set css_path = 'css/admin.css' %}
+{% set active = 'vendas' %}
+
+{% block content %}
+<div class="vendas-container">
+  <div class="vendas-header">
+    <div>
+      <h2>Vendas</h2>
+      <p class="subtitle">Histórico de vendas e operações de caixa</p>
+    </div>
+    <div class="vendas-actions">
+      <input type="text" id="searchSales" placeholder="Buscar por cliente, produto ou id">
+      <input type="date" id="dateFrom">
+      <input type="date" id="dateTo">
+      <button class="btn-small">Filtrar</button>
+      <button class="btn-small btn-primary">Nova Venda</button>
+    </div>
+  </div>
+
+  <div class="vendas-body">
+    <table class="vendas-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Data</th>
+          <th>Cliente</th>
+          <th>Itens</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody id="salesTableBody">
+        <tr class="empty-row">
+          <td colspan="7">Nenhuma venda encontrada</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
