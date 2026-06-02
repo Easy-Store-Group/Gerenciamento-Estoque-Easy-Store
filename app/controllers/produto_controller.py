@@ -102,6 +102,7 @@ async def criar_produto(
     request: Request,
     nome: str          = Form(...),
     preco: float       = Form(...),
+    plataforma: str    = Form(...),
     estoque_atual: int = Form(...),
     categoria_id: int  = Form(0),   # 0 = sem categoria
     imagem: UploadFile = File(None), # None = campo opcional
@@ -123,6 +124,7 @@ async def criar_produto(
                 "categorias":   categorias,
                 "erro":         "Já existe um produto com este nome.",
                 "valores":      {"nome": nome, "preco": preco,
+                                   "plataforma": plataforma,
                                    "estoque_atual": estoque_atual,
                                    "categoria_id": categoria_id},
                 "page_title":   "Adicionar produto",
@@ -139,6 +141,7 @@ async def criar_produto(
     produto = Produto(
         nome          = nome,
         preco         = preco,
+        plataforma    = plataforma,
         estoque_atual = estoque_atual,
         categoria_id  = categoria_id or None,  # 0 vira NULL no banco
         imagem_path   = imagem_path,
@@ -188,6 +191,7 @@ async def editar_produto(
     request: Request,
     nome: str          = Form(...),
     preco: float       = Form(...),
+    plataforma: str    = Form(...),
     estoque_atual: int = Form(...),
     categoria_id: int  = Form(0),
     imagem: UploadFile = File(None),
@@ -233,6 +237,7 @@ async def editar_produto(
 
     editando.nome          = nome
     editando.preco         = preco
+    editando.plataforma    = plataforma
     editando.estoque_atual = estoque_atual
     editando.categoria_id  = categoria_id or None
 

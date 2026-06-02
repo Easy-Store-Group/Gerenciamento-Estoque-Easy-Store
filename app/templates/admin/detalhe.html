@@ -7,6 +7,7 @@
   <div class="container">
     <h1>{{ produto.nome }}</h1>
     <p class="muted">Categoria: {{ produto.categoria.nome if produto.categoria else '—' }}</p>
+    <p class="muted">Plataforma: {{ produto.plataforma }}</p>
     <div class="product-grid">
       <div class="product-media">
         <img src="{{ produto.imagem_url or url_for('static', path='img/placeholder.png') }}" alt="{{ produto.nome }}">

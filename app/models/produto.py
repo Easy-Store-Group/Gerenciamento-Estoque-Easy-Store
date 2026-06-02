@@ -14,7 +14,6 @@ class Produto(Base):
     preco = Column(Float, nullable=False, default=0.0)
 
     plataforma = Column(String(100), nullable=False)
-    plataformas = Column(String(255), nullable=True)
     
     descricao = Column(String(255), nullable=True)
     
@@ -36,11 +35,4 @@ class Produto(Base):
             return f"/static/{self.imagem_path}"
         else:
             return "static/img/produto-placeholder.png"
-        
-
-
-from sqlalchemy import Column, String, Boolean, Integer, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from app.database import Base
-
 
