@@ -31,6 +31,7 @@ app.include_router(venda_controller.router)
 app.include_router(caixa_controller.router)
 app.include_router(conquistas_controller.router)
 app.include_router(movimentacao_controller.router)
+app.include_router(movimentacao_controller.router)
 
 # Tela inicial 
 @app.get("/")
