@@ -4,3 +4,8 @@ from app.models import produto
 from app.models import venda
 from app.models import item_venda
 from app.models import conquista
+from app.models import movimentacao
+
+#python -m alembic revision --autogenerate -m "criar tabelas cliente e vendas"
+
+#python -m alembic upgrade head
