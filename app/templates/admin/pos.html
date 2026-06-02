@@ -1,84 +1,699 @@
-﻿{% extends "admin/base.html" %}
-
-{% set title = "PDV - Ponto de Venda" %}
-{% set page_title = "Ponto de Venda" %}
-{% set css_path = "css/pos.css" %}
-{% set active = "pos" %}
-{% set extra_button = {'href': '/pdv/historico', 'label': 'Histórico de Vendas'} %}
+﻿{% extends "admin/pos-layout.html" %}
 
 {% block content %}
-<div class="pdv-wrapper">
-    <div id="alert-container"></div>
+<style>
+  .pos-container {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    height: calc(100vh - 120px);
+    gap: 0;
+    background: #f9fafb;
+  }
 
-    <div class="pdv-grid">
-        <section class="catalogo-section">
-            <div class="search-box">
-                <input type="text" id="input-busca" class="form-control" placeholder="🔍 Digite para buscar um produto...">
-            </div>
+  .pos-products {
+    display: flex;
+    flex-direction: column;
+    background: #f9fafb;
+    overflow: hidden;
+  }
 
-            <div class="produtos-grid">
-                {% for produto in produtos %}
-                <div class="produto-card-pdv"
-                     data-id="{{ produto.id }}"
-                     data-nome="{{ produto.nome }}"
-                     data-preco="{{ produto.preco }}"
-                     data-estoque="{{ produto.estoque_atual }}">
-                    <div>
-                        <p class="prod-nome">{{ produto.nome }}</p>
-                        <p class="prod-estoque">Estoque: {{ produto.estoque_atual }} un</p>
-                    </div>
-                    <p class="prod-preco">R$ {{ "%.2f"|format(produto.preco) }}</p>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
+  .pos-header {
+    padding: 24px;
+    background: white;
+    border-bottom: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
 
-        <aside class="carrinho-lateral">
-            <h3>Carrinho de Compras</h3>
+  .pos-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
 
-            <form id="form-finalizar" action="/pdv/finalizar" method="POST">
-                <input type="hidden" name="carrinho_json" id="carrinho_json">
+  .pos-header p {
+    font-size: 13px;
+    color: #666;
+  }
 
-                <div style="margin-top: 15px;">
-                    <label for="cliente_id" style="font-size: 13px; font-weight: 600; color: var(--color-gray-dark);">Cliente</label>
-                    <select name="cliente_id" id="cliente_id" class="form-control" onchange="atualizarTotais()">
-                        <option value="0">Consumidor Não Identificado</option>
-                        {% for cliente in clientes %}
-                        <option value="{{ cliente.id }}" data-associado="{{ 'true' if cliente.is_associado else 'false' }}">
-                            {{ cliente.nome }} {% if cliente.is_associado %}(Associado -{{ desconto_associado }}%){% endif %}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+  .search-box {
+    margin-top: 16px;
+    position: relative;
+  }
 
-                <div class="carrinho-itens" id="container-itens-carrinho"></div>
+  .search-box input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 13px;
+  }
 
-                <div style="margin-bottom: 15px;">
-                    <input type="text" name="observacao" class="form-control" placeholder="Observações da venda...">
-                </div>
+  .search-box input:focus {
+    outline: none;
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+  }
 
-                <div class="resumo-valores">
-                    <div class="linha-resumo">
-                        <span>Subtotal Bruto:</span>
-                        <span id="resumo-subtotal">R$ 0,00</span>
-                    </div>
-                    <div class="linha-resumo" style="color: #047857;">
-                        <span>Desconto Aplicado:</span>
-                        <span id="resumo-desconto">R$ 0,00</span>
-                    </div>
-                    <div class="linha-resumo total">
-                        <span>Total Líquido:</span>
-                        <span id="resumo-total">R$ 0,00</span>
-                    </div>
-                </div>
+  .products-grid {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
 
-                <button type="submit" class="btn btn-primary btn-large" style="width: 100%;">
-                    🛒 Finalizar Venda (F2)
-                </button>
-            </form>
-        </aside>
+  .product-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .product-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    border-color: #7c3aed;
+  }
+
+  .product-image {
+    width: 100%;
+    height: 140px;
+    background: #f3f4f6;
+    border-radius: 8px;
+    object-fit: cover;
+    margin-bottom: 8px;
+  }
+
+  .product-category {
+    font-size: 11px;
+    color: #999;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .product-name {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #1f2937;
+  }
+
+  .product-price {
+    font-size: 16px;
+    font-weight: 700;
+    color: #7c3aed;
+    margin-bottom: 8px;
+  }
+
+  .product-stock {
+    font-size: 11px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+
+  .btn-add {
+    padding: 8px 12px;
+    background: #7c3aed;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.2s;
+    margin-top: auto;
+  }
+
+  .btn-add:hover {
+    background: #6d28d9;
+  }
+
+  .pos-cart {
+    background: white;
+    border-left: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .cart-header {
+    padding: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
+    color: white;
+  }
+
+  .cart-header h3 {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .cart-header p {
+    font-size: 12px;
+    opacity: 0.9;
+  }
+
+  .customer-section {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+
+  .customer-section label {
+    font-size: 12px;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+    color: #374151;
+  }
+
+  .customer-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 12px;
+  }
+
+  .customer-info {
+    padding: 8px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    border-radius: 6px;
+    font-size: 12px;
+    margin-top: 4px;
+    color: #166534;
+  }
+
+  .cart-items {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+  }
+
+  .cart-empty {
+    text-align: center;
+    padding: 30px 10px;
+    color: #999;
+    font-size: 12px;
+  }
+
+  .cart-item {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+
+  .cart-item-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #1f2937;
+  }
+
+  .cart-item-qty {
+    color: #666;
+    margin-bottom: 4px;
+  }
+
+  .cart-item-price {
+    color: #7c3aed;
+    font-weight: 600;
+  }
+
+  .cart-item-remove {
+    float: right;
+    background: #fee2e2;
+    color: #dc2626;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .cart-summary {
+    padding: 12px;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 8px;
+    color: #666;
+  }
+
+  .summary-row.total {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1f2937;
+    border-top: 1px solid #e5e7eb;
+    padding-top: 8px;
+  }
+
+  .btn-checkout {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 8px;
+    font-size: 13px;
+    transition: all 0.2s;
+  }
+
+  .btn-checkout:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+
+  .btn-checkout:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 450px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+
+  .modal-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  .payment-method {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  .payment-btn {
+    flex: 1;
+    padding: 10px;
+    border: 2px solid #e5e7eb;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 12px;
+    transition: all 0.2s;
+  }
+
+  .payment-btn:hover {
+    border-color: #7c3aed;
+  }
+
+  .payment-btn.active {
+    border-color: #7c3aed;
+    background: #f3f4f6;
+    color: #7c3aed;
+  }
+
+  .xp-notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: white;
+    border-left: 4px solid #7c3aed;
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideIn 0.3s ease;
+    font-size: 12px;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  .achievement-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    font-size: 12px;
+  }
+
+  @keyframes popIn {
+    0% {
+      transform: scale(0.5) translateY(-100%);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+  }
+</style>
+
+<div class="pos-container">
+  <!-- Seção de Produtos -->
+  <div class="pos-products">
+    <div class="pos-header">
+      <h2>🎮 Frente de Caixa</h2>
+      <p>Selecione produtos para iniciar a venda</p>
+      <div class="search-box">
+        <input type="text" id="searchProducts" placeholder="Buscar produto...">
+      </div>
     </div>
+
+    <div class="products-grid" id="productsGrid">
+      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">
+        Carregando produtos...
+      </div>
+    </div>
+  </div>
+
+  <!-- Carrinho -->
+  <aside class="pos-cart">
+    <div class="cart-header">
+      <h3>🛒 Venda Atual</h3>
+      <p id="cartItemCount">0 itens</p>
+    </div>
+
+    <!-- Seção de Cliente -->
+    <div class="customer-section">
+      <label>📧 Email do Cliente</label>
+      <input type="email" id="customerEmail" class="customer-input" placeholder="usuario@email.com">
+      <div id="customerInfo" style="display: none;">
+        <div class="customer-info">
+          <strong id="customerName"></strong><br>
+          Nível: <span id="customerLevel"></span> | XP: <span id="customerXP"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-items" id="cartItems">
+      <div class="cart-empty">Nenhum produto selecionado</div>
+    </div>
+
+    <div class="cart-summary">
+      <div class="summary-row">
+        <span>Subtotal:</span>
+        <span id="subtotal">R$ 0,00</span>
+      </div>
+      <div class="summary-row" id="discountRow" style="display: none; color: #10b981;">
+        <span>Desconto XP:</span>
+        <span id="discountAmount">- R$ 0,00</span>
+      </div>
+      <div class="summary-row total">
+        <span>Total:</span>
+        <span id="total">R$ 0,00</span>
+      </div>
+      <button class="btn-checkout" id="checkoutBtn" disabled>Finalizar Venda</button>
+    </div>
+  </aside>
 </div>
 
-<script src="{{ request.url_for('static', path='js/pos.js') }}"></script>
+<!-- Modal de Pagamento -->
+<div class="modal" id="paymentModal">
+  <div class="modal-content">
+    <div class="modal-header">💳 Forma de Pagamento</div>
+    <div class="payment-method">
+      <button class="payment-btn" data-method="Dinheiro">💵 Dinheiro</button>
+      <button class="payment-btn" data-method="Débito">💳 Débito</button>
+    </div>
+    <div class="payment-method">
+      <button class="payment-btn" data-method="Crédito">💳 Crédito</button>
+      <button class="payment-btn" data-method="PIX">📱 PIX</button>
+    </div>
+    <button class="btn-checkout" id="confirmPaymentBtn" style="margin-top: 16px;">Confirmar Pagamento</button>
+    <button class="btn-checkout" style="background: #999; margin-top: 6px;" onclick="closePaymentModal()">Cancelar</button>
+  </div>
+</div>
+
+<script>
+let cart = [];
+let allProducts = [];
+let selectedPaymentMethod = null;
+let currentCustomer = null;
+
+async function loadProducts() {
+  try {
+    const response = await fetch('/api/vendas/produtos');
+    allProducts = await response.json();
+    renderProducts(allProducts);
+  } catch (error) {
+    console.error('Erro ao carregar produtos:', error);
+  }
+}
+
+function renderProducts(products) {
+  const grid = document.getElementById('productsGrid');
+
+  if (products.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #999;">Nenhum produto encontrado</div>';
+    return;
+  }
+
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" onclick="addToCart(${p.id}, '${p.nome}', ${p.preco})">
+      <img src="${p.imagem}" alt="${p.nome}" class="product-image" onerror="this.src='/static/img/produto-placeholder.png'">
+      <div class="product-category">${p.categoria}</div>
+      <div class="product-name">${p.nome}</div>
+      <div class="product-price">R$ ${p.preco.toFixed(2)}</div>
+      <div class="product-stock">
+        ${p.estoque > 0 ? `Estoque: ${p.estoque}` : 'Fora de estoque'}
+      </div>
+      <button class="btn-add">+ Adicionar</button>
+    </div>
+  `).join('');
+}
+
+function addToCart(productId, name, price) {
+  const existing = cart.find(item => item.productId === productId);
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ productId, name, price, quantity: 1 });
+  }
+
+  updateCart();
+}
+
+function updateCart() {
+  const cartContainer = document.getElementById('cartItems');
+
+  if (cart.length === 0) {
+    cartContainer.innerHTML = '<div class="cart-empty">Nenhum produto selecionado</div>';
+    document.getElementById('cartItemCount').textContent = '0 itens';
+    document.getElementById('checkoutBtn').disabled = true;
+    updateTotals();
+    return;
+  }
+
+  cartContainer.innerHTML = cart.map((item, index) => `
+    <div class="cart-item">
+      <div class="cart-item-name">${item.name} <button class="cart-item-remove" onclick="removeFromCart(${index})">✕</button></div>
+      <div class="cart-item-qty">Qtd:
+        <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity(${index}, this.value)" style="width: 40px; padding: 2px; border: 1px solid #e5e7eb; border-radius: 4px;">
+      </div>
+      <div class="cart-item-price">R$ ${(item.price * item.quantity).toFixed(2)}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('cartItemCount').textContent = `${cart.length} itens`;
+  document.getElementById('checkoutBtn').disabled = false;
+  updateTotals();
+}
+
+function updateQuantity(index, value) {
+  const qty = parseInt(value) || 1;
+  if (qty > 0) {
+    cart[index].quantity = qty;
+  } else {
+    cart.splice(index, 1);
+  }
+  updateCart();
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateCart();
+}
+
+function updateTotals() {
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+  document.getElementById('subtotal').textContent = `R$ ${subtotal.toFixed(2)}`;
+  document.getElementById('total').textContent = `R$ ${subtotal.toFixed(2)}`;
+  document.getElementById('discountRow').style.display = 'none';
+}
+
+// Busca de cliente por email
+document.getElementById('customerEmail').addEventListener('change', async (e) => {
+  const email = e.target.value.trim();
+  if (!email) {
+    currentCustomer = null;
+    document.getElementById('customerInfo').style.display = 'none';
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/vendas/usuario-por-email?email=${encodeURIComponent(email)}`);
+    if (response.ok) {
+      const usuario = await response.json();
+      currentCustomer = usuario;
+      document.getElementById('customerName').textContent = usuario.nome;
+      document.getElementById('customerLevel').textContent = usuario.nivel;
+      document.getElementById('customerXP').textContent = usuario.xp_total;
+      document.getElementById('customerInfo').style.display = 'block';
+    } else {
+      document.getElementById('customerInfo').style.display = 'none';
+    }
+  } catch (error) {
+    console.error('Erro ao buscar cliente:', error);
+  }
+});
+
+document.getElementById('searchProducts').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  const filtered = allProducts.filter(p =>
+    p.nome.toLowerCase().includes(query) ||
+    p.categoria.toLowerCase().includes(query)
+  );
+  renderProducts(filtered);
+});
+
+document.getElementById('checkoutBtn').addEventListener('click', () => {
+  if (!currentCustomer && !document.getElementById('customerEmail').value) {
+    alert('Informe o email do cliente');
+    return;
+  }
+  document.getElementById('paymentModal').classList.add('active');
+});
+
+document.querySelectorAll('.payment-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedPaymentMethod = e.target.dataset.method;
+  });
+});
+
+document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
+  if (!selectedPaymentMethod) {
+    alert('Selecione uma forma de pagamento');
+    return;
+  }
+
+  const itens = cart.map(item => ({
+    produto_id: item.productId,
+    quantidade: item.quantity
+  }));
+
+  try {
+    const response = await fetch('/api/vendas/finalizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        itens,
+        metodos_pagamento: selectedPaymentMethod,
+        usuario_email: document.getElementById('customerEmail').value || null
+      })
+    });
+
+    const resultado = await response.json();
+
+    if (response.ok) {
+      showXpNotification(resultado.xp_ganho);
+
+      if (resultado.conquista) {
+        showAchievementPopup(resultado.conquista.nome, `+R$ ${resultado.conquista.desconto} de desconto`);
+      }
+
+      if (resultado.nivel_novo) {
+        showAchievementPopup(`Nível ${resultado.nivel_novo}!`, `Parabéns, você subiu de nível!`);
+      }
+
+      cart = [];
+      currentCustomer = null;
+      selectedPaymentMethod = null;
+      document.getElementById('customerEmail').value = '';
+      document.getElementById('customerInfo').style.display = 'none';
+      updateCart();
+      document.getElementById('paymentModal').classList.remove('active');
+      loadProducts();
+    } else {
+      alert('Erro: ' + resultado.detail);
+    }
+  } catch (error) {
+    console.error('Erro ao finalizar venda:', error);
+    alert('Erro ao processar venda');
+  }
+});
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').classList.remove('active');
+  selectedPaymentMethod = null;
+  document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
+}
+
+function showXpNotification(xp) {
+  const notification = document.createElement('div');
+  notification.className = 'xp-notification';
+  notification.innerHTML = `🎮 +${xp} XP para o cliente!`;
+  document.body.appendChild(notification);
+
+  setTimeout(() => notification.remove(), 3000);
+}
+
+function showAchievementPopup(title, message) {
+  const popup = document.createElement('div');
+  popup.className = 'achievement-popup';
+  popup.innerHTML = `<strong>🏆 ${title}</strong><br>${message}`;
+  document.body.appendChild(popup);
+
+  setTimeout(() => popup.remove(), 5000);
+}
+
+loadProducts();
+</script>
 {% endblock %}
