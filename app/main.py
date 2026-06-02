@@ -69,6 +69,15 @@ def admin_dashboard(request: Request,
     )
 
 
+@app.get("/admin/caixa")
+def admin_caixa(request: Request, admin = Depends(get_admin)):
+    return templates.TemplateResponse(
+        request,
+        "admin/dashboard-caixa.html",
+        {"request": request}
+    )
+
+
 @app.get("/admin/pos")
 def admin_pos(request: Request, admin = Depends(get_admin)):
     return templates.TemplateResponse(

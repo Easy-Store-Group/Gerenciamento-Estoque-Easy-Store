@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📊 Dashboard de Caixa - EasyStore</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #7c3aed;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto;
+      background: var(--gray-50);
+      color: var(--gray-800);
+    }
+
+    .dashboard {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .dashboard-header {
+      margin-bottom: 32px;
+    }
+
+    .dashboard-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .dashboard-header p {
+      color: #666;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e5e7eb;
+    }
+
+    .card-small {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e5e7eb;
+    }
+
+    .metric {
+      margin-bottom: 16px;
+    }
+
+    .metric:last-child {
+      margin-bottom: 0;
+    }
+
+    .metric-label {
+      font-size: 13px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .metric-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+
+    .metric-secondary {
+      font-size: 13px;
+      color: #666;
+      margin-top: 6px;
+    }
+
+    .stat-card {
+      text-align: center;
+    }
+
+    .stat-icon {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--gray-900);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #666;
+      text-transform: uppercase;
+    }
+
+    .alert {
+      background: #fef3c7;
+      border-left: 4px solid var(--warning);
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .alert-critical {
+      background: #fee2e2;
+      border-left-color: var(--danger);
+    }
+
+    .alert-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alert-text h4 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .alert-text p {
+      font-size: 12px;
+      color: #666;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: var(--primary);
+      color: white;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .badge.danger {
+      background: var(--danger);
+    }
+
+    .badge.warning {
+      background: var(--warning);
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    .table thead {
+      background: var(--gray-100);
+    }
+
+    .table th {
+      padding: 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: #666;
+    }
+
+    .table td {
+      padding: 12px;
+      border-top: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    .table tr:hover {
+      background: var(--gray-50);
+    }
+
+    @media (max-width: 1024px) {
+      .grid-2 {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 640px) {
+      .grid-4 {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard {
+        padding: 16px;
+      }
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #e5e7eb;
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <div class="dashboard-header">
+      <h1>📊 Dashboard de Caixa</h1>
+      <p>Acompanhamento em tempo real de vendas e estoque</p>
+    </div>
+
+    <!-- Resumo do Dia -->
+    <div class="grid-4" id="resumoDia">
+      <div class="card-small stat-card">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="grid-2">
+      <div class="card">
+        <h2 style="margin-bottom: 20px;">💰 Fluxo de Caixa (últimos 30 dias)</h2>
+        <canvas id="fluxoChart"></canvas>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom: 20px;">📦 Vendas por Categoria</h2>
+        <canvas id="categoriasChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Alertas e Produtos -->
+    <div class="grid-2">
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">⚠️ Alertas de Estoque</h2>
+        <div id="alertasEstoque">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 style="margin-bottom: 16px;">🏆 Produtos Mais Vendidos</h2>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>Qtd Vendida</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody id="topProdutos">
+            <tr><td colspan="3" class="loading"><div class="spinner"></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let fluxoChart, categoriasChart;
+
+    async function loadDashboard() {
+      try {
+        await Promise.all([
+          loadResumoDia(),
+          loadFluxoCaixa(),
+          loadVendasCategoria(),
+          loadAlertas(),
+          loadTopProdutos()
+        ]);
+      } catch (error) {
+        console.error('Erro ao carregar dashboard:', error);
+      }
+    }
+
+    async function loadResumoDia() {
+      const response = await fetch('/api/caixa/resumo/dia');
+      const data = await response.json();
+
+      document.getElementById('resumoDia').innerHTML = `
+        <div class="card-small stat-card">
+          <div class="stat-icon">🛒</div>
+          <div class="stat-value">${data.numero_vendas}</div>
+          <div class="stat-label">Vendas</div>
+        </div>
+        <div class="card-small stat-card">
+          <div class="stat-icon">💰</div>
+          <div class="stat-value">R$ ${data.total_vendas.toFixed(2)}</div>
+          <div class="stat-label">Total</div>
+        </div>
+        <div class="card-small stat-card">
+          <div class="stat-icon">🎮</div>
+          <div class="stat-value">${data.total_xp}</div>
+          <div class="stat-label">XP Ganho</div>
+        </div>
+        <div class="card-small stat-card">
+          <div class="stat-icon">🏷️</div>
+          <div class="stat-value">R$ ${data.ticket_medio.toFixed(2)}</div>
+          <div class="stat-label">Ticket Médio</div>
+        </div>
+      `;
+    }
+
+    async function loadFluxoCaixa() {
+      const response = await fetch('/api/caixa/fluxo-caixa?dias=30');
+      const data = await response.json();
+
+      const ctx = document.getElementById('fluxoChart').getContext('2d');
+
+      if (fluxoChart) fluxoChart.destroy();
+
+      fluxoChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: data.dados.map(d => new Date(d.data).toLocaleDateString('pt-BR', {month: 'short', day: 'numeric'})),
+          datasets: [{
+            label: 'Total de Vendas',
+            data: data.dados.map(d => d.total),
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124, 58, 237, 0.1)',
+            tension: 0.3,
+            fill: true
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true } }
+        }
+      });
+    }
+
+    async function loadVendasCategoria() {
+      const response = await fetch('/api/caixa/vendas-por-categoria');
+      const data = await response.json();
+
+      const ctx = document.getElementById('categoriasChart').getContext('2d');
+
+      if (categoriasChart) categoriasChart.destroy();
+
+      categoriasChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: data.map(d => d.categoria),
+          datasets: [{
+            data: data.map(d => d.total),
+            backgroundColor: ['#7c3aed', '#ec4899', '#10b981', '#f59e0b', '#ef4444']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+
+    async function loadAlertas() {
+      const response = await fetch('/api/caixa/alertas/estoque');
+      const alertas = await response.json();
+
+      const container = document.getElementById('alertasEstoque');
+
+      if (alertas.length === 0) {
+        container.innerHTML = '<p style="color: #666; text-align: center; padding: 20px;">✅ Todos os produtos com estoque OK</p>';
+        return;
+      }
+
+      container.innerHTML = alertas.map(a => `
+        <div class="alert ${a.urgencia === 'crítica' ? 'alert-critical' : ''}">
+          <div class="alert-item">
+            <div class="alert-text">
+              <h4>${a.nome}</h4>
+              <p>Estoque: ${a.estoque_atual}/${a.estoque_minimo}</p>
+            </div>
+            <span class="badge ${a.urgencia === 'crítica' ? 'danger' : 'warning'}">${a.urgencia}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function loadTopProdutos() {
+      const response = await fetch('/api/caixa/top-produtos?limit=5');
+      const produtos = await response.json();
+
+      document.getElementById('topProdutos').innerHTML = produtos.map(p => `
+        <tr>
+          <td>${p.nome}</td>
+          <td>${p.quantidade_vendida}</td>
+          <td>R$ ${p.valor_total.toFixed(2)}</td>
+        </tr>
+      `).join('');
+    }
+
+    loadDashboard();
+    setInterval(loadDashboard, 30000); // Atualizar a cada 30s
+  </script>
+</body>
+</html>
