@@ -15,6 +15,7 @@ from app.controllers import categoria_controller
 from app.controllers import produto_controller
 from app.controllers import venda_controller
 from app.controllers import caixa_controller
+from app.controllers import conquistas_controller
 
 app = FastAPI(title="Sistema estoque")
 
@@ -30,6 +31,7 @@ app.include_router(categoria_controller.router)
 app.include_router(produto_controller.router)
 app.include_router(venda_controller.router)
 app.include_router(caixa_controller.router)
+app.include_router(conquistas_controller.router)
 
 # Tela inicial 
 @app.get("/")
