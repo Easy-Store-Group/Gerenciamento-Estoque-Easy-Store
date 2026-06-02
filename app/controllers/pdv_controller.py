@@ -57,6 +57,8 @@ def tela_pdv(
             "usuario":             usuario,
             "produtos":            produtos,
             "clientes":            clientes,
+            "css_path":     "css/pos.css",
+            "active":       "pos",
             "desconto_associado":  DESCONTO_ASSOCIADO,
         }
     )

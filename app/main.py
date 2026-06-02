@@ -80,7 +80,6 @@ def admin_caixa(request: Request, admin = Depends(get_admin)):
         {"request": request}
     )
 
-
 @app.get("/admin/pos")
 def admin_pos(request: Request, db: Session = Depends(get_db), admin = Depends(get_admin)):
     produtos = (
@@ -104,9 +103,9 @@ def admin_pos(request: Request, db: Session = Depends(get_db), admin = Depends(g
             "produtos": produtos,
             "clientes": clientes,
             "desconto_associado": 10.0,
+            "css_path": "css/pos.css",  # ✅ linha adicionada
         }
     )
-
 
 @app.get("/operador")
 def operador_dashboard(request: Request,

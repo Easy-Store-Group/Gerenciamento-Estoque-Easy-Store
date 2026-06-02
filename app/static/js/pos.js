@@ -1,217 +1,212 @@
-/**
- * SISTEMA DE PDV — CONTROLE OPERACIONAL DO CARRINHO
- * Sincronizado com FastAPI + SQLAlchemy
- */
+let cart = [];
+let allProducts = [];
+let selectedPaymentMethod = null;
+let currentCustomer = null;
 
-// 1. CONFIGURAÇÕES E ESTADO GLOBAL
-// Busca o valor do desconto injetado no elemento HTML de configuração
-const obterDescontoMinimo = () => {
-    const elemento = document.getElementById('config-desconto');
-    return elemento ? parseFloat(elemento.dataset.desconto) : 0;
-};
+// Carrega os produtos assim que a tela abre
+document.addEventListener("DOMContentLoaded", () => {
+    loadProducts();
+});
 
-let carrinho = [];
-
-// Recuperação segura do sessionStorage ao iniciar a página
-try {
-    carrinho = JSON.parse(sessionStorage.getItem('carrinho')) || [];
-} catch (e) {
-    console.error("Erro ao ler o sessionStorage, reiniciando carrinho:", e);
-    carrinho = [];
+async function loadProducts() {
+  try {
+    const response = await fetch('/api/vendas/produtos');
+    allProducts = await response.json();
+    renderProducts(allProducts);
+  } catch (error) {
+    console.error('Erro ao carregar produtos:', error);
+    // Fallback visual caso a rota da API demore ou falhe
+    document.getElementById('productsGrid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">Erro ao carregar catálogo de produtos.</div>';
+  }
 }
 
-// 2. CAPTURA DE ERROS DA URL (RETORNO DO BACKEND)
-const processarErrosURL = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('erro')) {
-        const erro = urlParams.get('erro');
-        const container = document.getElementById('alert-container');
-        
-        if (container) {
-            let mensagem = "Ocorreu um erro ao processar a venda.";
-            if (erro === 'vazio') mensagem = "⚠️ O carrinho não pode estar vazio para finalizar a venda.";
-            if (erro === 'quantidade') mensagem = "⚠️ Quantidade inválida de itens informada.";
-            if (erro === 'estoque') mensagem = `❌ Estoque insuficiente para o produto: ${urlParams.get('produto') || 'solicitado'}.`;
-            if (erro === 'produto_inexistente') mensagem = "❌ Um ou mais produtos do carrinho não foram localizados.";
-            if (erro === 'json') mensagem = "❌ Erro na integridade dos dados enviados.";
+function renderProducts(products) {
+  const grid = document.getElementById('productsGrid');
 
-            container.innerHTML = `<div class="alert alert-danger">${mensagem}</div>`;
-        }
-    }
-};
+  if (products.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: #64748b;">Nenhum produto encontrado</div>';
+    return;
+  }
 
-// 3. FUNÇÕES DE MANIPULAÇÃO DO CARRINHO
-function adicionarAoCarrinho(id, nome, preco, estoqueMax) {
-    const itemExistente = carrinho.find(item => item.produto_id === id);
+  grid.innerHTML = products.map(p => `
+    <div class="product-card" onclick="addToCart(${p.id}, '${p.nome}', ${p.preco})">
+      <img src="${p.imagem}" alt="${p.nome}" class="product-image" onerror="this.src='/static/img/produto-placeholder.png'">
+      <div class="product-category">${p.categoria}</div>
+      <div class="product-name">${p.nome}</div>
+      <div class="product-price">R$ ${p.preco.toFixed(2).replace('.', ',')}</div>
+      <div class="product-stock">
+        ${p.estoque > 0 ? `Estoque: ${p.estoque}` : '<span style="color: #ef4444;">Fora de estoque</span>'}
+      </div>
+      <button class="btn-add">+ Adicionar</button>
+    </div>
+  `).join('');
+}
 
-    if (itemExistente) {
-        if (itemExistente.quantidade < estoqueMax) {
-            itemExistente.quantidade++;
-        } else {
-            alert(`Quantidade máxima em estoque atingida para este produto (${estoqueMax} un).`);
-            return;
-        }
+function addToCart(productId, name, price) {
+  const existing = cart.find(item => item.productId === productId);
+
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ productId, name, price, quantity: 1 });
+  }
+
+  updateCart();
+}
+
+function updateCart() {
+  const cartContainer = document.getElementById('cartItems');
+
+  if (cart.length === 0) {
+    cartContainer.innerHTML = '<div class="cart-empty">Nenhum produto selecionado</div>';
+    document.getElementById('cartItemCount').textContent = '0 itens';
+    document.getElementById('checkoutBtn').disabled = true;
+    updateTotals();
+    return;
+  }
+
+  cartContainer.innerHTML = cart.map((item, index) => `
+    <div class="cart-item">
+      <div class="cart-item-name">
+        ${item.name} 
+        <button class="cart-item-remove" onclick="event.stopPropagation(); removeFromCart(${index})">✕</button>
+      </div>
+      <div class="cart-item-qty">Qtd:
+        <input type="number" min="1" value="${item.quantity}" onchange="updateQuantity(${index}, this.value)" onclick="event.stopPropagation();" style="width: 50px; padding: 4px; border: 1px solid #e2e8f0; border-radius: 6px; text-align: center;">
+      </div>
+      <div class="cart-item-price">R$ ${(item.price * item.quantity).toFixed(2).replace('.', ',')}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('cartItemCount').textContent = `${cart.length} item(ns)`;
+  document.getElementById('checkoutBtn').disabled = false;
+  updateTotals();
+}
+
+function updateQuantity(index, value) {
+  const qty = parseInt(value) || 1;
+  if (qty > 0) {
+    cart[index].quantity = qty;
+  } else {
+    cart.splice(index, 1);
+  }
+  updateCart();
+}
+
+function removeFromCart(index) {
+  cart.splice(index, 1);
+  updateCart();
+}
+
+function updateTotals() {
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const subtotalFormatado = `R$ ${subtotal.toFixed(2).replace('.', ',')}`;
+
+  document.getElementById('subtotal').textContent = subtotalFormatado;
+  document.getElementById('total').textContent = subtotalFormatado;
+  document.getElementById('discountRow').style.display = 'none';
+}
+
+// Busca de cliente por email
+document.getElementById('customerEmail').addEventListener('change', async (e) => {
+  const email = e.target.value.trim();
+  if (!email) {
+    currentCustomer = null;
+    document.getElementById('customerInfo').style.display = 'none';
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/vendas/usuario-por-email?email=${encodeURIComponent(email)}`);
+    if (response.ok) {
+      const usuario = await response.json();
+      currentCustomer = usuario;
+      document.getElementById('customerName').textContent = usuario.nome;
+      document.getElementById('customerLevel').textContent = usuario.nivel;
+      document.getElementById('customerXP').textContent = usuario.xp_total;
+      document.getElementById('customerInfo').style.display = 'block';
     } else {
-        if (estoqueMax <= 0) {
-            alert("Este produto está esgotado no momento.");
-            return;
-        }
-        carrinho.push({
-            produto_id: id,
-            nome: nome,
-            preco: preco,
-            quantidade: 1,
-            estoque_max: estoqueMax
-        });
+      document.getElementById('customerInfo').style.display = 'none';
     }
-    salvarERenderizar();
+  } catch (error) {
+    console.error('Erro ao buscar cliente:', error);
+  }
+});
+
+// Filtro de Busca Dinâmica
+document.getElementById('searchProducts').addEventListener('input', (e) => {
+  const query = e.target.value.toLowerCase();
+  const filtered = allProducts.filter(p =>
+    p.nome.toLowerCase().includes(query) ||
+    p.categoria.toLowerCase().includes(query)
+  );
+  renderProducts(filtered);
+});
+
+// Abrir e fechar Modal de Confirmação
+document.getElementById('checkoutBtn').addEventListener('click', () => {
+  if (!currentCustomer && !document.getElementById('customerEmail').value) {
+    alert('Informe o email do cliente antes de prosseguir.');
+    return;
+  }
+  document.getElementById('paymentModal').classList.add('active');
+});
+
+function closePaymentModal() {
+  document.getElementById('paymentModal').classList.remove('active');
 }
 
-function alterarQuantidade(id, delta) {
-    const item = carrinho.find(item => item.produto_id === id);
-    if (!item) return;
+document.querySelectorAll('.payment-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    selectedPaymentMethod = e.target.dataset.method;
+  });
+});
 
-    item.quantidade += delta;
+// Envio final para API de Vendas
+document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
+  if (!selectedPaymentMethod) {
+    alert('Selecione uma forma de pagamento');
+    return;
+  }
 
-    if (item.quantidade <= 0) {
-        carrinho = carrinho.filter(i => i.produto_id !== id);
-    } else if (item.quantidade > item.estoque_max) {
-        alert(`Quantidade máxima em estoque atingida (${item.estoque_max} un).`);
-        item.quantidade = item.estoque_max;
-    }
+  const itens = cart.map(item => ({
+    produto_id: item.productId,
+    quantidade: item.quantity
+  }));
 
-    salvarERenderizar();
-}
-
-// 4. PERSISTÊNCIA E SINCRONIZAÇÃO COM O FORMULÁRIO
-function salvarERenderizar() {
-    sessionStorage.setItem('carrinho', JSON.stringify(carrinho));
-    
-    // Envia apenas o payload que o modelo Pydantic/FastAPI espera receber
-    const backendPayload = carrinho.map(i => ({
-        produto_id: i.produto_id,
-        nome: i.nome,
-        preco: i.preco,
-        quantidade: i.quantidade
-    }));
-    
-    const inputHidden = document.getElementById('carrinho_json');
-    if (inputHidden) {
-        inputHidden.value = JSON.stringify(backendPayload);
-    }
-
-    renderizarCarrinhoHTML();
-    atualizarTotais();
-}
-
-function renderizarCarrinhoHTML() {
-    const container = document.getElementById('container-itens-carrinho');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    if (carrinho.length === 0) {
-        container.innerHTML = '<p style="text-align:center; color:var(--color-gray-dark); margin-top:20px;">Carrinho vazio</p>';
-        return;
-    }
-
-    carrinho.forEach(item => {
-        const itemHtml = `
-            <div class="carrinho-item">
-                <div class="item-meta">
-                    <h5>${item.nome}</h5>
-                    <p>R$ ${item.preco.toFixed(2).replace('.', ',')}</p>
-                </div>
-                <div class="item-controles">
-                    <button type="button" class="btn-qtd" onclick="alterarQuantidade(${item.produto_id}, -1)">-</button>
-                    <span style="font-weight:600; width:20px; text-align:center;">${item.quantidade}</span>
-                    <button type="button" class="btn-qtd" onclick="alterarQuantidade(${item.produto_id}, 1)">+</button>
-                </div>
-            </div>
-        `;
-        container.insertAdjacentHTML('beforeend', itemHtml);
-    });
-}
-
-function atualizarTotais() {
-    let bruto = 0;
-    carrinho.forEach(item => {
-        bruto += item.preco * item.quantidade;
+  try {
+    const response = await fetch('/api/vendas/finalizar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        itens,
+        metodos_pagamento: selectedPaymentMethod,
+        usuario_email: document.getElementById('customerEmail').value || null
+      })
     });
 
-    const selectCliente = document.getElementById('cliente_id');
-    let descPercentualCalculo = 0;
+    const resultado = await response.json();
 
-    if (selectCliente && selectCliente.selectedIndex !== -1) {
-        const opcaoSelecionada = selectCliente.options[selectCliente.selectedIndex];
-        if (opcaoSelecionada && opcaoSelecionada.dataset.associado === 'true') {
-            descPercentualCalculo = obterDescontoMinimo();
-        }
+    if (response.ok) {
+      closePaymentModal();
+      if(typeof showXpNotification === 'function') showXpNotification(resultado.xp_ganho);
+
+      if (resultado.conquista && typeof showAchievementPopup === 'function') {
+        showAchievementPopup(resultado.conquista.nome, `+R$ ${resultado.conquista.desconto} de desconto`);
+      }
+      
+      // Reseta o estado do PDV após sucesso
+      cart = [];
+      selectedPaymentMethod = null;
+      document.querySelectorAll('.payment-btn').forEach(b => b.classList.remove('active'));
+      updateCart();
+      alert('Venda processada com sucesso!');
+    } else {
+      alert('Erro ao finalizar venda: ' + resultado.error);
     }
-
-    let valorDesconto = bruto * (descPercentualCalculo / 100);
-    let liquido = bruto - valorDesconto;
-
-    const elemSubtotal = document.getElementById('resumo-subtotal');
-    const elemDesconto = document.getElementById('resumo-desconto');
-    const elemTotal = document.getElementById('resumo-total');
-
-    if (elemSubtotal) elemSubtotal.innerText = `R$ ${bruto.toFixed(2).replace('.', ',')}`;
-    if (elemDesconto) elemDesconto.innerText = `R$ ${valorDesconto.toFixed(2).replace('.', ',')}`;
-    if (elemTotal) elemTotal.innerText = `R$ ${liquido.toFixed(2).replace('.', ',')}`;
-}
-
-// 5. INICIALIZAÇÃO DE ESCUTADORES DE EVENTOS
-document.addEventListener('DOMContentLoaded', () => {
-    // Processa erros vindos do backend
-    processarErrosURL();
-
-    // Cliques nos cards de produtos
-    document.querySelectorAll('.produto-card-pdv').forEach(card => {
-        card.addEventListener('click', () => {
-            const id = parseInt(card.dataset.id, 10);
-            const nome = card.dataset.nome;
-            const preco = parseFloat(card.dataset.preco);
-            const estoqueMax = parseInt(card.dataset.estoque, 10);
-
-            if (!isNaN(id)) {
-                adicionarAoCarrinho(id, nome, preco, estoqueMax);
-            }
-        });
-    });
-
-    // Filtro de Busca em Tempo Real
-    const inputBusca = document.getElementById('input-busca');
-    if (inputBusca) {
-        inputBusca.addEventListener('input', function(e) {
-            const termo = e.target.value.toLowerCase().trim();
-            document.querySelectorAll('.produto-card-pdv').forEach(card => {
-                const nome = card.dataset.nome.toLowerCase();
-                card.style.display = nome.includes(termo) ? 'flex' : 'none';
-            });
-        });
-    }
-
-    // Monitoramento do Submit do Formulário
-    document.getElementById('form-finalizar')?.addEventListener('submit', function(e) {
-        if (carrinho.length === 0) {
-            e.preventDefault();
-            alert("Não é possível finalizar uma venda sem itens no carrinho.");
-            return;
-        }
-        // Agenda a limpeza do carrinho para após a requisição disparar
-        setTimeout(() => sessionStorage.removeItem('carrinho'), 200);
-    });
-
-    // Atalhos de Teclado (F2 — Enviar Formulário)
-    window.addEventListener('keydown', function(e) {
-        if (e.key === 'F2') {
-            e.preventDefault();
-            const form = document.getElementById('form-finalizar');
-            if (form) form.requestSubmit();
-        }
-    });
-
-    // Renderiza o estado inicial (caso existam itens salvos de outra aba)
-    salvarERenderizar();
+  } catch (error) {
+    console.error('Erro na requisição de fechamento:', error);
+  }
 });
