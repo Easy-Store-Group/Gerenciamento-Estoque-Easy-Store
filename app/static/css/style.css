@@ -6,13 +6,11 @@
     --color-white: #FFFFFF;
     --color-primary: #157ED3;
     --color-primary-dark: #1967A7;
-    --color-secondary: #10b981;
-    --color-accent: #7c3aed;
     --color-dark: #060055;
     --color-black: #000000;
     --color-gray-light: #F5F7FA;
     --color-gray: #E8EEF5;
-    --color-gray-dark: #374151;
+    --color-gray-dark: #6B7280;
     --color-text: #1F2937;
     
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
@@ -129,11 +127,11 @@ button {
 
 .nav-signup {
     color: var(--color-white);
-    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-secondary) 100%);
+    background-color: var(--color-primary);
 }
 
 .nav-signup:hover {
-    background: linear-gradient(135deg, #6b21a8, #0f766e);
+    background-color: var(--color-primary-dark);
     box-shadow: var(--shadow-md);
 }
 
@@ -267,22 +265,13 @@ button {
 }
 
 .btn-secondary {
-    background-color: var(--color-secondary);
-    color: var(--color-white);
-    border-color: transparent;
+    background-color: transparent;
+    color: var(--color-primary);
+    border-color: var(--color-primary);
 }
 
 .btn-secondary:hover {
-    background-color: #0f766e;
-}
-
-.nav-login {
-    color: var(--color-primary);
-    background-color: transparent;
-}
-
-.nav-login:hover {
-    background-color: rgba(16, 185, 129, 0.12);
+    background-color: var(--color-gray-light);
 }
 
 .btn-icon {
