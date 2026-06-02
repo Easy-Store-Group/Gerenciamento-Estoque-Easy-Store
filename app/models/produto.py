@@ -19,6 +19,8 @@ class Produto(Base):
     
     estoque_atual = Column(Integer, nullable=False, default=0)
 
+    estoque_minimo = Column(Integer, nullable=False, default=5)
+
     ativo = Column(Boolean, default=True)
 
     imagem_path = Column(String(255), nullable=True)
