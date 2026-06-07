@@ -6,7 +6,7 @@
   <title>{{ title or 'EasyStore Admin' }}</title>
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/admin.css') }}">
   {% if css_path and css_path != 'css/admin.css' %}
-  <link rel="stylesheet" href="{{ request.url_for('static', path=css_path) }}">
+  <link rel="stylesheet" href="{{ request.url_for('static', path=css_path) }}?v=4">
   {% endif %}
 </head>
 <body>
