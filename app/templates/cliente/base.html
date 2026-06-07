@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Minha área{% endblock %} - EasyStore</title>
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/cliente.css') }}?v=1">
+</head>
+<body>
+  <header class="cliente-header">
+    <div class="cliente-header-inner">
+      <a href="/cliente" class="cliente-brand">
+        <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
+        <span>EasyStore</span>
+      </a>
+      <nav class="cliente-nav">
+        <a href="/cliente?secao=produtos" class="{% if secao_ativa == 'produtos' %}active{% endif %}">Produtos</a>
+        <a href="/cliente?secao=categorias" class="{% if secao_ativa == 'categorias' %}active{% endif %}">Categorias</a>
+        <a href="/cliente?secao=compras" class="{% if secao_ativa == 'compras' %}active{% endif %}">Minhas compras</a>
+      </nav>
+      <div class="cliente-user">
+        <span>Olá, {{ usuario.get('nome', 'Cliente') }}</span>
+        <a href="/auth/logout" class="btn-logout">Sair</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="cliente-main">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

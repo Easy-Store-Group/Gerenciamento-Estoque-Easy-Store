@@ -38,7 +38,7 @@
       {% for dia in vendas_grafico %}
       <div class="chart-column">
         <div class="chart-value">R$ {{ "%.2f"|format(dia.total) }}</div>
-        <div class="chart-track">
+        <div class="chart-track">div
           <div class="chart-bar{% if dia.total == 0 %} is-empty{% endif %}" style="height: {{ dia.percentual }}%;"></div>
         </div>
         <span>{{ dia.label }}</span>
@@ -74,15 +74,5 @@
       {% endfor %}
     </div>
   </section>
-</div>
-
-<div class="welcome-card">
-  <h2>Bem-vindo ao EasyStore Admin</h2>
-  <p>Use a barra lateral para navegar entre produtos, categorias, ponto de venda e usuários. Aqui você pode editar, excluir, desativar e criar novos registros com um visual moderno.</p>
-  <div class="home-links">
-    <a href="/produtos" class="btn btn-secondary">Ver produtos</a>
-    <a href="/categorias" class="btn btn-secondary">Ver categorias</a>
-    <a href="/usuarios" class="btn btn-secondary">Gerenciar usuários</a>
-  </div>
 </div>
 {% endblock %}

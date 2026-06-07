@@ -92,28 +92,29 @@ function mostrarAlertaCheckout(mensagem, tipo = 'info') {
     `;
     
     // Cores baseadas no tipo
-    const cores = {
-        success: {
-            bg: '#dcfce7',
-            text: '#166534',
-            border: '#16a34a'
-        },
-        warning: {
-            bg: '#fef3c7',
-            text: '#92400e',
-            border: '#f59e0b'
-        },
-        error: {
-            bg: '#fee2e2',
-            text: '#991b1b',
-            border: '#dc2626'
-        },
-        info: {
-            bg: '#dbeafe',
-            text: '#1d4ed8',
-            border: '#2563eb'
-        }
-    };
+// Cores baseadas no tipo (Paleta em tons azuis)
+const cores = {
+    success: {
+        bg: '#ecfeff',     // Azul Cyan claro
+        text: '#155e75',   // Azul Cyan escuro
+        border: '#06b6d4'  // Azul Cyan médio
+    },
+    warning: {
+        bg: '#f0f9ff',     // Azul Sky claro
+        text: '#0369a1',   // Azul Sky escuro
+        border: '#0ea5e9'  // Azul Sky médio
+    },
+    error: {
+        bg: '#eef2ff',     // Azul Indigo claro
+        text: '#3730a3',   // Azul Indigo escuro
+        border: '#6366f1'  // Azul Indigo médio
+    },
+    info: {
+        bg: '#eff6ff',     // Azul Puro claro
+        text: '#1e40af',   // Azul Puro escuro
+        border: '#3b82f6'  // Azul Puro médio
+    }
+};
     
     const cor = cores[tipo] || cores.info;
     alertDiv.style.cssText += `

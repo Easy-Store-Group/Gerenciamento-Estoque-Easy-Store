@@ -1,0 +1,130 @@
+{% extends "cliente/base.html" %}
+
+{% block title %}Minha área{% endblock %}
+
+{% block content %}
+<div class="portal-hero">
+  <h1>Bem-vindo, {{ cliente.nome }}!</h1>
+  <p>Explore o catálogo, veja as categorias e acompanhe suas compras na loja.</p>
+  {% if cliente.is_associado %}
+  <span class="badge-associado">Cliente associado — 10% de desconto no PDV</span>
+  {% endif %}
+</div>
+
+{% if secao_ativa == 'produtos' %}
+<section class="portal-section">
+  <div class="section-header">
+    <h2>Produtos</h2>
+    <form class="portal-search" method="get" action="/cliente">
+      <input type="hidden" name="secao" value="produtos">
+      {% if categoria_id %}
+      <input type="hidden" name="categoria_id" value="{{ categoria_id }}">
+      {% endif %}
+      <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar produto...">
+      <button type="submit">Buscar</button>
+    </form>
+  </div>
+
+  {% if categorias %}
+  <div class="category-chips">
+    <a href="/cliente?secao=produtos{% if busca %}&busca={{ busca }}{% endif %}"
+       class="chip {% if not categoria_id %}active{% endif %}">Todos</a>
+    {% for cat in categorias %}
+    <a href="/cliente?secao=produtos&categoria_id={{ cat.id }}{% if busca %}&busca={{ busca }}{% endif %}"
+       class="chip {% if categoria_id == cat.id %}active{% endif %}">{{ cat.nome }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if produtos %}
+  <div class="products-grid">
+    {% for produto in produtos %}
+    <article class="product-card">
+      <div class="product-image">
+        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
+      </div>
+      <div class="product-body">
+        <span class="product-category">{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
+        <h3>{{ produto.nome }}</h3>
+        <p class="product-platform">{{ produto.plataforma }}</p>
+        <div class="product-footer">
+          <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
+          <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">
+            {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponível{% endif %}
+          </span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Nenhum produto encontrado.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if secao_ativa == 'categorias' %}
+<section class="portal-section">
+  <div class="section-header">
+    <h2>Categorias</h2>
+    <p class="section-subtitle">Navegue pelos tipos de produtos disponíveis na loja.</p>
+  </div>
+
+  {% if categorias %}
+  <div class="categories-grid">
+    {% for cat in categorias %}
+    <a href="/cliente?secao=produtos&categoria_id={{ cat.id }}" class="category-card">
+      <h3>{{ cat.nome }}</h3>
+      {% if cat.descricao %}
+      <p>{{ cat.descricao }}</p>
+      {% else %}
+      <p>Ver produtos desta categoria</p>
+      {% endif %}
+      <span class="category-link">Explorar →</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Nenhuma categoria cadastrada.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if secao_ativa == 'compras' %}
+<section class="portal-section">
+  <div class="section-header">
+    <h2>Minhas compras</h2>
+    <p class="section-subtitle">Histórico das vendas vinculadas à sua conta.</p>
+  </div>
+
+  {% if compras %}
+  <div class="purchases-list">
+    {% for venda in compras %}
+    <article class="purchase-card">
+      <div class="purchase-head">
+        <div>
+          <strong>Venda #{{ venda.id }}</strong>
+          <span>{{ venda.criado_em.strftime('%d/%m/%Y %H:%M') if venda.criado_em else '-' }}</span>
+        </div>
+        <strong class="purchase-total">R$ {{ "%.2f"|format(venda.total_liquido) }}</strong>
+      </div>
+      <ul class="purchase-items">
+        {% for item in venda.itens %}
+        <li>
+          <span>{{ item.quantidade }}x {{ item.produto_nome }}</span>
+          <span>R$ {{ "%.2f"|format(item.subtotal) }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% if venda.desconto_percentual > 0 %}
+      <p class="purchase-discount">Desconto de {{ "%.0f"|format(venda.desconto_percentual) }}% aplicado</p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Você ainda não possui compras registradas. Visite nossa loja física ou PDV para realizar sua primeira compra.</p>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

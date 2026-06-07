@@ -15,7 +15,12 @@
                 <span class="logo-text">EasyStore</span>
             </div>  
             <div class="navbar-buttons">
+                {% if usuario and usuario.get('role') == 'cliente' %}
+                <a href="/cliente" class="nav-btn nav-login">Minha área</a>
+                {% else %}
+                <a href="/auth/register" class="nav-btn nav-signup">Cadastre-se</a>
                 <a href="/auth/login" class="nav-btn nav-login">Login</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -32,8 +37,8 @@
                 </p>
                 
                 <div class="hero-buttons">
-                    <a href="/" class="btn btn-primary">
-                        <span>Explorar produtos</span>
+                    <a href="{% if usuario and usuario.get('role') == 'cliente' %}/cliente{% else %}/auth/register{% endif %}" class="btn btn-primary">
+                        <span>{% if usuario and usuario.get('role') == 'cliente' %}Ver minha área{% else %}Criar conta grátis{% endif %}</span>
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>

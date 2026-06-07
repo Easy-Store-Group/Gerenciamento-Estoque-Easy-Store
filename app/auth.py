@@ -91,11 +91,21 @@ def get_admin(request : Request):
     return usuario
 
 
-def get_operador(request : Request):
+def get_operador(request: Request):
     usuario = get_usuario_logado(request)
     if usuario.get("role") != "operador":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acesso restrito para operadores"
+        )
+    return usuario
+
+
+def get_cliente(request: Request):
+    usuario = get_usuario_logado(request)
+    if usuario.get("role") != "cliente":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso restrito para clientes"
         )
     return usuario

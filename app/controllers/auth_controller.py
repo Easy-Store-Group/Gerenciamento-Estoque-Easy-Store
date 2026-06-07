@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from app.database import get_db
 from app.models.usuario import Usuario
+from app.models.cliente import Cliente
 from app.auth import hash_senha, verificar_senha, criar_token
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
@@ -21,27 +22,92 @@ class LoginRequest(BaseModel):
     email: str
     senha: str
 
-@router.post("/register")
-def registrar_usuario(dados: RegisterRequest, db: Session = Depends(get_db)):
-    usuario_existe = db.query(Usuario).filter(Usuario.email == dados.email).first()
+def _criar_conta_cliente(
+    db: Session,
+    nome: str,
+    email: str,
+    senha: str,
+    telefone: str = "",
+) -> Usuario:
+    usuario_existe = db.query(Usuario).filter(Usuario.email == email).first()
     if usuario_existe:
-        raise HTTPException(status_code=400, detail="Email já cadastrado")
+        raise ValueError("Email já cadastrado")
 
     novo_usuario = Usuario(
-        nome=dados.nome,
-        email=dados.email,
-        senha_hash=hash_senha(dados.senha),
+        nome=nome.strip(),
+        email=email.strip().lower(),
+        senha_hash=hash_senha(senha),
         role="cliente",
         ativo=True,
         xp_total=0,
         nivel=1,
-        moedas_resgate=0
+        moedas_resgate=0,
     )
-
     db.add(novo_usuario)
+    db.flush()
+
+    db.add(Cliente(
+        nome=novo_usuario.nome,
+        email=novo_usuario.email,
+        telefone=telefone.strip() or None,
+        usuario_id=novo_usuario.id,
+        is_associado=False,
+        ativo=True,
+    ))
     db.commit()
+    db.refresh(novo_usuario)
+    return novo_usuario
+
+
+def _login_response(usuario: Usuario, destino: str) -> RedirectResponse:
+    token_data = {
+        "sub": usuario.email,
+        "nome": usuario.nome,
+        "role": usuario.role,
+        "id": usuario.id,
+    }
+    token = criar_token(token_data)
+    response = RedirectResponse(url=destino, status_code=302)
+    response.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        max_age=3600,
+        samesite="lax",
+    )
+    return response
+
+
+@router.post("/api/register")
+def registrar_usuario_api(dados: RegisterRequest, db: Session = Depends(get_db)):
+    try:
+        novo_usuario = _criar_conta_cliente(db, dados.nome, dados.email, dados.senha)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     return {"mensagem": "Usuário registrado com sucesso", "usuario_id": novo_usuario.id}
+
+
+@router.post("/register")
+def registrar_usuario(
+    request: Request,
+    nome: str = Form(...),
+    email: str = Form(...),
+    senha: str = Form(...),
+    telefone: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    try:
+        novo_usuario = _criar_conta_cliente(db, nome, email, senha, telefone)
+    except ValueError as exc:
+        return templates.TemplateResponse(
+            request,
+            "auth/register.html",
+            {"request": request, "erro": str(exc)},
+            status_code=400,
+        )
+
+    return _login_response(novo_usuario, "/cliente")
 
 @router.post("/login-json")
 def fazer_login_json(dados: LoginRequest, db: Session = Depends(get_db)):
@@ -110,33 +176,16 @@ def fazer_login(
             {"request": request, "erro": "Usuário inativo."}
         )
 
-    token_data = {
-        "sub": usuario.email,
-        "nome": usuario.nome,
-        "role": usuario.role,
-        "id": usuario.id,
-        }
-
-    token = criar_token(token_data)
-
     if usuario.role == "admin":
         destino = "/admin"
     elif usuario.role == "operador":
-        destino = "/operador"
+        destino = "/pdv"
+    elif usuario.role == "cliente":
+        destino = "/cliente"
     else:
-        destino = "/perfil"
+        destino = "/"
 
-    response = RedirectResponse(url=destino, status_code=302)
-
-    response.set_cookie(
-        key="access_token",
-        value=token,
-        httponly=True,
-        max_age=3600,
-        samesite="lax"
-    )
-
-    return response 
+    return _login_response(usuario, destino)
 
 @router.get("/logout")
 def sair():
