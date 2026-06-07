@@ -51,14 +51,16 @@ def tela_pdv(
 
     return templates.TemplateResponse(
         request,
-        "pdv/index.html",
+        "admin/pos.html",
         {
             "request":             request,
             "usuario":             usuario,
             "produtos":            produtos,
             "clientes":            clientes,
-            "css_path":     "css/pos.css",
-            "active":       "pos",
+            "css_path":            "css/pos.css",
+            "active":              "pos",
+            "page_title":          "Ponto de Venda",
+            "page_subtitle":       "Monte o carrinho e finalize a venda",
             "desconto_associado":  DESCONTO_ASSOCIADO,
         }
     )
@@ -190,8 +192,16 @@ def detalhe_venda(
 
     return templates.TemplateResponse(
         request,
-        "pdv/comprovante.html",
-        {"request": request, "usuario": usuario, "venda": venda}
+        "admin/comprovante.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "venda": venda,
+            "page_title": f"Venda #{venda.id}",
+            "page_subtitle": "Comprovante da venda finalizada",
+            "css_path": "css/vendas.css",
+            "active": "pos",
+        }
     )
 
 
@@ -210,6 +220,14 @@ def historico_vendas(
     )
     return templates.TemplateResponse(
         request,
-        "pdv/historico.html",
-        {"request": request, "usuario": usuario, "vendas": vendas}
+        "admin/vendas.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "vendas": vendas,
+            "page_title": "Vendas",
+            "page_subtitle": "Histórico de vendas do PDV",
+            "css_path": "css/vendas.css",
+            "active": "pos",
+        }
     )

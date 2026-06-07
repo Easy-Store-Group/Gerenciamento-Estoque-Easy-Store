@@ -1,0 +1,41 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="movement-summary">
+  <div class="movement-card">
+    <span>Entradas</span>
+    <strong>{{ total_entradas }}</strong>
+  </div>
+  <div class="movement-card">
+    <span>Saídas</span>
+    <strong>{{ total_saidas }}</strong>
+  </div>
+  <div class="movement-card">
+    <span>Estoque atual</span>
+    <strong>{{ produto.estoque_atual }}</strong>
+  </div>
+</div>
+
+<div class="table-card movements-table">
+  <div class="table-row header">
+    <div>Data</div>
+    <div>Produto</div>
+    <div>Tipo</div>
+    <div>Quantidade</div>
+    <div>Valor</div>
+    <div>Observação</div>
+  </div>
+  {% for movimento in movimentacoes %}
+  <div class="table-row">
+    <div>{{ movimento.criando_em.strftime('%d/%m/%Y %H:%M') if movimento.criando_em else '-' }}</div>
+    <div>{{ produto.nome }}</div>
+    <div><span class="status-badge {{ movimento.tipo.value }}">{{ movimento.tipo.value|capitalize }}</span></div>
+    <div>{{ movimento.quantidade }}</div>
+    <div>R$ {{ "%.2f"|format(movimento.valor_total) }}</div>
+    <div>{{ movimento.observacao or '-' }}</div>
+  </div>
+  {% else %}
+  <div class="empty-state">Nenhuma movimentação registrada para este produto.</div>
+  {% endfor %}
+</div>
+{% endblock %}

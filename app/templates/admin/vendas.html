@@ -1,7 +1,6 @@
-
 {% extends "admin/base.html" %}
-{% set css_path = 'css/admin.css' %}
-{% set active = 'vendas' %}
+{% set css_path = 'css/vendas.css' %}
+{% set active = active or 'pos' %}
 
 {% block content %}
 <div class="vendas-container">
@@ -11,11 +10,7 @@
       <p class="subtitle">Histórico de vendas e operações de caixa</p>
     </div>
     <div class="vendas-actions">
-      <input type="text" id="searchSales" placeholder="Buscar por cliente, produto ou id">
-      <input type="date" id="dateFrom">
-      <input type="date" id="dateTo">
-      <button class="btn-small">Filtrar</button>
-      <button class="btn-small btn-primary">Nova Venda</button>
+      <a href="/admin/pos" class="btn-small btn-primary">Nova venda</a>
     </div>
   </div>
 
@@ -28,17 +23,28 @@
           <th>Cliente</th>
           <th>Itens</th>
           <th>Total</th>
-          <th>Status</th>
+          <th>Desconto</th>
           <th>Ações</th>
         </tr>
       </thead>
-      <tbody id="salesTableBody">
+      <tbody>
+        {% for venda in vendas %}
+        <tr>
+          <td>#{{ venda.id }}</td>
+          <td>{{ venda.criado_em.strftime('%d/%m/%Y %H:%M') if venda.criado_em else '-' }}</td>
+          <td>{{ venda.cliente.nome if venda.cliente else 'Consumidor não identificado' }}</td>
+          <td>{{ venda.itens|length }}</td>
+          <td>R$ {{ "%.2f"|format(venda.total_liquido) }}</td>
+          <td>{{ "%.0f"|format(venda.desconto_percentual) }}%</td>
+          <td><a href="/pdv/venda/{{ venda.id }}" class="btn-small">Ver</a></td>
+        </tr>
+        {% else %}
         <tr class="empty-row">
           <td colspan="7">Nenhuma venda encontrada</td>
         </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
-
 {% endblock %}

@@ -19,7 +19,7 @@
 </div>
 
 {% if produtos %}
-<div class="table-card">
+<div class="table-card products-table">
   <div class="table-row header">
     <div>Produto</div>
     <div>Plataforma</div>
@@ -39,6 +39,7 @@
     <div>{{ produto.plataforma }}</div>
     <div>{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</div>
     <div>{{ produto.estoque_atual }}</div>
+    <div>{{ produto.preco }}</div>
     <div class="actions">
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
       {% if produto.ativo %}

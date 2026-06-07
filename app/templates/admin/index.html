@@ -18,10 +18,62 @@
     <p class="metric-note">Operadores e administradores do painel.</p>
   </div>
   <div class="metric-card accent-card">
-    <span class="metric-label"></span>
-    <strong class="metric-value">Ponto de venda</strong>
-    <p class="metric-note">Acesse o PDV para fechar vendas imediatas.</p>
+    <span class="metric-label">Atalhos</span>
+    <strong class="metric-value">PDV</strong>
+    <p class="metric-note">Acesse o ponto de venda para fechar vendas imediatas.</p>
   </div>
+</div>
+
+<div class="dashboard-grid">
+  <section class="dashboard-card sales-chart-card">
+    <div class="dashboard-card-header">
+      <div>
+        <h2>Vendas dos últimos 7 dias</h2>
+        <p class="metric-note">Total vendido por dia no PDV.</p>
+      </div>
+      <a href="/pdv/historico" class="btn btn-secondary">Ver histórico</a>
+    </div>
+
+    <div class="sales-chart">
+      {% for dia in vendas_grafico %}
+      <div class="chart-column">
+        <div class="chart-value">R$ {{ "%.2f"|format(dia.total) }}</div>
+        <div class="chart-track">
+          <div class="chart-bar" style="height: {{ dia.percentual }}%;"></div>
+        </div>
+        <span>{{ dia.label }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section class="dashboard-card latest-sales-card">
+    <div class="dashboard-card-header">
+      <div>
+        <h2>Últimas vendas</h2>
+        <p class="metric-note">Movimentações mais recentes do caixa.</p>
+      </div>
+    </div>
+
+    <div class="latest-sales-table">
+      <div class="latest-sales-row header">
+        <div>ID</div>
+        <div>Cliente</div>
+        <div>Total</div>
+        <div>Data</div>
+      </div>
+      {% for venda in ultimas_vendas %}
+      <a class="latest-sales-row" href="/pdv/venda/{{ venda.id }}">
+        <div>#{{ venda.id }}</div>
+        <div>{{ venda.cliente.nome if venda.cliente else 'Consumidor não identificado' }}</div>
+        <div>R$ {{ "%.2f"|format(venda.total_liquido) }}</div>
+        <div>{{ venda.criado_em.strftime('%d/%m %H:%M') if venda.criado_em else '-' }}</div>
+      </a>
+      {% else %}
+      <div class="empty-state">Nenhuma venda registrada ainda.</div>
+      {% endfor %}
+    </div>
+  </section>
 </div>
 
 <div class="welcome-card">

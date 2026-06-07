@@ -2,30 +2,30 @@
 
 {% block content %}
 <div class="form-card">
-  <h2>{% if usuario %}Editar usuário{% else %}Novo usuário{% endif %}</h2>
-  <form action="{% if usuario %}/usuarios/{{ usuario.id }}/editar{% else %}/usuarios/novo{% endif %}" method="post">
+  <h2>{% if editando %}Editar usuário{% else %}Novo usuário{% endif %}</h2>
+  <form action="{% if editando %}/usuarios/{{ editando.id }}/editar{% else %}/usuarios/novo{% endif %}" method="post">
     <div class="form-grid">
       <div class="input-group">
         <label>Nome</label>
-        <input type="text" name="nome" value="{{ usuario.nome if usuario else '' }}" required>
+        <input type="text" name="nome" value="{{ editando.nome if editando else '' }}" required>
       </div>
       <div class="input-group">
         <label>E-mail</label>
-        <input type="email" name="email" value="{{ usuario.email if usuario else '' }}" required>
+        <input type="email" name="email" value="{{ editando.email if editando else '' }}" required>
       </div>
       <div class="input-group">
         <label>Perfil</label>
         <select name="role">
-          <option value="operador" {% if usuario and usuario.role == 'operador' %}selected{% endif %}>Operador</option>
-          <option value="admin" {% if usuario and usuario.role == 'admin' %}selected{% endif %}>Admin</option>
+          <option value="operador" {% if editando and editando.role == 'operador' %}selected{% endif %}>Operador</option>
+          <option value="admin" {% if editando and editando.role == 'admin' %}selected{% endif %}>Admin</option>
         </select>
       </div>
       <div class="input-group">
-        <label>Senha {% if usuario %}(opcional){% endif %}</label>
-        <input type="password" name="senha" placeholder="Digite a senha{% if usuario %} ou deixe em branco{% endif %}">
+        <label>Senha {% if editando %}(opcional){% endif %}</label>
+        <input type="password" name="senha" placeholder="Digite a senha{% if editando %} ou deixe em branco{% endif %}">
       </div>
     </div>
-    <button type="submit" class="btn btn-primary">{% if usuario %}Salvar usuário{% else %}Criar usuário{% endif %}</button>
+    <button type="submit" class="btn btn-primary">{% if editando %}Salvar usuário{% else %}Criar usuário{% endif %}</button>
   </form>
 </div>
 {% endblock %}

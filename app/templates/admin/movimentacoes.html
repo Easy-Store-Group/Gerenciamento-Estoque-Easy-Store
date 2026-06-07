@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="page-actions">
+  <form class="search-bar" action="/movimentacoes" method="get">
+    <select name="produto_id">
+      <option value="0">Todos os produtos</option>
+      {% for produto in produtos %}
+      <option value="{{ produto.id }}" {% if produto.id == produto_id %}selected{% endif %}>{{ produto.nome }}</option>
+      {% endfor %}
+    </select>
+    <select name="tipo">
+      <option value="">Todos os tipos</option>
+      <option value="entrada" {% if tipo == 'entrada' %}selected{% endif %}>Entrada</option>
+      <option value="saida" {% if tipo == 'saida' %}selected{% endif %}>Saída</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+  </form>
+  <span class="detail-pill">{{ movimentacoes|length }} registro(s)</span>
+</div>
+
+<div class="table-card movements-table">
+  <div class="table-row header">
+    <div>Data</div>
+    <div>Produto</div>
+    <div>Tipo</div>
+    <div>Quantidade</div>
+    <div>Valor</div>
+    <div>Responsável</div>
+  </div>
+  {% for movimento in movimentacoes %}
+  <div class="table-row">
+    <div>{{ movimento.criando_em.strftime('%d/%m/%Y %H:%M') if movimento.criando_em else '-' }}</div>
+    <div>
+      <a href="/movimentacoes/produto/{{ movimento.produto_id }}">{{ movimento.produto.nome if movimento.produto else '-' }}</a>
+    </div>
+    <div><span class="status-badge {{ movimento.tipo.value }}">{{ movimento.tipo.value|capitalize }}</span></div>
+    <div>{{ movimento.quantidade }}</div>
+    <div>R$ {{ "%.2f"|format(movimento.valor_total) }}</div>
+    <div>{{ movimento.usuario.nome if movimento.usuario else '-' }}</div>
+  </div>
+  {% else %}
+  <div class="empty-state">Nenhuma movimentação encontrada.</div>
+  {% endfor %}
+</div>
+{% endblock %}

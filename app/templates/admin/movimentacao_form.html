@@ -1,0 +1,47 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="form-card">
+  <h2>Nova movimentação</h2>
+  {% if erro %}
+  <div class="alert alert-error">{{ erro }}</div>
+  {% endif %}
+
+  <form action="/movimentacoes/nova" method="post">
+    <div class="form-grid">
+      <div class="input-group">
+        <label>Produto</label>
+        <select name="produto_id" required>
+          {% for produto in produtos %}
+          <option value="{{ produto.id }}" {% if produto.id == produto_id %}selected{% endif %}>
+            {{ produto.nome }} - estoque: {{ produto.estoque_atual }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Tipo</label>
+        <select name="tipo" required>
+          {% for tipo in tipos %}
+          <option value="{{ tipo.value }}">{{ tipo.value|capitalize }}</option>
+    
+        </div>
+        {% endfor %}
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Quantidade</label>
+        <input type="number" name="quantidade" min="1" required>
+      </div>
+      <div class="input-group">
+        <label>Preço unitário</label>
+        <input type="number" name="preco_unitario" step="0.01" min="0" required>
+      </div>
+      <div class="input-group">
+        <label>Observação</label>
+        <textarea name="observacao" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Registrar movimentação</button>
+  </form>
+</div>
+{% endblock %}

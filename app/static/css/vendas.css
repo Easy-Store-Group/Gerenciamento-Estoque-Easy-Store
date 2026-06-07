@@ -51,7 +51,7 @@
   font-size: 13px;
 }
 
-.btn-primary {
+.btn-small.btn-primary {
   background: linear-gradient(90deg,#7c3aed,#ec4899);
   color: #fff;
   border: none;
@@ -109,6 +109,27 @@
   border: 1px solid #e5e7eb;
   background: white;
   cursor: pointer;
+}
+
+.sale-total {
+  align-items: center;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-end;
+  padding: 16px;
+}
+
+.sale-total span {
+  color: #64748b;
+}
+
+.sale-total strong {
+  color: #102a43;
+  font-size: 18px;
 }
 
 @media (max-width: 900px) {

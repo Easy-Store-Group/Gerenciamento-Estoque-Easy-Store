@@ -1,0 +1,24 @@
+.products-table .table-row {
+  grid-template-columns: 2.5fr 1.2fr 1.2fr 0.8fr 1.6fr;
+}
+
+.categories-table .table-row {
+  grid-template-columns: 2fr 1fr 1fr 1.4fr;
+}
+
+.users-table .table-row {
+  grid-template-columns: 1.4fr 1.8fr 0.9fr 0.9fr 1.2fr;
+}
+
+.product-info {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+}
+
+.product-info img {
+  border-radius: 18px;
+  height: 56px;
+  object-fit: cover;
+  width: 56px;
+}

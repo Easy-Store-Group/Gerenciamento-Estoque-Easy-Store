@@ -25,7 +25,7 @@ def listar_usuarios(request: Request, db: Session = Depends(get_db), admin = Dep
             "usuarios": usuarios,
             "page_title": "Usuários",
             "page_subtitle": "Gerencie acessos e status dos usuários",
-            "css_path": "css/admin.css",
+            "css_path": "css/cadastros.css",
             "active": "usuarios",
         }
     )
@@ -37,11 +37,11 @@ def tela_novo_usuario(request: Request, admin = Depends(get_admin)):
         "admin/usuarios_form.html",
         {
             "request": request,
-            "admin": admin,
-            "usuario": None,
+            "usuario": admin,
+            "editando": None,
             "page_title": "Novo usuário",
             "page_subtitle": "Crie um novo operador ou administrador",
-            "css_path": "css/admin.css",
+            "css_path": "css/cadastros.css",
             "active": "usuarios",
         }
     )
@@ -49,7 +49,7 @@ def tela_novo_usuario(request: Request, admin = Depends(get_admin)):
 @router.post("/novo")
 def criar_usuario(
     nome: str = Form(...), email: str = Form(...), senha: str = Form(...),
-    role: str = Form("user"), db: Session = Depends(get_db), admin = Depends(get_admin)
+    role: str = Form("operador"), db: Session = Depends(get_db), admin = Depends(get_admin)
 ):
     novo_usuario = Usuario(nome=nome, email=email, senha_hash=hash_senha(senha), role=role, ativo=True)
     db.add(novo_usuario)
@@ -65,10 +65,10 @@ def tela_editar_usuario(usuario_id: int, request: Request, db: Session = Depends
         {
             "request": request,
             "usuario": admin,
-            "usuario": usuario,
+            "editando": usuario,
             "page_title": "Editar usuário",
             "page_subtitle": "Atualize perfil e status do usuário",
-            "css_path": "css/admin.css",
+            "css_path": "css/cadastros.css",
             "active": "usuarios",
         }
     )
