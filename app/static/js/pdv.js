@@ -13,52 +13,49 @@ const carrinhoJsonInput = document.getElementById('carrinho_json');
 
 // Inicializa quando a página carrega
 document.addEventListener('DOMContentLoaded', () => {
+    carregarDescontoAssociado();
+    exibirErroDaUrl();
     inicializarPDV();
-    detectarDescontoAssociado();
 });
 
 function inicializarPDV() {
-    // Captura todos os produtos do template
     document.querySelectorAll('.produto-card-pdv').forEach(card => {
+        const produtoId = Number(card.dataset.id);
+        if (!produtoId) return;
+
         todosProdutos.push({
-            id: parseInt(card.dataset.id),
+            produto_id: produtoId,
             nome: card.dataset.nome,
             preco: parseFloat(card.dataset.preco),
-            estoque: parseInt(card.dataset.estoque),
+            estoque: parseInt(card.dataset.estoque, 10),
             card: card
         });
     });
 
-    // Adicionar evento de click aos cards de produtos
     document.querySelectorAll('.produto-card-pdv').forEach(card => {
         card.addEventListener('click', () => {
-            const produtoId = parseInt(card.dataset.id);
-            const produto = todosProdutos.find(p => p.id === produtoId);
+            const produtoId = Number(card.dataset.id);
+            const produto = todosProdutos.find(p => p.produto_id === produtoId);
             if (produto) {
                 adicionarAoCarrinho(produto);
             }
         });
-        
-        // Mostrar cursor de pointer
+
         card.style.cursor = 'pointer';
     });
 
-    // Busca de produtos
     inputBusca.addEventListener('input', (e) => {
         const termo = e.target.value.toLowerCase();
         filtrarProdutos(termo);
     });
 
-    // Mudança de cliente
     clienteSelect.addEventListener('change', atualizarTotais);
 
-    // Submissão do formulário
     formFinalizar.addEventListener('submit', (e) => {
         e.preventDefault();
         finalizarVenda();
     });
 
-    // F2 para finalizar venda
     document.addEventListener('keydown', (e) => {
         if (e.key === 'F2') {
             e.preventDefault();
@@ -72,18 +69,13 @@ function inicializarPDV() {
 function filtrarProdutos(termo) {
     document.querySelectorAll('.produto-card-pdv').forEach(card => {
         const nome = card.dataset.nome.toLowerCase();
-        if (nome.includes(termo)) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = nome.includes(termo) ? '' : 'none';
     });
 }
 
 function adicionarAoCarrinho(produto) {
-    // Verificar se já existe no carrinho
-    const itemExistente = carrinho.find(item => item.id === produto.id);
-    
+    const itemExistente = carrinho.find(item => item.produto_id === produto.produto_id);
+
     if (itemExistente) {
         if (itemExistente.quantidade < produto.estoque) {
             itemExistente.quantidade++;
@@ -93,31 +85,35 @@ function adicionarAoCarrinho(produto) {
         }
     } else {
         carrinho.push({
-            ...produto,
+            produto_id: produto.produto_id,
+            nome: produto.nome,
+            preco: produto.preco,
+            estoque: produto.estoque,
             quantidade: 1
         });
     }
-    
+
     atualizarCarrinho();
     mostrarAlerta(`${produto.nome} adicionado ao carrinho!`, 'success');
 }
 
 function removerDoCarrinho(produtoId) {
-    carrinho = carrinho.filter(item => item.id !== produtoId);
+    carrinho = carrinho.filter(item => item.produto_id !== produtoId);
     atualizarCarrinho();
 }
 
 function atualizarQuantidade(produtoId, novaQuantidade) {
-    const item = carrinho.find(item => item.id === produtoId);
-    if (item) {
-        const qtd = parseInt(novaQuantidade);
-        if (qtd > 0 && qtd <= item.estoque) {
-            item.quantidade = qtd;
-        } else if (qtd > item.estoque) {
-            mostrarAlerta('Quantidade excede o estoque disponível!', 'warning');
-            return;
-        }
+    const item = carrinho.find(item => item.produto_id === produtoId);
+    if (!item) return;
+
+    const qtd = parseInt(novaQuantidade, 10);
+    if (qtd > 0 && qtd <= item.estoque) {
+        item.quantidade = qtd;
+    } else if (qtd > item.estoque) {
+        mostrarAlerta('Quantidade excede o estoque disponível!', 'warning');
+        return;
     }
+
     atualizarCarrinho();
 }
 
@@ -130,50 +126,73 @@ function atualizarCarrinho() {
                 <div class="item-info">
                     <div class="item-nome">${item.nome}</div>
                     <div class="item-qtd">
-                        <input type="number" min="1" max="${item.estoque}" value="${item.quantidade}" 
-                               onchange="atualizarQuantidade(${item.id}, this.value)" style="width: 50px;">
+                        <input type="number" min="1" max="${item.estoque}" value="${item.quantidade}"
+                               onchange="atualizarQuantidade(${item.produto_id}, this.value)" style="width: 50px;">
                     </div>
                 </div>
                 <div class="item-preco">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</div>
-                <button type="button" onclick="removerDoCarrinho(${item.id})" 
+                <button type="button" onclick="removerDoCarrinho(${item.produto_id})"
                         style="background: none; border: none; color: #dc2626; cursor: pointer; font-weight: bold;">✕</button>
             </div>
         `).join('');
     }
-    
+
     atualizarTotais();
 }
 
 function atualizarTotais() {
-    const clienteId = parseInt(clienteSelect.value);
     const isAssociado = clienteSelect.options[clienteSelect.selectedIndex]?.dataset.associado === 'true';
-    
+
     let subtotalBruto = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
-    let desconto = 0;
-    
-    if (isAssociado) {
-        desconto = subtotalBruto * (descontoAssociado / 100);
-    }
-    
+    let desconto = isAssociado ? subtotalBruto * (descontoAssociado / 100) : 0;
     let totalLiquido = subtotalBruto - desconto;
-    
+
     document.getElementById('resumo-subtotal').textContent = `R$ ${subtotalBruto.toFixed(2).replace('.', ',')}`;
     document.getElementById('resumo-desconto').textContent = `R$ ${desconto.toFixed(2).replace('.', ',')}`;
     document.getElementById('resumo-total').textContent = `R$ ${totalLiquido.toFixed(2).replace('.', ',')}`;
-    
-    carrinhoJsonInput.value = JSON.stringify(carrinho);
+
+    if (carrinhoJsonInput) {
+        carrinhoJsonInput.value = serializarCarrinho();
+    }
 }
 
-function detectarDescontoAssociado() {
-    // Extrair desconto de um dos options
-    const firstOption = clienteSelect.querySelector('option[data-associado]');
-    if (firstOption) {
-        // Procurar por padrão "(Associado -X%)" no texto
-        const match = clienteSelect.textContent.match(/Associado -(\d+)%/);
-        if (match) {
-            descontoAssociado = parseFloat(match[1]);
-        }
+function serializarCarrinho() {
+    return JSON.stringify(
+        carrinho.map(item => ({
+            produto_id: item.produto_id,
+            quantidade: item.quantidade
+        }))
+    );
+}
+
+function carregarDescontoAssociado() {
+    const wrapper = document.querySelector('.pdv-wrapper');
+    const valor = parseFloat(wrapper?.dataset.descontoAssociado);
+    if (!Number.isNaN(valor)) {
+        descontoAssociado = valor;
     }
+}
+
+function exibirErroDaUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const erro = params.get('erro');
+    if (!erro) return;
+
+    const mensagens = {
+        json: 'Carrinho inválido. Tente adicionar os produtos novamente.',
+        vazio: 'O carrinho está vazio. Adicione produtos antes de finalizar.',
+        item_invalido: 'Um ou mais itens do carrinho estão inválidos.',
+        quantidade: 'Quantidade inválida em um dos itens.',
+        produto_inexistente: `Produto #${params.get('id') || '?'} não encontrado ou inativo.`,
+        estoque: `Estoque insuficiente para "${params.get('produto') || 'produto'}".`,
+        salvar: 'Não foi possível salvar a venda. Tente novamente.',
+    };
+
+    mostrarAlerta(mensagens[erro] || 'Ocorreu um erro ao finalizar a venda.', 'warning');
+
+    const url = new URL(window.location.href);
+    url.search = '';
+    window.history.replaceState({}, '', url);
 }
 
 function mostrarAlerta(mensagem, tipo = 'success') {
@@ -182,29 +201,47 @@ function mostrarAlerta(mensagem, tipo = 'success') {
     alertDiv.className = `alert alert-${tipo}`;
     alertDiv.textContent = mensagem;
     alertDiv.style.animation = 'slideIn 0.3s ease-out';
-    
+
     alertContainer.appendChild(alertDiv);
-    
+
     setTimeout(() => {
         alertDiv.style.animation = 'slideOut 0.3s ease-out';
         setTimeout(() => alertDiv.remove(), 300);
     }, 3000);
 }
 
-function finalizarVenda() {
+async function finalizarVenda() {
     if (carrinho.length === 0) {
         mostrarAlerta('Carrinho vazio! Adicione produtos.', 'warning');
         return;
     }
-    
-    // Atualizar o JSON do carrinho antes de submeter
-    carrinhoJsonInput.value = JSON.stringify(carrinho);
-    
-    // Submeter o formulário
-    formFinalizar.submit();
+
+    const payload = serializarCarrinho();
+    if (carrinhoJsonInput) {
+        carrinhoJsonInput.value = payload;
+    }
+
+    const formData = new FormData(formFinalizar);
+    formData.set('carrinho_json', payload);
+
+    const btn = formFinalizar.querySelector('button[type="submit"]');
+    if (btn) btn.disabled = true;
+
+    try {
+        const response = await fetch(formFinalizar.action, {
+            method: 'POST',
+            body: formData,
+            credentials: 'same-origin',
+            redirect: 'follow',
+        });
+
+        window.location.href = response.url;
+    } catch (error) {
+        mostrarAlerta('Erro ao finalizar venda. Tente novamente.', 'warning');
+        if (btn) btn.disabled = false;
+    }
 }
 
-// Estilos para animação de alerta
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideOut {

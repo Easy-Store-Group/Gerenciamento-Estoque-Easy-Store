@@ -6,7 +6,7 @@
 {% set extra_button = {'href': '/pdv/historico', 'label': 'Histórico de Vendas'} %}
 
 {% block content %}
-<div class="pdv-wrapper">
+<div class="pdv-wrapper" data-desconto-associado="{{ desconto_associado }}">
     <div id="alert-container"></div>
 
     <div class="pdv-grid">
@@ -81,6 +81,6 @@
     </div>
 </div>
 
-<script src="{{ request.url_for('static', path='js/pdv.js') }}"></script>
+<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=3"></script>
 <script src="{{ request.url_for('static', path='js/checkout.js') }}"></script>
 {% endblock %}
