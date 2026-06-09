@@ -1,53 +1,80 @@
-# 🎮 EasyStore - PDV com Sistema XP Gamificado
+# 🎮 EasyStore PDV
 
-Sistema completo de Ponto de Venda (PDV) para loja de games com sistema inovador de XP e fidelidade gamificada.
+> Sistema completo de Ponto de Venda para loja de games com sistema inovador de XP e fidelidade gamificada.
+
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
+![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-D71F00?style=flat&logo=python&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat&logo=sqlite&logoColor=white)
+![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=flat&logo=chartdotjs&logoColor=white)
+
+---
 
 ## ✨ Funcionalidades
 
 ### 🛒 Frente de Caixa (PDV)
-- **Busca Rápida**: Busca em tempo real de produtos por nome ou categoria
-- **Multi-Pagamento**: Suporte para múltiplas formas de pagamento
-- **Cancelamento**: Remover itens ou cancelar venda completa
-- **Interface Responsiva**: Design moderno otimizado
+- Busca em tempo real de produtos por nome ou categoria
+- Suporte a múltiplas formas de pagamento
+- Cancelamento de itens ou venda completa
+- Interface responsiva e moderna
 
 ### 🎮 Sistema de XP e Fidelidade
-- **1 Real = 1 XP**: Acúmulo automático
-- **10 Níveis**: Progressão com bonificações
-- **Conquistas**: Descontos automáticos ao atingir marcos
+- **1 Real = 1 XP** acumulado automaticamente
+- **10 níveis** de progressão com bonificações
+- Conquistas e descontos automáticos ao atingir marcos
 
 ### 📊 Dashboard de Caixa
-- Resumo do dia, gráficos de fluxo, análise por categoria
-- Produtos mais vendidos, alertas de estoque
+- Resumo do dia e gráficos de fluxo
+- Análise por categoria e produtos mais vendidos
+- Alertas de estoque baixo
 
 ### 📦 Gestão de Estoque
-- Cadastro com categorias, estoque mínimo, rastreamento automático
+- Cadastro com categorias e estoque mínimo
+- Rastreamento automático de movimentações
 
 ### 👤 Perfil do Cliente
-- XP, nível, conquistas desbloqueadas, próximas recompensas
+- XP acumulado, nível atual e conquistas desbloqueadas
+- Visualização das próximas recompensas
 
-## 🚀 Como Usar
+---
+
+## 🚀 Como Rodar
 
 ```bash
-# Instalar e rodar
+# Instalar dependências
 pip install -r requirements.txt
+
+# Popular o banco de dados
 python seed_db.py
+
+# Iniciar o servidor
 uvicorn app.main:app --reload
 ```
 
-**URLs principais:**
-- PDV: http://localhost:8000/admin/pos
-- Dashboard: http://localhost:8000/admin/caixa
-- Perfil: http://localhost:8000/perfil?id=1
+### URLs Principais
 
-## 🛠️ APIs
+| Tela | URL |
+|---|---|
+| PDV | http://localhost:8000/admin/pos |
+| Dashboard | http://localhost:8000/admin/caixa |
+| Perfil do cliente | http://localhost:8000/perfil?id=1 |
 
-- `/api/vendas/` - Vendas e operações
-- `/api/caixa/` - Dashboard e analytics
-- `/api/conquistas/` - Sistema de achievements
+---
 
-## ✅ Desenvolvido com
+## 🛠️ Endpoints da API
 
-- FastAPI + SQLAlchemy
-- Responsive CSS + JavaScript vanilla
-- Chart.js para gráficos
-- SQLite para banco de dados
+| Rota | Descrição |
+|---|---|
+| `/api/vendas/` | Vendas e operações de caixa |
+| `/api/caixa/` | Dashboard e analytics |
+| `/api/conquistas/` | Sistema de achievements |
+
+---
+
+## 🧱 Tecnologias
+
+- **FastAPI** — backend e roteamento
+- **SQLAlchemy** — ORM e modelos
+- **SQLite** — banco de dados local
+- **Jinja2** — templates HTML
+- **Chart.js** — gráficos no dashboard
+- **Vanilla JS + CSS** — frontend responsivo
