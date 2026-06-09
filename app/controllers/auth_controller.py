@@ -3,7 +3,9 @@ from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-
+from app.models.categoria import Categoria
+from app.models.produto import Produto
+from app.models.venda import Venda
 from app.database import get_db
 from app.models.usuario import Usuario
 from app.models.cliente import Cliente

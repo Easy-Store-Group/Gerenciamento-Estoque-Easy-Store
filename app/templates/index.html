@@ -37,8 +37,8 @@
                 </p>
                 
                 <div class="hero-buttons">
-                    <a href="{% if usuario and usuario.get('role') == 'cliente' %}/cliente{% else %}/auth/register{% endif %}" class="btn btn-primary">
-                        <span>{% if usuario and usuario.get('role') == 'cliente' %}Ver minha área{% else %}Criar conta grátis{% endif %}</span>
+                    <a href="/auth/produtos" class="btn btn-primary">
+                        <span>Explorar produto</span>
                         <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                             <polyline points="12 5 19 12 12 19"></polyline>
@@ -48,12 +48,12 @@
 
                 <div class="hero-stats">
                     <div class="stat-item">
-                        <span class="stat-number">15K+</span>
+                        <span class="stat-number">1K+</span>
                         <span class="stat-label">Jogos</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">500K+</span>
-                        <span class="stat-label">Usuários</span>
+                        <span class="stat-number">500+</span>
+                        <span class="stat-label">Clientes</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-number">24/7</span>
@@ -95,6 +95,7 @@
         .auth-section {
             background: linear-gradient(135deg, #f0fdf4 0%, #fef3c7 100%);
             padding: 60px 20px;
+
             margin: 40px 0;
         }
 
@@ -219,7 +220,7 @@
         <div class="cta-container">
             <h2>Pronto para começar?</h2>
             <p>Começe a explorar nossos milhares de jogos e outros diversos produtos</p>
-            <a href="/produtos" class="btn btn-primary btn-large">Começar</a>
+            <a href="/auth/register" class="btn btn-primary btn-large">Começar</a>
         </div>
     </section>
 

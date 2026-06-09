@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    
+
+
+{% if secao_ativa == 'produtos' %}
+<section class="portal-section">
+  <div class="section-header">
+    <h2>Produtos</h2>
+    <form class="portal-search" method="get" action="/cliente">
+      <input type="hidden" name="secao" value="produtos">
+      {% if categoria_id %}
+      <input type="hidden" name="categoria_id" value="{{ categoria_id }}">
+      {% endif %}
+      <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar produto...">
+      <button type="submit">Buscar</button>
+    </form>
+  </div>
+
+  {% if categorias %}
+  <div class="category-chips">
+    <a href="/cliente?secao=produtos{% if busca %}&busca={{ busca }}{% endif %}"
+       class="chip {% if not categoria_id %}active{% endif %}">Todos</a>
+    {% for cat in categorias %}
+    <a href="/cliente?secao=produtos&categoria_id={{ cat.id }}{% if busca %}&busca={{ busca }}{% endif %}"
+       class="chip {% if categoria_id == cat.id %}active{% endif %}">{{ cat.nome }}</a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if produtos %}
+  <div class="products-grid">
+    {% for produto in produtos %}
+    <article class="product-card">
+      <div class="product-image">
+        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
+      </div>
+      <div class="product-body">
+        <span class="product-category">{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
+        <h3>{{ produto.nome }}</h3>
+        <p class="product-platform">{{ produto.plataforma }}</p>
+        <div class="product-footer">
+          <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
+          <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">
+            {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponível{% endif %}
+          </span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Nenhum produto encontrado.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if secao_ativa == 'categorias' %}
+<section class="portal-section">
+  <div class="section-header">
+    <h2>Categorias</h2>
+    <p class="section-subtitle">Navegue pelos tipos de produtos disponíveis na loja.</p>
+  </div>
+
+  {% if categorias %}
+  <div class="categories-grid">
+    {% for cat in categorias %}
+    <a href="/cliente?secao=produtos&categoria_id={{ cat.id }}" class="category-card">
+      <h3>{{ cat.nome }}</h3>
+      {% if cat.descricao %}
+      <p>{{ cat.descricao }}</p>
+      {% else %}
+      <p>Ver produtos desta categoria</p>
+      {% endif %}
+      <span class="category-link">Explorar →</span>
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="empty-state">Nenhuma categoria cadastrada.</p>
+  {% endif %}
+</section>
+{% endif %}
+</body>
+</html>
+
