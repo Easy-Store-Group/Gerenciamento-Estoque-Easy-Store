@@ -32,3 +32,15 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Movement form button adjustment */
+.btn-lg {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 22px;
+  padding: 12px 18px;
+}
+
+.btn-lg:hover {
+  box-shadow: 0 18px 44px rgba(37, 99, 235, 0.28);
+}

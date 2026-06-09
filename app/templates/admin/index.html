@@ -36,10 +36,11 @@
 
     <div class="sales-chart">
       {% for dia in vendas_grafico %}
+      {% set chart_bar_class = 'chart-bar is-empty' if dia.total == 0 else 'chart-bar' %}
       <div class="chart-column">
         <div class="chart-value">R$ {{ "%.2f"|format(dia.total) }}</div>
-        <div class="chart-track">div
-          <div class="chart-bar{% if dia.total == 0 %} is-empty{% endif %}" style="height: {{ dia.percentual }}%;"></div>
+        <div class="chart-track">
+          <div class="{{ chart_bar_class }}" style="height: {{ dia.percentual }}%;"></div>
         </div>
         <span>{{ dia.label }}</span>
       </div>

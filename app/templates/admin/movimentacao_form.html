@@ -24,9 +24,7 @@
         <select name="tipo" required>
           {% for tipo in tipos %}
           <option value="{{ tipo.value }}">{{ tipo.value|capitalize }}</option>
-    
-        </div>
-        {% endfor %}
+          {% endfor %}
         </select>
       </div>
       <div class="input-group">
@@ -40,8 +38,9 @@
       <div class="input-group">
         <label>Observação</label>
         <textarea name="observacao" rows="3"></textarea>
+      </div>
     </div>
-    <button type="submit" class="btn btn-primary">Registrar movimentação</button>
+    <button type="submit" class="btn btn-primary btn-lg">Registrar movimentação</button>
   </form>
 </div>
 {% endblock %}
