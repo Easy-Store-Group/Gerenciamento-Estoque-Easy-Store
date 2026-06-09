@@ -9,7 +9,7 @@ from app.models.venda import Venda
 from app.database import get_db
 from app.models.usuario import Usuario
 from app.models.cliente import Cliente
-from app.auth import hash_senha, verificar_senha, criar_token
+from app.auth import hash_senha, verificar_senha, criar_token, get_usuario_opcional
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
@@ -151,6 +151,42 @@ def tela_register(request: Request):
         request,
         "auth/register.html",
         {'request': request}
+    )
+
+@router.get("/produtos")
+def tela_produtos_publicos(
+    request: Request,
+    categoria_id: int = 0,
+    busca: str = "",
+    db: Session = Depends(get_db),
+    usuario = Depends(get_usuario_opcional),
+):
+    categorias = (
+        db.query(Categoria)
+        .filter(Categoria.ativo == True)
+        .order_by(Categoria.nome)
+        .all()
+    )
+
+    query = db.query(Produto).filter(Produto.ativo == True)
+    if categoria_id:
+        query = query.filter(Produto.categoria_id == categoria_id)
+    if busca.strip():
+        query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
+
+    produtos = query.order_by(Produto.nome).all()
+
+    return templates.TemplateResponse(
+        request,
+        "produtos_publicos.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "produtos": produtos,
+            "categorias": categorias,
+            "categoria_id": categoria_id,
+            "busca": busca,
+        },
     )
 
 @router.post("/login")

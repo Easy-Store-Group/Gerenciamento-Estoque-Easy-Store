@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Produtos - EasyStore</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}">
+</head>
+<body>
+    <header class="public-header">
+        <div class="public-header-inner">
+            <a href="/" class="public-brand">
+                <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
+                <span>EasyStore</span>
+            </a>
+
+            <nav class="public-nav">
+                <a href="/">Inicio</a>
+                <a href="/auth/produtos" class="active">Produtos</a>
+                <a href="/sobre-nos">Sobre</a>
+            </nav>
+
+            <div class="public-actions">
+                {% if usuario and usuario.get('role') == 'cliente' %}
+                <a href="/cliente" class="btn btn-outline">Minha area</a>
+                {% else %}
+                <a href="/auth/login" class="btn btn-outline">Login</a>
+
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="public-main">
+        <section class="catalog-hero">
+            <div>
+                <span class="eyebrow">Catalogo publico</span>
+                <h1>Produtos EasyStore</h1>
+                <p>Confira nossos jogos, consoles e acessorios disponiveis antes de entrar no sistema.</p>
+            </div>
+            <a href="/auth/register" class="hero-link">Criar conta</a>
+        </section>
+
+        <section class="catalog-section">
+            <div class="section-header">
+                <div>
+                    <h2>Produtos</h2>
+                    <p>Use a busca ou filtre por categoria para encontrar o que voce procura.</p>
+                </div>
+
+                <form class="catalog-search" method="get" action="/auth/produtos">
+                    {% if categoria_id %}
+                    <input type="hidden" name="categoria_id" value="{{ categoria_id }}">
+                    {% endif %}
+                    <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar produto...">
+                    <button type="submit">Buscar</button>
+                </form>
+            </div>
+
+            {% if categorias %}
+            <div class="category-chips">
+                <a href="/auth/produtos{% if busca %}?busca={{ busca }}{% endif %}"
+                   class="chip {% if not categoria_id %}active{% endif %}">Todos</a>
+                {% for cat in categorias %}
+                <a href="/auth/produtos?categoria_id={{ cat.id }}{% if busca %}&busca={{ busca }}{% endif %}"
+                   class="chip {% if categoria_id == cat.id %}active{% endif %}">{{ cat.nome }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if produtos %}
+            <div class="products-grid">
+                {% for produto in produtos %}
+                <article class="product-card">
+                    <div class="product-image">
+                        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
+                    </div>
+                    <div class="product-body">
+                        <span class="product-category">{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
+                        <h3>{{ produto.nome }}</h3>
+                        <p class="product-platform">{{ produto.plataforma }}</p>
+                        <div class="product-footer">
+                            <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
+                            <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">
+                                {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponivel{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="empty-state">Nenhum produto encontrado.</p>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>
