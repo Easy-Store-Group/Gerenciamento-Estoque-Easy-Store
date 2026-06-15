@@ -15,7 +15,8 @@
                 <span class="logo-text">EasyStore</span>
             </div>  
             <div class="navbar-buttons">
-                {% if usuario and usuario.get('role') == 'cliente' %}
+                {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
+                {% if role == 'cliente' %}
                 <a href="/cliente" class="nav-btn nav-login">Minha área</a>
                 {% else %}
                 <a href="/auth/register" class="nav-btn nav-signup">Cadastre-se</a>

@@ -41,6 +41,8 @@
     <div>{{ produto.estoque_atual }}</div>
     <div>{{ produto.preco }}</div>
     <div class="actions">
+      {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
+      {% if role == 'admin' %}
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
       {% if produto.ativo %}
       <form action="/produtos/{{ produto.id }}/desativar" method="post"><button type="submit" class="btn btn-warning">Desativar</button></form>
@@ -48,6 +50,9 @@
       <form action="/produtos/{{ produto.id }}/ativar" method="post"><button type="submit" class="btn btn-success">Ativar</button></form>
       {% endif %}
       <form action="/produtos/{{ produto.id }}/deletar" method="post"><button type="submit" class="btn btn-danger">Excluir</button></form>
+      {% else %}
+      <span class="muted">Ações administrativas ocultas</span>
+      {% endif %}
     </div>
   </div>
   {% endfor %}

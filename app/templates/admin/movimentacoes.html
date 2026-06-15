@@ -17,6 +17,9 @@
     <button type="submit" class="btn btn-primary">Filtrar</button>
   </form>
   <span class="detail-pill">{{ movimentacoes|length }} registro(s)</span>
+  {% if extra_button and extra_button.href %}
+  <a href="{{ extra_button.href }}" class="btn btn-primary" style="margin-left:12px;">{{ extra_button.label }}</a>
+  {% endif %}
 </div>
 
 <div class="table-card movements-table">

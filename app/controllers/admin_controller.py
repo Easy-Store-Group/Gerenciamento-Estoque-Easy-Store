@@ -8,21 +8,27 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.cliente import Cliente
 from app.models.usuario import Usuario
-from app.auth import get_admin, hash_senha
+from app.auth import get_admin, hash_senha, get_usuario_logado
+from fastapi import HTTPException
 
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 
 templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/")
-def listar_usuarios(request: Request, db: Session = Depends(get_db), admin = Depends(get_admin)):
+def listar_usuarios(request: Request, db: Session = Depends(get_db), usuario = Depends(get_usuario_logado)):
+    # permite que administradores e operadores vejam a lista de usuários
+    role = usuario.get("role")
+    if role not in ("admin", "operador"):
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
     usuarios = db.query(Usuario).order_by(Usuario.nome).all()
     return templates.TemplateResponse(
         request,
         "admin/usuarios.html",
         {
             "request": request,
-            "usuario": admin,
+            "usuario": usuario,
             "usuarios": usuarios,
             "page_title": "Usuários",
             "page_subtitle": "Gerencie acessos e status dos usuários",

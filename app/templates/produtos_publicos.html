@@ -21,7 +21,8 @@
             </nav>
 
             <div class="public-actions">
-                {% if usuario and usuario.get('role') == 'cliente' %}
+                {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
+                {% if role == 'cliente' %}
                 <a href="/cliente" class="btn btn-outline">Minha area</a>
                 {% else %}
                 <a href="/auth/login" class="btn btn-outline">Login</a>

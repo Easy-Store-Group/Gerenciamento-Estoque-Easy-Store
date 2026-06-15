@@ -10,7 +10,12 @@
       <p class="subtitle">Histórico de vendas e operações de caixa</p>
     </div>
     <div class="vendas-actions">
+      {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
+      {% if role == 'admin' %}
       <a href="/admin/pos" style="background: linear-gradient(90deg,#157ED3,#1967A7);" class="btn-small btn-primary">Nova venda</a>
+      {% elif role == 'operador' %}
+      <a href="/pdv" style="background: linear-gradient(90deg,#157ED3,#1967A7);" class="btn-small btn-primary">Nova venda</a>
+      {% endif %}
     </div>
   </div>
 

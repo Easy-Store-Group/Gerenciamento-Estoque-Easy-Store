@@ -24,14 +24,30 @@
         <a href="/admin" class="{% if active == 'home' %}active{% endif %}"><span>📊</span>Dashboard</a>
         <a href="/produtos" class="{% if active == 'produtos' %}active{% endif %}"><span>📦</span>Produtos</a>
         <a href="/categorias" class="{% if active == 'categorias' %}active{% endif %}"><span>🗂️</span>Categorias</a>
-        <a href="/admin/pos" class="{% if active == 'pos' %}active{% endif %}"><span>🛒</span>Ponto de Venda</a>
+        {% if usuario %}
+          {% if usuario is mapping %}
+            {% set role = usuario.get('role') %}
+            {% set logged_name = usuario.get('nome', usuario.get('sub', 'Usuário')) %}
+          {% else %}
+            {% set role = usuario.role %}
+            {% set logged_name = usuario.nome if usuario.nome else 'Usuário' %}
+          {% endif %}
+          {% if role == 'admin' %}
+            <a href="/admin/pos" class="{% if active == 'pos' %}active{% endif %}"><span>🛒</span>Ponto de Venda</a>
+          {% elif role == 'operador' %}
+            <a href="/pdv" class="{% if active == 'pos' %}active{% endif %}"><span>🛒</span>Ponto de Venda</a>
+          {% endif %}
+        {% else %}
+          {% set role = None %}
+          {% set logged_name = 'Usuário' %}
+        {% endif %}
         <a href="/usuarios" class="{% if active == 'usuarios' %}active{% endif %}"><span>👥</span>Usuários</a>
         <a href="/movimentacoes" class="{% if active == 'movimentacoes' %}active{% endif %}"><span>🔃</span>Movimentações</a>
       </nav>
 
       <div class="sidebar-footer">
         <div class="profile-card">
-          {% set logged_name = usuario.nome if usuario and usuario.nome else usuario.get('nome', usuario.get('sub', 'Usuário')) if usuario else 'Usuário' %}
+          {# logged_name já definido acima quando usuario existe #}
           <span>Logado como</span>
           <strong>{{ logged_name }}</strong>
         </div>

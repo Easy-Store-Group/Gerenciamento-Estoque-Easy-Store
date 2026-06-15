@@ -4,7 +4,9 @@
 <div class="table-actions">
   <div class="detail-pill">Total de usuarios: <strong>{{ usuarios|length }}</strong></div>
   <div class="detail-pill premium-count">Premium ativos: <strong>{{ usuarios|selectattr('cliente_perfil.is_associado')|selectattr('ativo')|list|length }}</strong></div>
+  {% if usuario and (usuario.role if usuario is not mapping else usuario.get('role')) == 'admin' %}
   <a href="/usuarios/novo" class="btn btn-primary">Novo usuario</a>
+  {% endif %}
 </div>
 
 <div class="table-card users-table">
@@ -16,24 +18,28 @@
     <div>Status</div>
     <div>Acoes</div>
   </div>
-  {% for usuario in usuarios %}
-  {% set premium_ativo = usuario.cliente_perfil and usuario.cliente_perfil.is_associado and usuario.ativo and usuario.cliente_perfil.ativo %}
+  {% for u in usuarios %}
+  {% set premium_ativo = u.cliente_perfil and u.cliente_perfil.is_associado and u.ativo and u.cliente_perfil.ativo %}
   <div class="table-row {% if premium_ativo %}premium-user{% endif %}">
-    <div>{{ usuario.nome }}</div>
-    <div>{{ usuario.email }}</div>
-    <div>{{ usuario.role }}</div>
+    <div>{{ u.nome }}</div>
+    <div>{{ u.email }}</div>
+    <div>{{ u.role }}</div>
     <div>
-      {% if usuario.cliente_perfil and usuario.cliente_perfil.is_associado %}
+      {% if u.cliente_perfil and u.cliente_perfil.is_associado %}
         <span class="plan-badge premium">Premium 10%</span>
         <small class="plan-note">{{ 'Apto ao desconto' if premium_ativo else 'Plano inativo' }}</small>
       {% else %}
         <span class="plan-badge standard">Comum</span>
       {% endif %}
     </div>
-    <div><span class="status-badge {% if usuario.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativo' if usuario.ativo else 'Inativo' }}</span></div>
+    <div><span class="status-badge {% if u.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativo' if u.ativo else 'Inativo' }}</span></div>
     <div class="actions">
-      <a href="/usuarios/{{ usuario.id }}/editar" class="btn btn-secondary">Editar</a>
-      <form action="/usuarios/{{ usuario.id }}/toggle-ativo" method="post"><button type="submit" class="btn btn-warning">{% if usuario.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
+      {% if usuario and (usuario.role if usuario is not mapping else usuario.get('role')) == 'admin' %}
+      <a href="/usuarios/{{ u.id }}/editar" class="btn btn-secondary">Editar</a>
+      <form action="/usuarios/{{ u.id }}/toggle-ativo" method="post"><button type="submit" class="btn btn-warning">{% if u.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
+      {% else %}
+      <span class="muted">Somente administradores</span>
+      {% endif %}
     </div>
   </div>
   {% endfor %}

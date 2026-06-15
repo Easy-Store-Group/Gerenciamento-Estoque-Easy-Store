@@ -33,7 +33,7 @@ def listar_movimentacoes(
     produto_id: int = 0,
     tipo: str = "",
     db: Session = Depends(get_db),
-    admin=Depends(get_admin),
+    usuario=Depends(get_usuario_logado),
 ):
     query = db.query(Movimentacao).order_by(Movimentacao.criando_em.desc())
 
@@ -43,6 +43,12 @@ def listar_movimentacoes(
     if tipo in {item.value for item in Tipo_de_movimentacao}:
         query = query.filter(Movimentacao.tipo == Tipo_de_movimentacao(tipo))
 
+    # permite visualização por operadores e admins
+    role = usuario.get("role") if isinstance(usuario, dict) else getattr(usuario, "role", None)
+    if role not in ("admin", "operador"):
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
     movimentacoes = query.limit(200).all()
     produtos = db.query(Produto).filter(Produto.ativo == True).order_by(Produto.nome).all()
 
@@ -51,7 +57,7 @@ def listar_movimentacoes(
         "admin/movimentacoes.html",
         {
             "request": request,
-            "usuario": admin,
+            "usuario": usuario,
             "movimentacoes": movimentacoes,
             "produtos": produtos,
             "produto_id": produto_id,
@@ -60,7 +66,8 @@ def listar_movimentacoes(
             "page_subtitle": "Histórico de entradas e saídas do estoque",
             "css_path": "css/movimentacoes.css",
             "active": "movimentacoes",
-            "extra_button": {"href": "/movimentacoes/nova", "label": "Nova movimentação"},
+            # mostre botão de nova movimentação somente para admin (operador faz movimentações via PDV)
+            "extra_button": {"href": "/movimentacoes/nova", "label": "Nova movimentação"} if role == "admin" else None,
         },
     )
 

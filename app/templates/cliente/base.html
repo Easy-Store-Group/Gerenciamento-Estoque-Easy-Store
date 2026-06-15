@@ -19,7 +19,15 @@
         <a href="/cliente?secao=compras" class="{% if secao_ativa == 'compras' %}active{% endif %}">Minhas compras</a>
       </nav>
       <div class="cliente-user">
-        <span>Olá, {{ usuario.get('nome', 'Cliente') }}</span>
+        {% if usuario %}
+          {% if usuario is mapping %}
+            <span>Olá, {{ usuario.get('nome', 'Cliente') }}</span>
+          {% else %}
+            <span>Olá, {{ usuario.nome if usuario.nome else 'Cliente' }}</span>
+          {% endif %}
+        {% else %}
+          <span>Olá, Cliente</span>
+        {% endif %}
         <a href="/auth/logout" class="btn-logout">Sair</a>
       </div>
     </div>

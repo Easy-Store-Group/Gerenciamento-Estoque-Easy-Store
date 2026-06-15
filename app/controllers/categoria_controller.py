@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.categoria import Categoria
-from app.auth import get_admin
+from app.auth import get_admin, get_usuario_logado
+from fastapi import HTTPException
 
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
 
@@ -24,13 +25,18 @@ templates = Jinja2Templates(directory="app/templates")
 def listar_categorias(
     request: Request,
     db: Session = Depends(get_db),
-    admin = Depends(get_admin)
+    usuario = Depends(get_usuario_logado),
 ):
     """
     Lista todas as categorias ordenadas por nome.
     Inclui a contagem de produtos de cada categoria
     para dar contexto ao admin antes de desativar.
     """
+    # permite visualização por operadores e administradores
+    role = usuario.get("role") if isinstance(usuario, dict) else getattr(usuario, "role", None)
+    if role not in ("admin", "operador"):
+        raise HTTPException(status_code=403, detail="Acesso negado")
+
     categorias = db.query(Categoria).order_by(Categoria.nome).all()
 
     return templates.TemplateResponse(
@@ -38,7 +44,7 @@ def listar_categorias(
         "admin/categorias.html",
         {
             "request":      request,
-            "usuario":      admin,
+            "usuario":      usuario,
             "categorias":   categorias,
             "page_title":   "Categorias",
             "page_subtitle":"Gerencie as categorias do estoque",
