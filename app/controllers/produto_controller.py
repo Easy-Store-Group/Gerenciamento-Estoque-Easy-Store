@@ -10,7 +10,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.produto import Produto
 from app.models.categoria import Categoria
+from app.models.movimentacao import Movimentacao
 from app.auth import get_usuario_logado, get_admin
+from app.errors import OperacaoInvalidaError
 
 router = APIRouter(prefix="/produtos", tags=["Produtos"])
 
@@ -290,6 +292,11 @@ def deletar_produto(
     produto = db.query(Produto).filter(Produto.id == produto_id).first()
 
     if produto:
+        # Não permitir exclusão se houver movimentações associadas
+        movimentacoes_count = db.query(Movimentacao).filter(Movimentacao.produto_id == produto.id).count()
+        if movimentacoes_count > 0:
+            raise OperacaoInvalidaError(f"Não é possível excluir o produto porque existem {movimentacoes_count} movimentações associadas.")
+
         db.delete(produto)
         db.commit()
 

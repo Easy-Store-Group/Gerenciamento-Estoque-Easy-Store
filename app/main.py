@@ -26,6 +26,26 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 templates = Jinja2Templates(directory="app/templates")
 
+from app.errors import (
+    NaoAutenticadoError,
+    PermissaoNegadaError,
+    RecursoNaoEncontradoError,
+    EstoqueInsuficienteError,
+    OperacaoInvalidaError,
+    handler_nao_autenticado,
+    handler_permissao_negada,
+    handler_recurso_nao_encontrado,
+    handler_estoque_insuficiente,
+    handler_operacao_invalida,
+)
+
+# Registra handlers de exceções customizadas (API -> JSON ; Frontend -> HTML/redirect)
+app.add_exception_handler(NaoAutenticadoError, handler_nao_autenticado)
+app.add_exception_handler(PermissaoNegadaError, handler_permissao_negada)
+app.add_exception_handler(RecursoNaoEncontradoError, handler_recurso_nao_encontrado)
+app.add_exception_handler(EstoqueInsuficienteError, handler_estoque_insuficiente)
+app.add_exception_handler(OperacaoInvalidaError, handler_operacao_invalida)
+
 app.include_router(auth_controller.router)
 app.include_router(admin_controller.router)
 app.include_router(categoria_controller.router)

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Enum, Float
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql import func
 from app.database import Base
 import enum
@@ -28,7 +28,10 @@ class Movimentacao(Base):
     usuario_id = Column(Integer, ForeignKey("usuarios.id", ondelete="SET NULL"), nullable=False)
 
     # relacionamento
-    produto = relationship("Produto", backref="movimentacoes")
+    produto = relationship(
+        "Produto",
+        backref=backref("movimentacoes", cascade="all, delete-orphan", passive_deletes=True),
+    )
     usuario = relationship("Usuario", backref="movimentacoes")
 
     @property
