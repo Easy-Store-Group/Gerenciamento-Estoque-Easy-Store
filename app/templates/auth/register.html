@@ -17,7 +17,7 @@
         <span class="brand-name" id="brandName">EasyStore</span>
       </div>
       <p class="tagline" id="tagline">Crie sua conta<br>e acompanhe suas compras</p>
-      <p class="sub">Catálogo, categorias e histórico em um só lugar ✦</p>
+      <p class="sub">Catalogo, categorias e historico em um so lugar</p>
     </div>
   </div>
 
@@ -42,11 +42,18 @@
         </div>
         <div class="input-group">
           <label>Senha</label>
-          <input type="password" name="senha" placeholder="••••••••" minlength="6" required>
+          <input type="password" name="senha" placeholder="Digite sua senha" minlength="6" required>
         </div>
-        <button type="submit" class="btn-confirm">✦ Criar conta</button>
-        <p class="footer-text">Já tem conta? <a href="/auth/login">Entrar</a></p>
-        <p class="footer-text">Voltar para o <a href="/">Início</a></p>
+        <label class="premium-option">
+          <input type="checkbox" name="plano_premium" value="true">
+          <span>
+            <strong>Quero ser cliente premium</strong>
+            <small>Plano ativo com 10% de desconto em toda compra.</small>
+          </span>
+        </label>
+        <button type="submit" class="btn-confirm">Criar conta</button>
+        <p class="footer-text">Ja tem conta? <a href="/auth/login">Entrar</a></p>
+        <p class="footer-text">Voltar para o <a href="/">Inicio</a></p>
       </form>
     </div>
   </div>

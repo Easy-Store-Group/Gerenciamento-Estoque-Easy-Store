@@ -2,8 +2,9 @@
 
 {% block content %}
 <div class="table-actions">
-  <div class="detail-pill">Total de usuários: <strong>{{ usuarios|length }}</strong></div>
-  <a href="/usuarios/novo" class="btn btn-primary">Novo usuário</a>
+  <div class="detail-pill">Total de usuarios: <strong>{{ usuarios|length }}</strong></div>
+  <div class="detail-pill premium-count">Premium ativos: <strong>{{ usuarios|selectattr('cliente_perfil.is_associado')|selectattr('ativo')|list|length }}</strong></div>
+  <a href="/usuarios/novo" class="btn btn-primary">Novo usuario</a>
 </div>
 
 <div class="table-card users-table">
@@ -11,14 +12,24 @@
     <div>Nome</div>
     <div>E-mail</div>
     <div>Perfil</div>
+    <div>Plano</div>
     <div>Status</div>
-    <div>Ações</div>
+    <div>Acoes</div>
   </div>
   {% for usuario in usuarios %}
-  <div class="table-row">
+  {% set premium_ativo = usuario.cliente_perfil and usuario.cliente_perfil.is_associado and usuario.ativo and usuario.cliente_perfil.ativo %}
+  <div class="table-row {% if premium_ativo %}premium-user{% endif %}">
     <div>{{ usuario.nome }}</div>
     <div>{{ usuario.email }}</div>
     <div>{{ usuario.role }}</div>
+    <div>
+      {% if usuario.cliente_perfil and usuario.cliente_perfil.is_associado %}
+        <span class="plan-badge premium">Premium 10%</span>
+        <small class="plan-note">{{ 'Apto ao desconto' if premium_ativo else 'Plano inativo' }}</small>
+      {% else %}
+        <span class="plan-badge standard">Comum</span>
+      {% endif %}
+    </div>
     <div><span class="status-badge {% if usuario.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativo' if usuario.ativo else 'Inativo' }}</span></div>
     <div class="actions">
       <a href="/usuarios/{{ usuario.id }}/editar" class="btn btn-secondary">Editar</a>

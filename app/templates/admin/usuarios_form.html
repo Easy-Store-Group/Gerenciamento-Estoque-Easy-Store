@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="form-card">
-  <h2>{% if editando %}Editar usuário{% else %}Novo usuário{% endif %}</h2>
+  <h2>{% if editando %}Editar usuario{% else %}Novo usuario{% endif %}</h2>
   <form action="{% if editando %}/usuarios/{{ editando.id }}/editar{% else %}/usuarios/novo{% endif %}" method="post">
     <div class="form-grid">
       <div class="input-group">
@@ -18,14 +18,22 @@
         <select name="role">
           <option value="operador" {% if editando and editando.role == 'operador' %}selected{% endif %}>Operador</option>
           <option value="admin" {% if editando and editando.role == 'admin' %}selected{% endif %}>Admin</option>
+          <option value="cliente" {% if editando and editando.role == 'cliente' %}selected{% endif %}>Cliente</option>
         </select>
       </div>
       <div class="input-group">
         <label>Senha {% if editando %}(opcional){% endif %}</label>
         <input type="password" name="senha" placeholder="Digite a senha{% if editando %} ou deixe em branco{% endif %}">
       </div>
+      <label class="input-group checkbox-card premium-admin-option">
+        <input type="checkbox" name="plano_premium" value="true" {% if editando and editando.cliente_perfil and editando.cliente_perfil.is_associado %}checked{% endif %}>
+        <span>
+          <strong>Cliente premium</strong>
+          <small>Ativa o plano e deixa o cliente apto a 10% de desconto em toda compra.</small>
+        </span>
+      </label>
     </div>
-    <button type="submit" class="btn btn-primary">{% if editando %}Salvar usuário{% else %}Criar usuário{% endif %}</button>
+    <button type="submit" class="btn btn-primary">{% if editando %}Salvar usuario{% else %}Criar usuario{% endif %}</button>
   </form>
 </div>
 {% endblock %}

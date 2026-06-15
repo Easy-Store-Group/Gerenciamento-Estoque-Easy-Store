@@ -19,6 +19,7 @@ class RegisterRequest(BaseModel):
     nome: str
     email: str
     senha: str
+    plano_premium: bool = False
 
 class LoginRequest(BaseModel):
     email: str
@@ -30,6 +31,7 @@ def _criar_conta_cliente(
     email: str,
     senha: str,
     telefone: str = "",
+    plano_premium: bool = False,
 ) -> Usuario:
     usuario_existe = db.query(Usuario).filter(Usuario.email == email).first()
     if usuario_existe:
@@ -53,7 +55,7 @@ def _criar_conta_cliente(
         email=novo_usuario.email,
         telefone=telefone.strip() or None,
         usuario_id=novo_usuario.id,
-        is_associado=False,
+        is_associado=plano_premium,
         ativo=True,
     ))
     db.commit()
@@ -83,7 +85,13 @@ def _login_response(usuario: Usuario, destino: str) -> RedirectResponse:
 @router.post("/api/register")
 def registrar_usuario_api(dados: RegisterRequest, db: Session = Depends(get_db)):
     try:
-        novo_usuario = _criar_conta_cliente(db, dados.nome, dados.email, dados.senha)
+        novo_usuario = _criar_conta_cliente(
+            db,
+            dados.nome,
+            dados.email,
+            dados.senha,
+            plano_premium=dados.plano_premium,
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -97,10 +105,11 @@ def registrar_usuario(
     email: str = Form(...),
     senha: str = Form(...),
     telefone: str = Form(""),
+    plano_premium: bool = Form(False),
     db: Session = Depends(get_db),
 ):
     try:
-        novo_usuario = _criar_conta_cliente(db, nome, email, senha, telefone)
+        novo_usuario = _criar_conta_cliente(db, nome, email, senha, telefone, plano_premium)
     except ValueError as exc:
         return templates.TemplateResponse(
             request,
