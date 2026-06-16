@@ -153,7 +153,7 @@ def admin_pos(
             "usuario": admin,
             "produtos": produtos,
             "clientes": clientes,
-            "desconto_associado": 10.0,
+            "desconto_associado": 5.0,
             "css_path": "css/pos.css",
             "active": "pos",
         },

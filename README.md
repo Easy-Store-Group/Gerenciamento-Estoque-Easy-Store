@@ -25,12 +25,7 @@
 ### 📦 Gestão de Estoque
 - Cadastro com categorias e estoque mínimo
 - Rastreamento automático de movimentações
-
-### 👤 Perfil do Cliente
-- XP acumulado, nível atual e conquistas desbloqueadas
-- Visualização das próximas recompensas
-
----
+ ---
 
 ## 🧱 Tecnologias
 

@@ -19,7 +19,7 @@ class Cliente(Base):
         unique=True,
     )
 
-    # is_associado define se o cliente tem 10% de desconto
+    # is_associado define se o cliente tem 5% de desconto
     is_associado = Column(Boolean, default=False, nullable=False)
 
     ativo      = Column(Boolean, default=True)

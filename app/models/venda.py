@@ -32,7 +32,7 @@ class Venda(Base):
         nullable=True
     )
 
-    # Percentual de desconto aplicado — 0.0 ou 10.0
+    # Percentual de desconto aplicado — 0.0 ou 5.0
     # Guardamos o valor histórico para não depender do cadastro do cliente
     desconto_percentual = Column(Float, nullable=False, default=0.0)
 
