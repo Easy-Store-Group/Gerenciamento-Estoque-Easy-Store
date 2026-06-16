@@ -1,6 +1,7 @@
 from fastapi import Request, status
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from urllib.parse import quote_plus
 import logging
 
@@ -52,8 +53,43 @@ def handler_nao_autenticado(request: Request, exc: NaoAutenticadoError):
             status_code=status.HTTP_401_UNAUTHORIZED,
             content={"error": "nao_autenticado", "mensagem": "Usuário não autenticado."},
         )
-    # Frontend HTML: redireciona para /login
-    return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    return _render_nao_autenticado(request)
+
+
+def handler_http_exception(request: Request, exc: StarletteHTTPException):
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        logger.info("Não autenticado: %s %s", request.method, request.url.path)
+        if _is_api_request(request):
+            return JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "nao_autenticado", "mensagem": "Faça login para continuar."},
+            )
+        return _render_nao_autenticado(request)
+
+    if exc.status_code == status.HTTP_403_FORBIDDEN:
+        logger.warning("Permissão negada: %s %s", request.method, request.url.path)
+        if _is_api_request(request):
+            return JSONResponse(
+                status_code=status.HTTP_403_FORBIDDEN,
+                content={"error": "permissao_negada", "mensagem": str(exc.detail)},
+            )
+        html = templates.env.get_template("errors/erro.html").render(
+            {"request": request, "codigo": 403, "titulo": "Permissão negada", "mensagem": str(exc.detail)}
+        )
+        return HTMLResponse(content=html, status_code=status.HTTP_403_FORBIDDEN)
+
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers=exc.headers,
+    )
+
+
+def _render_nao_autenticado(request: Request):
+    html = templates.env.get_template("errors/nao_autenticado.html").render(
+        {"request": request, "next_url": request.url.path}
+    )
+    return HTMLResponse(content=html, status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 def handler_permissao_negada(request: Request, exc: PermissaoNegadaError):
@@ -119,6 +155,7 @@ __all__ = [
     "EstoqueInsuficienteError",
     "OperacaoInvalidaError",
     "handler_nao_autenticado",
+    "handler_http_exception",
     "handler_permissao_negada",
     "handler_recurso_nao_encontrado",
     "handler_estoque_insuficiente",

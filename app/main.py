@@ -4,6 +4,7 @@ from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from sqlalchemy.orm import Session
 
 from app.auth import get_admin, get_usuario_opcional
@@ -33,6 +34,7 @@ from app.errors import (
     EstoqueInsuficienteError,
     OperacaoInvalidaError,
     handler_nao_autenticado,
+    handler_http_exception,
     handler_permissao_negada,
     handler_recurso_nao_encontrado,
     handler_estoque_insuficiente,
@@ -41,6 +43,7 @@ from app.errors import (
 
 # Registra handlers de exceções customizadas (API -> JSON ; Frontend -> HTML/redirect)
 app.add_exception_handler(NaoAutenticadoError, handler_nao_autenticado)
+app.add_exception_handler(StarletteHTTPException, handler_http_exception)
 app.add_exception_handler(PermissaoNegadaError, handler_permissao_negada)
 app.add_exception_handler(RecursoNaoEncontradoError, handler_recurso_nao_encontrado)
 app.add_exception_handler(EstoqueInsuficienteError, handler_estoque_insuficiente)

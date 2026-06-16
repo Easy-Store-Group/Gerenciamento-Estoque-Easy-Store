@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso restrito - EasyStore</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
+</head>
+<body class="auth-required-page">
+    <main class="auth-required">
+        <section class="auth-required-card">
+            <a href="/" class="auth-required-brand">
+                <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo">
+                <span>EasyStore</span>
+            </a>
+
+            <div class="auth-required-content">
+                <span class="auth-required-kicker">Acesso protegido</span>
+                <h1>Entre na sua conta para continuar</h1>
+                <p>
+                    Esta área faz parte do painel da EasyStore. Faça login para acessar seus produtos,
+                    vendas, estoque ou portal do cliente com segurança.
+                </p>
+            </div>
+
+            <div class="auth-required-actions">
+                <a href="/auth/login" class="btn btn-primary">Fazer login</a>
+                <a href="/auth/register" class="auth-required-link">Criar conta</a>
+            </div>
+
+            <div class="auth-required-features">
+                <div>
+                    <strong>Estoque</strong>
+                    <span>Controle produtos, categorias e movimentações.</span>
+                </div>
+                <div>
+                    <strong>PDV</strong>
+                    <span>Finalize vendas e acompanhe o histórico.</span>
+                </div>
+                <div>
+                    <strong>Cliente</strong>
+                    <span>Acesse benefícios, compras e dados da conta.</span>
+                </div>
+            </div>
+
+            <a href="/" class="auth-required-back">Voltar para a página inicial</a>
+        </section>
+    </main>
+</body>
+</html>

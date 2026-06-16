@@ -1,234 +1,157 @@
 <!DOCTYPE html>
-
-<html lang="pt-br">
-
+<html lang="pt-BR">
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Sobre Nós - Easy Store</title>
-
-    <link rel="stylesheet" href="static/css/sobre-nos.css">
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-
+    <title>Sobre nós - EasyStore</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/sobre-nos.css') }}">
 </head>
-
 <body>
+    <header class="public-header">
+        <div class="public-header-inner">
+            <a href="/" class="public-brand">
+                <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
+                <span>EasyStore</span>
+            </a>
 
+            <nav class="public-nav">
+                <a href="/">Inicio</a>
+                <a href="/auth/produtos">Produtos</a>
+                <a href="/sobre-nos" class="active">Sobre</a>
+            </nav>
 
-
-    <!-- NAVBAR -->
-
-    <nav class="navbar">
-
-        <a href="/" class="nav-logo">
-
-            <span class="logo-icon">◈</span> EasyStore
-
-        </a>
-
-        <div class="nav-links">
-
-            <a href="/">Inicio</a>
-
+            <div class="public-actions">
+                <a href="/" class="btn btn-outline">Voltar ao inicio</a>
+            </div>
         </div>
+    </header>
 
-    </nav>
+    <main class="public-main">
+        <section class="about-hero">
+            <div>
+                <span class="eyebrow">Quem somos</span>
+                <h1>Feito por gamers, para gamers.</h1>
+                <p>
+                    A EasyStore nasceu da paixão por games e tecnologia. Somos uma loja especializada
+                    em jogos, consoles e equipamentos para PC, do controle ao setup completo.
+                </p>
+            </div>
+            <a href="/auth/produtos" class="hero-link">Ver produtos</a>
+        </section>
 
+        <section class="about-stats">
+            <article>
+                <strong>5</strong>
+                <span>Membros</span>
+            </article>
+            <article>
+                <strong>100%</strong>
+                <span>Dedicação</span>
+            </article>
+            <article>
+                <strong>24/7</strong>
+                <span>Foco no cliente</span>
+            </article>
+        </section>
 
-
-    <!-- HERO -->
-
-    <section class="hero">
-
-        <div class="hero-bg-text">EASY</div>
-
-        <div class="hero-content">
-
-            <span class="hero-tag">— Quem somos</span>
-
-            <h1 class="hero-title">
-
-                Feito por gamers,<br>
-
-                <em>para gamers.</em>
-
-            </h1>
-
-            <p class="hero-desc">
-
-                A Easy Store nasceu da paixão por games e tecnologia. 
-
-                Somos uma loja especializada em jogos, consoles e equipamentos para PC — 
-
-                do controle ao setup completo, tudo em um só lugar.
-
-            </p>
-
-        </div>
-
-        <div class="hero-stats">
-
-            <div class="stat">
-
-                <span class="stat-num">5</span>
-
-                <span class="stat-label">Membros</span>
-
+        <section class="about-section">
+            <div class="section-header">
+                <div>
+                    <h2>Nossa base</h2>
+                    <p>O que guia a EasyStore no atendimento e no desenvolvimento do sistema.</p>
+                </div>
             </div>
 
-            <div class="stat-divider"></div>
+            <div class="values-grid">
+                <article class="value-card">
+                    <span class="value-icon">🎯</span>
+                    <h3>Missão</h3>
+                    <p>Oferecer produtos gamer com uma experiência de compra simples, confiável e acessível.</p>
+                </article>
+                <article class="value-card">
+                    <span class="value-icon">🚀</span>
+                    <h3>Visão</h3>
+                    <p>Ser referência em games, consoles e equipamentos para PC, unindo loja e gestão em um só lugar.</p>
+                </article>
+                <article class="value-card">
+                    <span class="value-icon">💙</span>
+                    <h3>Valores</h3>
+                    <p>Autenticidade, inovação, respeito ao cliente e amor pelo universo dos jogos.</p>
+                </article>
+            </div>
+        </section>
 
-            <div class="stat">
-
-                <span class="stat-num">100%</span>
-
-                <span class="stat-label">Dedicação</span>
-
+        <section class="about-section">
+            <div class="section-header">
+                <div>
+                    <h2>Time EasyStore</h2>
+                    <p>Conheça quem faz a loja e o sistema acontecerem.</p>
+                </div>
+                <a href="/" class="section-link">Voltar ao inicio</a>
             </div>
 
-            <div class="stat-divider"></div>
-
-            <div class="stat">
-
-                <span class="stat-num">∞</span>
-
-                <span class="stat-label">Paixão</span>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- MISSÃO -->
-
-    <section class="mission">
-
-        <div class="mission-grid">
-
-            <div class="mission-card">
-
-                <span class="mission-icon">◉</span>
-
-                <h3>Missão</h3>
-
-                <p>Oferecer os melhores produtos para gamers com uma experiência de compra confiável.</p>
-
-            </div>
-
-            <div class="mission-card accent">
-
-                <span class="mission-icon">◈</span>
-
-                <h3>Visão</h3>
-
-                <p>Ser a referência em games e equipamentos para PC, reconhecida pela qualidade e paixão pelo universo gamer.</p>
-
-            </div>
-
-            <div class="mission-card">
-
-                <span class="mission-icon">◇</span>
-
-                <h3>Valores</h3>
-
-                <p>Autenticidade, inovação, respeito ao cliente e amor incondicional pelo mundo dos games.</p>
-
-            </div>
-
-        </div>
-
-    </section>
-
-
-
-    <!-- TIME -->
-
-    <section class="team">
-
-        <div class="team-header">
-
-            <span class="section-tag">— O time por trás</span>
-
-            <h2>Conheça quem<br>faz acontecer</h2>
-
-        </div>
-
-
-
-       <div class="team-grid">
-
-           
-           <div class="member-card">
-               <div class="member-photo-wrap">
-                   <div class="member-photo" style="background-image: url('/static/img/guilherme.png');">
+            <div class="team-grid">
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="{{ request.url_for('static', path='img/guilherme.png') }}" alt="Guilherme Zamboni">
+                        <span>01</span>
                     </div>
-                    <div class="member-number">01</div>
-                </div>
-                <div class="member-info">
-                    <h3>Guilherme Zamboni</h3>
-                    <span class="member-role back">Líder</span>
-                    <p class="member-bio">Nosso líder que apoiou tanto no back-end quanto no front-end.</p>
-                </div>
-            </div>
-            <div class="member-card">
-                <div class="member-photo-wrap">
-                    <div class="member-photo" style="background-image: url('/static/img/kaua.jpeg');">
+                    <div class="member-info">
+                        <h3>Guilherme Zamboni</h3>
+                        <strong>Líder</strong>
+                        <p>Apoio no back-end e no front-end, organizando as entregas do projeto.</p>
                     </div>
-                    <div class="member-number">02</div>
-                </div>
-                <div class="member-info">
-                    <h3>Kauã Santos</h3>
-                    <span class="member-role back">Back-end</span>
-                    <p class="member-bio">Responsável pela arquitetura do sistema, rotas e banco de dados.</p>
-                </div>
-            </div>
+                </article>
 
-            <div class="member-card">
-                <div class="member-photo-wrap">
-                    <div class="member-photo" style="background-image: url('/static/img/raul.png'); max-width: 350px; max-height: 500px; display: flex;">
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="{{ request.url_for('static', path='img/kaua.jpeg') }}" alt="Kauã Santos">
+                        <span>02</span>
                     </div>
-                    <div class="member-number">03</div>
-                </div>
-                <div class="member-info">
-                    <h3>Raul Bissoli</h3>
-                    <span class="member-role back">Back-end</span>
-                    <p class="member-bio">Especialista em autenticação, segurança e controle de acesso.</p>
-                </div>
-            </div>
-
-            <div class="member-card">
-                <div class="member-photo-wrap">
-                    <div class="member-photo" style="background-image: url('/static/img/damas.png');">
+                    <div class="member-info">
+                        <h3>Kauã Santos</h3>
+                        <strong>Back-end</strong>
+                        <p>Responsável pela arquitetura do sistema, rotas e banco de dados.</p>
                     </div>
-                    <div class="member-number">04</div>
-                </div>
-                <div class="member-info">
-                    <h3>Vinícios Damas</h3>
-                    <span class="member-role front">Front-end</span>
-                    <p class="member-bio">Designer de interfaces e responsável pela experiência visual do sistema.</p>
-                </div>
-            </div>
+                </article>
 
-            <div class="member-card">
-                <div class="member-photo-wrap">
-                    <div class="member-photo" style="background-image: url('/static/img/lohan.png');">
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="{{ request.url_for('static', path='img/raul.png') }}" alt="Raul Bissoli">
+                        <span>03</span>
                     </div>
-                    <div class="member-number">05</div>
-                </div>
-                <div class="member-info">
-                    <h3>Lohan Victor</h3>
-                    <span class="member-role front">Front-end</span>
-                    <p class="member-bio">Desenvolvedor front-end focado em componentes e responsividade.</p>
-                </div>
-            </div>
+                    <div class="member-info">
+                        <h3>Raul Bissoli</h3>
+                        <strong>Back-end</strong>
+                        <p>Especialista em autenticação, segurança e controle de acesso.</p>
+                    </div>
+                </article>
 
-        </div>
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="{{ request.url_for('static', path='img/damas.png') }}" alt="Vinícios Damas">
+                        <span>04</span>
+                    </div>
+                    <div class="member-info">
+                        <h3>Vinícios Damas</h3>
+                        <strong>Front-end</strong>
+                        <p>Designer de interfaces e responsável pela experiência visual do sistema.</p>
+                    </div>
+                </article>
+
+                <article class="member-card">
+                    <div class="member-photo">
+                        <img src="{{ request.url_for('static', path='img/lohan.png') }}" alt="Lohan Victor">
+                        <span>05</span>
+                    </div>
+                    <div class="member-info">
+                        <h3>Lohan Victor</h3>
+                        <strong>Front-end</strong>
+                        <p>Desenvolvedor front-end focado em componentes e responsividade.</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
