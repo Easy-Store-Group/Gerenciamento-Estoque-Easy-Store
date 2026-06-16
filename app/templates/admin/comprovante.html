@@ -1,25 +1,51 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="vendas-container">
-  <div class="vendas-header">
-    <div>
-      <h2>Comprovante</h2>
-      <p class="subtitle">Venda finalizada em {{ venda.criado_em.strftime('%d/%m/%Y %H:%M') if venda.criado_em else '-' }}</p>
-    </div>
-    <div class="vendas-actions">
-      <a href="/pdv" class="btn-small btn-primary" style="background: linear-gradient(90deg,#157ED3,#1967A7);">Nova venda</a>
-      <a href="/pdv/historico" class="btn-small">Histórico</a>
-    </div>
-  </div>
+{% if request.query_params.get('sucesso') %}
+<div class="alert alert-success">✅ Venda finalizada com sucesso!</div>
+{% endif %}
 
-  <div class="vendas-body">
-    <table class="vendas-table">
+<div class="comprovante-wrapper">
+  <div class="comprovante-card" id="comprovante-print">
+
+    <div class="comprovante-header">
+      <h2>🧾 Comprovante de Venda</h2>
+      <span class="comprovante-id">#{{ venda.id }}</span>
+    </div>
+
+    <div class="comprovante-meta">
+      <div class="meta-row">
+        <span>📅 Data</span>
+        <strong>{{ venda.criado_em.strftime('%d/%m/%Y %H:%M') if venda.criado_em else '—' }}</strong>
+      </div>
+      <div class="meta-row">
+        <span>👤 Cliente</span>
+        <strong>{{ venda.cliente.nome if venda.cliente else 'Consumidor não identificado' }}</strong>
+      </div>
+      {% if venda.cliente and venda.cliente.is_associado %}
+      <div class="meta-row">
+        <span>⭐ Associado</span>
+        <strong style="color:#059669">Sim — desconto aplicado</strong>
+      </div>
+      {% endif %}
+      <div class="meta-row">
+        <span>🔑 Operador</span>
+        <strong>{{ venda.usuario.nome if venda.usuario else '—' }}</strong>
+      </div>
+      {% if venda.observacao %}
+      <div class="meta-row">
+        <span>📝 Obs.</span>
+        <strong>{{ venda.observacao }}</strong>
+      </div>
+      {% endif %}
+    </div>
+
+    <table class="comprovante-table">
       <thead>
         <tr>
           <th>Produto</th>
-          <th>Quantidade</th>
-          <th>Preço unitário</th>
+          <th>Qtd</th>
+          <th>Unit.</th>
           <th>Subtotal</th>
         </tr>
       </thead>
@@ -29,17 +55,60 @@
           <td>{{ item.produto_nome }}</td>
           <td>{{ item.quantidade }}</td>
           <td>R$ {{ "%.2f"|format(item.preco_unitario) }}</td>
-          <td>R$ {{ "%.2f"|format(item.subtotal) }}</td>
+          <td><strong>R$ {{ "%.2f"|format(item.subtotal) }}</strong></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
+
+    <div class="comprovante-totais">
+      <div class="total-row">
+        <span>Subtotal bruto</span>
+        <span>R$ {{ "%.2f"|format(venda.total_bruto) }}</span>
+      </div>
+      {% if venda.desconto_percentual > 0 %}
+      <div class="total-row desconto-row">
+        <span>Desconto ({{ venda.desconto_percentual|int }}%)</span>
+        <span>— R$ {{ "%.2f"|format(venda.desconto_valor) }}</span>
+      </div>
+      {% endif %}
+      <div class="total-row total-final">
+        <span>Total pago</span>
+        <strong>R$ {{ "%.2f"|format(venda.total_liquido) }}</strong>
+      </div>
+    </div>
+
   </div>
 
-  <div class="sale-total">
-    <span>Subtotal: R$ {{ "%.2f"|format(venda.total_bruto) }}</span>
-    <span>Desconto: R$ {{ "%.2f"|format(venda.desconto_valor) }}</span>
-    <strong>Total: R$ {{ "%.2f"|format(venda.total_liquido) }}</strong>
+  <div class="comprovante-actions no-print">
+    <button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir</button>
+    <a href="/pdv" class="btn btn-secondary">🛒 Nova venda</a>
+    <a href="/pdv/historico" class="btn btn-outline">📋 Histórico</a>
   </div>
 </div>
+
+<style>
+.comprovante-wrapper { display:flex; flex-direction:column; gap:20px; max-width:640px; }
+.comprovante-card { background:#fff; border:1px solid #e5e7eb; border-radius:16px; padding:28px; }
+.comprovante-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #f3f4f6; padding-bottom:16px; }
+.comprovante-header h2 { font-size:1.2rem; margin:0; }
+.comprovante-id { background:#eff6ff; color:#2563eb; font-weight:700; padding:4px 12px; border-radius:99px; }
+.comprovante-meta { display:flex; flex-direction:column; gap:8px; margin-bottom:20px; }
+.meta-row { display:flex; justify-content:space-between; font-size:.875rem; }
+.meta-row span { color:#6b7280; }
+.comprovante-table { width:100%; border-collapse:collapse; margin-bottom:16px; }
+.comprovante-table th { text-align:left; padding:8px 10px; background:#f9fafb; font-size:.75rem; text-transform:uppercase; letter-spacing:.05em; color:#6b7280; border-bottom:1px solid #e5e7eb; }
+.comprovante-table td { padding:10px 10px; font-size:.875rem; border-bottom:1px solid #f3f4f6; }
+.comprovante-totais { border-top:2px solid #f3f4f6; padding-top:12px; display:flex; flex-direction:column; gap:6px; }
+.total-row { display:flex; justify-content:space-between; font-size:.875rem; }
+.desconto-row { color:#059669; }
+.total-final { font-size:1.1rem; font-weight:700; margin-top:6px; padding-top:8px; border-top:1px solid #e5e7eb; }
+.comprovante-actions { display:flex; gap:10px; }
+@media print {
+  .no-print, .sidebar, .topbar, header { display:none !important; }
+  .admin-layout { grid-template-columns:1fr !important; }
+  .admin-content { padding:0 !important; }
+  .comprovante-card { box-shadow:none; border:none; }
+}
+</style>
 {% endblock %}
