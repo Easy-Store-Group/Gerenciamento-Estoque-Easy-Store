@@ -105,6 +105,7 @@ def admin_dashboard(
         }
         for dia, total in totais_por_dia.items()
     ]
+    total_vendas_7_dias = sum(totais_por_dia.values())
 
     return templates.TemplateResponse(
         request,
@@ -122,6 +123,7 @@ def admin_dashboard(
             "ativos_produtos": ativos_produtos,
             "vendas_grafico": vendas_grafico,
             "ultimas_vendas": ultimas_vendas,
+            "total_vendas_7_dias": total_vendas_7_dias,
         },
     )
 
