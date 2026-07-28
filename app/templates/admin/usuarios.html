@@ -26,7 +26,7 @@
     <div>{{ u.role }}</div>
     <div>
       {% if u.cliente_perfil and u.cliente_perfil.is_associado %}
-        <span class="plan-badge premium">Premium 10%</span>
+        <span class="plan-badge premium">Premium 5%</span>
         <small class="plan-note">{{ 'Apto ao desconto' if premium_ativo else 'Plano inativo' }}</small>
       {% else %}
         <span class="plan-badge standard">Comum</span>

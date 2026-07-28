@@ -17,11 +17,6 @@
 - Cancelamento de itens ou venda completa
 - Interface responsiva e moderna
 
-### 🎮 Sistema de XP e Fidelidade
-- **1 Real = 1 XP** acumulado automaticamente
-- **10 níveis** de progressão com bonificações
-- Conquistas e descontos automáticos ao atingir marcos
-
 ### 📊 Dashboard de Caixa
 - Resumo do dia e gráficos de fluxo
 - Análise por categoria e produtos mais vendidos
@@ -30,45 +25,7 @@
 ### 📦 Gestão de Estoque
 - Cadastro com categorias e estoque mínimo
 - Rastreamento automático de movimentações
-
-### 👤 Perfil do Cliente
-- XP acumulado, nível atual e conquistas desbloqueadas
-- Visualização das próximas recompensas
-
----
-
-## 🚀 Como Rodar
-
-```bash
-# Instalar dependências
-pip install -r requirements.txt
-
-# Popular o banco de dados
-python seed_db.py
-
-# Iniciar o servidor
-uvicorn app.main:app --reload
-```
-
-### URLs Principais
-
-| Tela | URL |
-|---|---|
-| PDV | http://localhost:8000/admin/pos |
-| Dashboard | http://localhost:8000/admin/caixa |
-| Perfil do cliente | http://localhost:8000/perfil?id=1 |
-
----
-
-## 🛠️ Endpoints da API
-
-| Rota | Descrição |
-|---|---|
-| `/api/vendas/` | Vendas e operações de caixa |
-| `/api/caixa/` | Dashboard e analytics |
-| `/api/conquistas/` | Sistema de achievements |
-
----
+ ---
 
 ## 🧱 Tecnologias
 

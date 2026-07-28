@@ -58,6 +58,11 @@ button {
   flex-direction: column;
   gap: 28px;
   padding: 32px 24px;
+  /* keep sidebar visible on tall pages: occupy full viewport height */
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
 }
 
 .brand-block {
@@ -132,6 +137,10 @@ button {
   color: #ffffff;
   display: block;
   margin-top: 4px;
+}
+
+.profile-card {
+  text-align: center;
 }
 
 .logout-btn {
@@ -414,6 +423,8 @@ button {
     min-height: auto;
     overflow-x: auto;
     padding: 18px;
+    position: static;
+    height: auto;
   }
 
   .sidebar-footer {
