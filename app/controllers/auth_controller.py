@@ -264,7 +264,7 @@ def enviar_token_reset(
         return templates.TemplateResponse(
             request,
             "auth/forgot.html",
-            {"request": request, "mensagem": "Se o e-mail estiver cadastrado, você receberá instruções."},
+            {"request": request, "erro": "Se o e-mail estiver cadastrado, você receberá instruções."},
         )
 
     token_data = {"sub": usuario.email, "action": "reset_password"}
@@ -277,7 +277,7 @@ def enviar_token_reset(
     return templates.TemplateResponse(
         request,
         "auth/forgot.html",
-        {"request": request, "mensagem": "Link de reset gerado abaixo (em produção, seria enviado por e-mail)", "reset_link": reset_link},
+        {"request": request, "reset_link": reset_link},
     )
 
 
@@ -295,6 +295,7 @@ def resetar_senha(
     request: Request,
     token: str = Form(...),
     nova_senha: str = Form(...),
+    nova_senha_confirm: str = Form(...),
     db: Session = Depends(get_db),
 ):
     try:
@@ -303,14 +304,28 @@ def resetar_senha(
         return templates.TemplateResponse(
             request,
             "auth/reset_password.html",
-            {"request": request, "erro": "Token inválido ou expirado."},
+            {"request": request, "token": token, "erro": "Token inválido ou expirado."},
         )
 
     if payload.get("action") != "reset_password":
         return templates.TemplateResponse(
             request,
             "auth/reset_password.html",
-            {"request": request, "erro": "Token inválido."},
+            {"request": request, "token": token, "erro": "Token inválido."},
+        )
+
+    if nova_senha != nova_senha_confirm:
+        return templates.TemplateResponse(
+            request,
+            "auth/reset_password.html",
+            {"request": request, "token": token, "erro": "As senhas não conferem."},
+        )
+
+    if len(nova_senha) < 6:
+        return templates.TemplateResponse(
+            request,
+            "auth/reset_password.html",
+            {"request": request, "token": token, "erro": "A senha deve ter no mínimo 6 caracteres."},
         )
 
     email = payload.get("sub")
@@ -319,7 +334,7 @@ def resetar_senha(
         return templates.TemplateResponse(
             request,
             "auth/reset_password.html",
-            {"request": request, "erro": "Usuário não encontrado."},
+            {"request": request, "token": token, "erro": "Usuário não encontrado."},
         )
 
     usuario.senha_hash = hash_senha(nova_senha)
