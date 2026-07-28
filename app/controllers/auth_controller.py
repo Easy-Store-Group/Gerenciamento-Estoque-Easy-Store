@@ -1,3 +1,6 @@
+import os
+from urllib.parse import quote
+
 from fastapi import APIRouter, Depends, Request, Form,status, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -14,6 +17,17 @@ from app.auth import hash_senha, verificar_senha, criar_token, get_usuario_opcio
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 templates = Jinja2Templates(directory="app/templates")
+
+WHATSAPP_NUMERO_LOJA = os.getenv("WHATSAPP_NUMERO_LOJA", "5511915724817")
+
+
+def montar_link_reserva_whatsapp(produto: Produto, nome_cliente: str = "") -> str:
+    saudacao = f"Meu nome e {nome_cliente}. " if nome_cliente else ""
+    mensagem = (
+        f"Ola! {saudacao}Gostaria de reservar o produto {produto.nome} "
+        f"por R$ {produto.preco:.2f}."
+    )
+    return f"https://wa.me/{WHATSAPP_NUMERO_LOJA}?text={quote(mensagem)}"
 
 class RegisterRequest(BaseModel):
     nome: str
@@ -184,6 +198,10 @@ def tela_produtos_publicos(
         query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
 
     produtos = query.order_by(Produto.nome).all()
+    links_reserva = {
+        produto.id: montar_link_reserva_whatsapp(produto)
+        for produto in produtos
+    }
 
     return templates.TemplateResponse(
         request,
@@ -195,8 +213,10 @@ def tela_produtos_publicos(
             "categorias": categorias,
             "categoria_id": categoria_id,
             "busca": busca,
+            "links_reserva": links_reserva,
         },
     )
+
 
 @router.post("/login")
 def fazer_login(
