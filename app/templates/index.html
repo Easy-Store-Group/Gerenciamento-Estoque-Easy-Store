@@ -1,19 +1,28 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EasyStore - Sua Loja de Jogos PC e Consoles</title>
+
+    <title>EasyStore - Gestão de Estoque Inteligente</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
     <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
 </head>
+
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar">
+    <nav class="navbar" aria-label="Navegação principal">
         <div class="navbar-container">
-            <div class="navbar-logo">
+            <a class="navbar-logo" href="/" aria-label="EasyStore - página inicial">
                 <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo" class="logo-image">
                 <span class="logo-text">EasyStore</span>
-            </div>  
+            </a>
             <div class="navbar-buttons">
                 {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
                 {% if role == 'cliente' %}
@@ -27,231 +36,198 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    Descubra a <span class="highlight">EasyStore</span>
-                </h1>
-                <p class="hero-subtitle">
-                    A loja mais barata e inovadora para PC e consoles. Acesso a mais de 100 títulos exclusivos, ofertas incríveis e suporte 24/7. Sua melhor experiência com jogos começa aqui.
-                </p>
+    <main>
+        <section class="hero section-enter" aria-labelledby="hero-title">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <p class="hero-eyebrow">Gestão de estoque inteligente</p>
+                    <h1 class="hero-title" id="hero-title">
+                        Controle seu estoque com a <span class="highlight">EasyStore</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Organize produtos, acompanhe movimentações, registre vendas e tome decisões melhores. Tudo em
+                        uma plataforma simples para o dia a dia do seu negócio.
+                    </p>
 
-                <div class="hero-badges">
-                    <span>Entrega digital</span>
-                    <span>Garantia EasyStore</span>
-                    <span>Ofertas semanais</span>
-                </div>
-                
-                <div class="hero-buttons">
-                    <a href="/auth/produtos" class="btn btn-primary">
-                        <span>Explorar produtos</span>
-                        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="5" y1="12" x2="19" y2="12"></line>
-                            <polyline points="12 5 19 12 12 19"></polyline>
-                        </svg>
-                    </a>
-                </div>
-
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">1K+</span>
-                        <span class="stat-label">Jogos</span>
+                    <div class="hero-badges">
+                        <span>Estoque em tempo real</span>
+                        <span>Operação centralizada</span>
+                        <span>Decisões com dados</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-number">500+</span>
-                        <span class="stat-label">Clientes</span>
+
+                    <div class="hero-buttons">
+                        <a href="/auth/produtos" class="btn btn-primary">
+                            <span>Conhecer a plataforma</span>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </a>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-number">24/7</span>
-                        <span class="stat-label">Suporte</span>
+
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">1</span>
+                            <span class="stat-label">Plataforma</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">360°</span>
+                            <span class="stat-label">Visão da operação</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">+</span>
+                            <span class="stat-label">Controle diário</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-visual" aria-label="Gestão de estoque EasyStore">
+                    <div class="hero-orbit orbit-one" aria-hidden="true"></div>
+                    <div class="hero-orbit orbit-two" aria-hidden="true"></div>
+                    <div class="hero-emblem" aria-hidden="true">
+                        <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="">
+                        <span class="emblem-ring ring-a"></span>
+                        <span class="emblem-ring ring-b"></span>
                     </div>
                 </div>
             </div>
+        </section>
 
-
-
-                <div class="floating-card card-1" style="animation-delay: 0s;">
-                    <div class="card-icon">🖥️</div>
-                    <p>PC Games</p>
-                </div>
-                <div class="floating-card card-2" style="animation-delay: 0.3s;">
-                    <div class="card-icon">🎮</div>
-                    <p>Consoles</p>
+        <section class="services section-enter" aria-labelledby="services-title">
+            <div class="services-container">
+                <div class="section-header">
+                    <h2 id="services-title">O controle que sua operação precisa</h2>
+                    <p>Recursos essenciais para simplificar a rotina e manter seu estoque saudável.</p>
                 </div>
 
-                <div class="floating-card card-3" style="animation-delay: 1.2s;">
-                    <div class="card-icon">💰</div>
-                    <p>Melhor Preço</p>
-                </div>
-                <div class="floating-card card-5" style="animation-delay: 1.5s;">
-                    <div class="card-icon">🌟</div>
-                    <p>Inovação</p>
-                </div>
-                <div class="floating-card card-4" style="animation-delay: 0.9s;">
-                    <div class="card-icon">🛡️</div>
-                    <p>Garantia</p>
-                </div>
-                <div class="floating-card card-7" style="animation-delay: 1.8s;">
-                    <div class="card-icon">📱</div>
-                    <p>Multi-Plataforma</p>
+                <div class="services-grid">
+                    <div class="service-card">
+                        <div class="service-icon" aria-hidden="true">
+                            <img src="{{ request.url_for('static', path='img/box.png') }}" alt="">
+                        </div>
+                        <h3>Produtos e categorias</h3>
+                        <p>Cadastre, organize e encontre cada item com rapidez.</p>
+                        <div class="service-badge">Organização</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon" aria-hidden="true">
+                            <img src="{{ request.url_for('static', path='img/caminhao.png') }}" alt="">
+                        </div>
+                        <h3>Movimentações precisas</h3>
+                        <p>Acompanhe entradas, saídas e ajustes sem perder o histórico.</p>
+                        <div class="service-badge">Rastreabilidade</div>
+                    </div>
+
+                    <div class="service-card">
+                        <div class="service-icon" aria-hidden="true">
+                            <img src="{{ request.url_for('static', path='img/dinheiro.png') }}" alt="">
+                        </div>
+                        <h3>Vendas e indicadores</h3>
+                        <p>Transforme a rotina de vendas em informações para agir melhor.</p>
+                        <div class="service-badge">Visão estratégica</div>
+                    </div>
+
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <style>
-        .auth-section {
-            background: linear-gradient(135deg, #f0fdf4 0%, #fef3c7 100%);
-            padding: 60px 20px;
-
-            margin: 40px 0;
-        }
-
-        .auth-container {
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .auth-card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            border: 2px solid #e5e7eb;
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .auth-header h2 {
-            font-size: 24px;
-            margin-bottom: 8px;
-            color: #111827;
-        }
-
-        .auth-header p {
-            color: #666;
-            font-size: 14px;
-        }
-
-        .auth-benefits {
-            margin-top: 24px;
-            padding-top: 24px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .auth-benefits h3 {
-            font-size: 14px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #1f2937;
-        }
-
-        .auth-benefits ul {
-            list-style: none;
-        }
-
-        .auth-benefits li {
-            font-size: 13px;
-            color: #666;
-            margin-bottom: 8px;
-            padding-left: 24px;
-            position: relative;
-        }
-
-        .auth-benefits li:before {
-            content: '';
-            position: absolute;
-            left: 0;
-            width: 16px;
-            height: 16px;
-        }
-
-        .btn-submit {
-            padding: 12px;
-            background: linear-gradient(135deg, #7c3aed 0%, #ec4899 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            margin-top: 8px;
-            display: block;
-            text-decoration: none;
-        }
-
-        .btn-submit:hover {
-            box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
-            transform: translateY(-2px);
-        }
-    </style>
-    </section>
-
-    <section class="services">
-        <div class="services-container">
-            <div class="section-header">
-                <h2>Nossos Serviços Principais</h2>
-                <p>Tudo que você precisa para uma experiência de compra perfeita</p>
+        <section class="cta-section section-enter">
+            <div class="cta-container">
+                <h2>Pronto para simplificar sua operação?</h2>
+                <p>Centralize seu estoque e tenha mais clareza para cuidar do crescimento do negócio.</p>
+                <a href="/auth/register" class="btn btn-primary btn-large">Criar minha conta</a>
             </div>
-            
-            <div class="services-grid">
-                <div class="service-card">
-                    <div class="service-icon">🛒</div>
-                    <h3>Compra segura</h3>
-                    <p>Produtos confiáveis com nosso selo de qualidade.</p>
-                    <div class="service-badge">Qualidade</div>
-                </div>
-                
-                <div class="service-card">
-                    <div class="service-icon">🖥️</div>
-                    <h3>Diversas categorias</h3>
-                    <p>Temos jogos, consoles, PCs, etc. Tudo para se adequar ao seu gosto.</p>
-                    <div class="service-badge">Flexível</div>
-                </div>
+        </section>
 
-                <div class="service-card">
-                    <div class="service-icon">💬</div>
-                    <h3>Comunicaçao e Inovaçao</h3>
-                    <p>Somos uma equipe treinada na comunicao. Nossa empresa é inovadora.</p>
-                    <div class="service-badge">Social</div>
+        <section class="story-section section-enter" aria-labelledby="story-title">
+            <div class="story-container">
+                <div class="story-intro home-reveal">
+                    <p class="section-kicker">Sobre a EasyStore</p>
+                    <h2 id="story-title">Tecnologia simples para uma operação mais organizada.</h2>
+                    <p>A EasyStore é uma plataforma de gerenciamento de estoque pensada para negócios que precisam de
+                        clareza na rotina. Centralizamos produtos, categorias, movimentações e vendas para que sua
+                        equipe trabalhe com mais segurança.</p>
+                    <a href="/sobre-nos" class="text-link">Conheça a nossa história <span
+                            aria-hidden="true">→</span></a>
                 </div>
-                
+                <div class="story-values" aria-label="Pilares da EasyStore">
+                    <article class="value-item home-reveal">
+                        <span class="value-number">01</span>
+                        <h3>Informação em um só lugar</h3>
+                        <p>Tenha uma visão organizada dos itens e categorias que movem o seu negócio.</p>
+                    </article>
+                    <article class="value-item home-reveal">
+                        <span class="value-number">02</span>
+                        <h3>Rotina com segurança</h3>
+                        <p>Registre cada movimentação e reduza incertezas no controle do estoque.</p>
+                    </article>
+                    <article class="value-item home-reveal">
+                        <span class="value-number">03</span>
+                        <h3>Crescimento orientado por dados</h3>
+                        <p>Use os indicadores da operação para transformar informação em decisão.</p>
+                    </article>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <section class="cta-section">
-        <div class="cta-container">
-            <h2>Pronto para começar?</h2>
-            <p>Começe a explorar nossos milhares de jogos e outros diversos produtos</p>
-            <a href="/auth/register" class="btn btn-primary btn-large">Começar</a>
-        </div>
-    </section>
+        <section class="journey-section section-enter" aria-labelledby="journey-title">
+            <div class="journey-container">
+                <div class="section-header home-reveal">
+                    <p class="section-kicker">Como funciona</p>
+                    <h2 id="journey-title">Do cadastro ao controle, sem complicação.</h2>
+                    <p>Uma rotina clara para manter a operação sempre atualizada.</p>
+                </div>
+                <ol class="journey-steps">
+                    <li class="home-reveal"><span>1</span>
+                        <div>
+                            <h3>Cadastre</h3>
+                            <p>Organize produtos e categorias da sua operação.</p>
+                        </div>
+                    </li>
+                    <li class="home-reveal"><span>2</span>
+                        <div>
+                            <h3>Movimente</h3>
+                            <p>Registre entradas, saídas, vendas e ajustes.</p>
+                        </div>
+                    </li>
+                    <li class="home-reveal"><span>3</span>
+                        <div>
+                            <h3>Decida</h3>
+                            <p>Acompanhe os dados para agir com mais confiança.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </section>
+    </main>
 
     <footer class="footer">
         <div class="footer-container">
             <div class="footer-content">
                 <div class="footer-section">
                     <h4>EasyStore</h4>
-                    <p>Sua loja de jogos confiável</p>
+                    <p>Gestão de estoque simples e inteligente.</p>
                 </div>
                 <div class="footer-section">
                     <h4>Links</h4>
                     <ul>
                         <li><a href="/sobre-nos">Sobre</a></li>
-                        <li><a target="_blank" href="https://github.com/Easy-Store-Group/Gerenciamento-Estoque-Easy-Store">GitHub</a></li>
+                        <li><a target="_blank"
+                                href="https://github.com/Easy-Store-Group/Gerenciamento-Estoque-Easy-Store">GitHub</a>
+                        </li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Contatos</h4>
                     <ul>
-                        <li><p>11 94002-8922</p></li>
-                        <li><p>EasyStore@gmail.com</p></li>
+                        <li>
+                            <p>11 94002-8922</p>
+                        </li>
+                        <li>
+                            <p>EasyStore@gmail.com</p>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -262,4 +238,5 @@
     </footer>
 
 </body>
+
 </html>
