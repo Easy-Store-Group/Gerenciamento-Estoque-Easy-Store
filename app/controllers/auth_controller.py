@@ -116,13 +116,21 @@ def registrar_usuario_api(dados: RegisterRequest, db: Session = Depends(get_db))
 @router.post("/register")
 def registrar_usuario(
     request: Request,
-    nome: str = Form(...),
-    email: str = Form(...),
-    senha: str = Form(...),
+    nome: str = Form(""),
+    email: str = Form(""),
+    senha: str = Form(""),
     telefone: str = Form(""),
     plano_premium: bool = Form(False),
     db: Session = Depends(get_db),
 ):
+    if not nome.strip() or not email.strip() or not senha.strip():
+        return templates.TemplateResponse(
+            request,
+            "auth/register.html",
+            {"request": request, "erro": "Preencha todos os campos obrigatórios para criar sua conta."},
+            status_code=400,
+        )
+
     try:
         novo_usuario = _criar_conta_cliente(db, nome, email, senha, telefone, plano_premium)
     except ValueError as exc:
@@ -222,10 +230,17 @@ def tela_produtos_publicos(
 @router.post("/login")
 def fazer_login(
     request: Request,
-    email: str = Form(...),
-    senha: str = Form(...),
+    email: str = Form(""),
+    senha: str = Form(""),
     db: Session = Depends(get_db)
 ):
+    if not email.strip() or not senha.strip():
+        return templates.TemplateResponse(
+            request,
+            "auth/login.html",
+            {"request": request, "erro": "Informe seu e-mail e sua senha para entrar."},
+            status_code=400,
+        )
 
     usuario = db.query(Usuario).filter_by(email=email).first()
 

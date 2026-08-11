@@ -32,16 +32,16 @@
     <div class="login-box">
       <h2>Entrar</h2>
       {% if erro %}
-        <p style="color: red;">{{ erro }}</p>
+        <p class="login-error" role="alert">{{ erro }}</p>
       {% endif %}
-      <form action="/auth/login" method="post">
+      <form id="login-form" action="/auth/login" method="post">
         <div class="input-group">
           <label>E-mail</label>
-          <input type="email" name="email" placeholder="Digite seu e-mail">
+          <input type="email" name="email" placeholder="Digite seu e-mail" required>
         </div>
         <div class="input-group">
           <label>Senha</label>
-          <input type="password" name="senha" placeholder="••••••••">
+          <input type="password" name="senha" placeholder="••••••••" required>
         </div>
         <button type="submit" class="btn-confirm">✦ Confirmar</button>
         <p class="footer-text">Não tem conta? <a href="/auth/register">Cadastre-se</a></p>
@@ -51,6 +51,7 @@
   </div>
 </div>
 <script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
+<script src="{{ request.url_for('static', path='js/login.js') }}?v=1" defer></script>
 </body>
 
 </html>
