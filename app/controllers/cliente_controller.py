@@ -1,3 +1,6 @@
+import os
+from urllib.parse import quote
+
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -12,6 +15,17 @@ from app.services.cliente_service import obter_ou_criar_cliente
 
 router = APIRouter(prefix="/cliente", tags=["Cliente"])
 templates = Jinja2Templates(directory="app/templates")
+
+WHATSAPP_NUMERO_LOJA = os.getenv("WHATSAPP_NUMERO_LOJA", "5511915724817")
+
+
+def montar_link_reserva_whatsapp(produto: Produto, nome_cliente: str = "") -> str:
+    saudacao = f"Meu nome e {nome_cliente}. " if nome_cliente else ""
+    mensagem = (
+        f"Ola! {saudacao}Gostaria de reservar o produto {produto.nome} "
+        f"por R$ {produto.preco:.2f}."
+    )
+    return f"https://wa.me/{WHATSAPP_NUMERO_LOJA}?text={quote(mensagem)}"
 
 
 @router.get("/")
@@ -40,6 +54,10 @@ def portal_cliente(
     if busca.strip():
         query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
     produtos = query.order_by(Produto.nome).all()
+    links_reserva = {
+        produto.id: montar_link_reserva_whatsapp(produto, cliente.nome)
+        for produto in produtos
+    }
 
     compras = (
         db.query(Venda)
@@ -65,6 +83,7 @@ def portal_cliente(
             "secao_ativa": secao_ativa,
             "categoria_id": categoria_id,
             "busca": busca,
+            "links_reserva": links_reserva,
             "css_path": "css/cliente.css",
         },
     )

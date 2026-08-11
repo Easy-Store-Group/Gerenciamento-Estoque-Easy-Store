@@ -35,6 +35,15 @@ def criar_token(data: dict):
     token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
     return token
 
+
+def criar_token_personalizado(data: dict, minutos: int):
+    """Cria um JWT com expiração personalizada (em minutos)."""
+    payload = data.copy()
+    expira = datetime.now(timezone.utc) + timedelta(minutes=minutos)
+    payload.update({"exp": expira})
+    token = jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return token
+
 def decodificar_token(token: str):
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     return payload

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Produtos - EasyStore</title>
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}?v=5">
 </head>
 <body>
     <header class="public-header">
@@ -73,21 +73,43 @@
             <div class="products-grid">
                 {% for produto in produtos %}
                 <article class="product-card">
-                    <div class="product-image">
-                        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
-                    </div>
-                    <div class="product-body">
-                        <span class="product-category">{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
-                        <h3>{{ produto.nome }}</h3>
-                        <p class="product-platform">{{ produto.plataforma }}</p>
-                        <div class="product-footer">
-                            <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
-                            <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">
-                                {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponivel{% endif %}
-                            </span>
+                    <a class="product-card-link" href="#reservar-{{ produto.id }}">
+                        <div class="product-image">
+                            <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
                         </div>
-                    </div>
+                        <div class="product-body">
+                            <span class="product-category">{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
+                            <h3>{{ produto.nome }}</h3>
+                            <p class="product-platform">{{ produto.plataforma }}</p>
+                            <div class="product-footer">
+                                <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
+                                <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">
+                                    {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponivel{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
                 </article>
+                <div class="reserve-modal" id="reservar-{{ produto.id }}">
+                    <a class="modal-backdrop" href="#produtos" aria-label="Fechar"></a>
+                    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ produto.id }}">
+                        <a class="modal-close" href="#produtos" aria-label="Fechar">x</a>
+                        <span class="modal-kicker">Reserva EasyStore</span>
+                        <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
+                        {% if produto.estoque_atual > 0 %}
+                        <p>Produto disponivel para reserva pelo WhatsApp.</p>
+                        <a class="reserve-button modal-whatsapp"
+                           href="{{ links_reserva.get(produto.id) }}"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Abrir WhatsApp
+                        </a>
+                        {% else %}
+                        <p>Este produto esta sem estoque no momento.</p>
+                        <span class="reserve-button disabled modal-whatsapp">Indisponivel</span>
+                        {% endif %}
+                    </div>
+                </div>
                 {% endfor %}
             </div>
             {% else %}

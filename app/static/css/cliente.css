@@ -224,6 +224,11 @@ a {
   transform: translateY(-4px);
 }
 
+.product-card-link {
+  display: block;
+  height: 100%;
+}
+
 .product-image {
   align-items: center;
   background: white;
@@ -271,6 +276,41 @@ a {
 .product-footer strong {
   color: var(--cliente-primary-dark);
   font-size: 1.15rem;
+}
+
+.reserve-button {
+  align-items: center;
+  background: #16a34a;
+  border-radius: 999px;
+  color: white;
+  display: inline-flex;
+  font-size: 0.9rem;
+  font-weight: 700;
+  justify-content: center;
+  margin-top: 16px;
+  min-height: 38px;
+  padding: 9px 14px;
+  text-align: center;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  width: fit-content;
+}
+
+.reserve-button:hover {
+  background: #15803d;
+  box-shadow: 0 10px 18px rgba(22, 163, 74, 0.28);
+  transform: translateY(-3px) scale(1.03);
+}
+
+.reserve-button.disabled {
+  background: #e2e8f0;
+  color: var(--cliente-muted);
+  cursor: not-allowed;
+  width: fit-content;
+}
+
+.reserve-button.disabled:hover {
+  background: #e2e8f0;
+  transform: none;
 }
 
 .stock {
@@ -382,6 +422,87 @@ a {
   line-height: 1.7;
   margin: 0;
   text-align: center;
+}
+
+.reserve-modal {
+  align-items: center;
+  display: none;
+  inset: 0;
+  justify-content: center;
+  padding: 24px;
+  position: fixed;
+  z-index: 100;
+}
+
+.reserve-modal:target {
+  display: flex;
+}
+
+.modal-backdrop {
+  backdrop-filter: blur(12px);
+  background: rgba(15, 23, 42, 0.52);
+  inset: 0;
+  position: absolute;
+}
+
+.modal-card {
+  background: linear-gradient(180deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.26);
+  max-width: 500px;
+  padding: 90px;
+  position: relative;
+  text-align: center;
+  width: min(100%, 500px);
+  z-index: 1;
+}
+
+.modal-close {
+  align-items: center;
+  background: #f1f5f9;
+  border-radius: 999px;
+  color: var(--cliente-muted);
+  display: inline-flex;
+  font-size: 1.25rem;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  width: 34px;
+}
+
+.modal-close:hover {
+  background: #e2e8f0;
+  color: var(--cliente-text);
+}
+
+.modal-kicker {
+  color: #16a34a;
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+}
+
+.modal-card h3 {
+  font-size: 1.55rem;
+  line-height: 1.15;
+  margin: 0 0 10px;
+}
+
+.modal-card p {
+  color: var(--cliente-muted);
+  line-height: 1.6;
+  margin: 0 0 22px;
+}
+
+.modal-whatsapp {
+  margin-top: 0;
 }
 
 @media (max-width: 900px) {

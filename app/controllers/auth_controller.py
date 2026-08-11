@@ -1,3 +1,6 @@
+import os
+from urllib.parse import quote
+
 from fastapi import APIRouter, Depends, Request, Form,status, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -10,10 +13,22 @@ from app.database import get_db
 from app.models.usuario import Usuario
 from app.models.cliente import Cliente
 from app.auth import hash_senha, verificar_senha, criar_token, get_usuario_opcional
+from app.auth import criar_token_personalizado, decodificar_token
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 templates = Jinja2Templates(directory="app/templates")
+
+WHATSAPP_NUMERO_LOJA = os.getenv("WHATSAPP_NUMERO_LOJA", "5511915724817")
+
+
+def montar_link_reserva_whatsapp(produto: Produto, nome_cliente: str = "") -> str:
+    saudacao = f"Meu nome e {nome_cliente}. " if nome_cliente else ""
+    mensagem = (
+        f"Ola! {saudacao}Gostaria de reservar o produto {produto.nome} "
+        f"por R$ {produto.preco:.2f}."
+    )
+    return f"https://wa.me/{WHATSAPP_NUMERO_LOJA}?text={quote(mensagem)}"
 
 class RegisterRequest(BaseModel):
     nome: str
@@ -184,6 +199,10 @@ def tela_produtos_publicos(
         query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
 
     produtos = query.order_by(Produto.nome).all()
+    links_reserva = {
+        produto.id: montar_link_reserva_whatsapp(produto)
+        for produto in produtos
+    }
 
     return templates.TemplateResponse(
         request,
@@ -195,8 +214,10 @@ def tela_produtos_publicos(
             "categorias": categorias,
             "categoria_id": categoria_id,
             "busca": busca,
+            "links_reserva": links_reserva,
         },
     )
+
 
 @router.post("/login")
 def fazer_login(
@@ -239,3 +260,109 @@ def sair():
     response = RedirectResponse(url="/auth/login", status_code=302)
     response.delete_cookie("access_token")
     return response
+
+
+# Esqueci senha - exibir formulário para enviar email
+@router.get("/forgot")
+def tela_esqueci_senha(request: Request):
+    return templates.TemplateResponse(
+        request,
+        "auth/forgot.html",
+        {"request": request},
+    )
+
+
+# Recebe email e gera token de reset (em vez de enviar email, exibimos link para desenvolvimento)
+@router.post("/forgot")
+def enviar_token_reset(
+    request: Request,
+    email: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+    if not usuario:
+        return templates.TemplateResponse(
+            request,
+            "auth/forgot.html",
+            {"request": request, "erro": "Se o e-mail estiver cadastrado, você receberá instruções."},
+        )
+
+    token_data = {"sub": usuario.email, "action": "reset_password"}
+    # token curto: 20 minutos
+    token = criar_token_personalizado(token_data, minutos=20)
+
+    reset_link = f"/auth/reset-password?token={token}"
+
+    # Para ambiente de produção aqui você enviaria um e-mail com o link.
+    return templates.TemplateResponse(
+        request,
+        "auth/forgot.html",
+        {"request": request, "reset_link": reset_link},
+    )
+
+
+@router.get("/reset-password")
+def tela_reset_senha(request: Request, token: str = ""):
+    return templates.TemplateResponse(
+        request,
+        "auth/reset_password.html",
+        {"request": request, "token": token},
+    )
+
+
+@router.post("/reset-password")
+def resetar_senha(
+    request: Request,
+    token: str = Form(...),
+    nova_senha: str = Form(...),
+    nova_senha_confirm: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    try:
+        payload = decodificar_token(token)
+    except Exception:
+        return templates.TemplateResponse(
+            request,
+            "auth/reset_password.html",
+            {"request": request, "token": token, "erro": "Token inválido ou expirado."},
+        )
+
+    if payload.get("action") != "reset_password":
+        return templates.TemplateResponse(
+            request,
+            "auth/reset_password.html",
+            {"request": request, "token": token, "erro": "Token inválido."},
+        )
+
+    if nova_senha != nova_senha_confirm:
+        return templates.TemplateResponse(
+            request,
+            "auth/reset_password.html",
+            {"request": request, "token": token, "erro": "As senhas não conferem."},
+        )
+
+    if len(nova_senha) < 6:
+        return templates.TemplateResponse(
+            request,
+            "auth/reset_password.html",
+            {"request": request, "token": token, "erro": "A senha deve ter no mínimo 6 caracteres."},
+        )
+
+    email = payload.get("sub")
+    usuario = db.query(Usuario).filter(Usuario.email == email).first()
+    if not usuario:
+        return templates.TemplateResponse(
+            request,
+            "auth/reset_password.html",
+            {"request": request, "token": token, "erro": "Usuário não encontrado."},
+        )
+
+    usuario.senha_hash = hash_senha(nova_senha)
+    db.add(usuario)
+    db.commit()
+
+    return templates.TemplateResponse(
+        request,
+        "auth/login.html",
+        {"request": request, "mensagem": "Senha alterada com sucesso. Faça login."},
+    )
