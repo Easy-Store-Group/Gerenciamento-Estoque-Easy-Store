@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initScrollReveal();
     initButtonEffects();
     initResponsiveSidebar();
+    initReserveOptions();
 });
 
 /* ============================================
@@ -162,5 +163,45 @@ function initCategorySelection() {
             animateClick(clickedButton);
             centerMobileSidebarItem(clickedButton);
         });
+    });
+}
+
+/* ============================================
+   5. RESERVA: INCLUIR TAMANHO/COR NO LINK DO WHATSAPP
+   ============================================ */
+function initReserveOptions() {
+    // Delegation: captura clicks em links de reserva
+    document.addEventListener('click', function (e) {
+        const target = e.target.closest('.modal-whatsapp');
+        if (!target) return;
+
+        // Apenas manipulamos anchors que contenham data-base-href
+        const base = target.getAttribute('data-base-href') || target.href;
+        if (!base) return;
+
+        // Localiza o modal pai para ler selects de tamanho/cor
+        const modal = target.closest('.reserve-modal') || document;
+        const sizeEl = modal.querySelector('.option-size');
+        const colorEl = modal.querySelector('.option-color');
+
+        // Se não houver opções, deixa o comportamento padrão
+        if (!sizeEl && !colorEl) return;
+
+        e.preventDefault();
+
+        const size = sizeEl ? sizeEl.value : '';
+        const color = colorEl ? colorEl.value : '';
+
+        // Mensagem personalizada
+        const productName = modal.querySelector('h3') ? modal.querySelector('h3').textContent.trim() : '';
+        let message = `Quero reservar: ${productName}`;
+        if (size) message += ` - Tamanho: ${size}`;
+        if (color) message += ` - Cor: ${color}`;
+
+        // Anexa a mensagem ao link do WhatsApp (respeita se já houver parâmetros)
+        const separator = base.includes('?') ? '&' : '?';
+        const finalUrl = base + separator + 'text=' + encodeURIComponent(message);
+
+        window.open(finalUrl, '_blank', 'noopener');
     });
 }

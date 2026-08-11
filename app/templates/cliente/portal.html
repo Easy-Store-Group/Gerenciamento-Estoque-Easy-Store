@@ -64,20 +64,35 @@
         <span class="modal-kicker">Reserva EasyStore</span>
         <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
         {% if produto.estoque_atual > 0 %}
-        <p>Produto disponível — agende pelo WhatsApp.</p>
-        <div class="whatsapp-scheduler">
-          <label style="display:block;margin-bottom:6px;">Data: <input type="date" class="schedule-date"></label>
-          <label style="display:block;margin-bottom:12px;">Hora: <input type="time" class="schedule-time"></label>
-          <button type="button" class="reserve-button whatsapp-schedule-btn modal-whatsapp"
-            data-phone="{{ whatsapp_numero }}"
-            data-product="{{ produto.nome }}"
-            data-link="{{ links_reserva.get(produto.id) }}">
-            Agendar por WhatsApp
-          </button>
+        <p>Produto disponivel para reserva pelo WhatsApp.</p>
+        {% if produto.categoria and produto.categoria.nome == 'Camisas' %}
+        <div class="product-options">
+          <label for="size-{{ produto.id }}">Tamanho</label>
+          <select id="size-{{ produto.id }}" class="option-size">
+            <option value="P">P</option>
+            <option value="M">M</option>
+            <option value="G">G</option>
+            <option value="GG">GG</option>
+          </select>
+
+          <label for="color-{{ produto.id }}">Cor</label>
+          <select id="color-{{ produto.id }}" class="option-color">
+            <option value="Branco">Branco</option>
+            <option value="Preto">Preto</option>
+            
+          </select>
         </div>
+        {% endif %}
+        <a class="reserve-button modal-whatsapp"
+           data-base-href="{{ links_reserva.get(produto.id) }}"
+           href="{{ links_reserva.get(produto.id) }}"
+           target="_blank"
+           rel="noopener noreferrer">
+          Agendar por WhatsApp
+        </a>
         {% else %}
-        <p>Este produto está sem estoque no momento.</p>
-        <span class="reserve-button disabled modal-whatsapp">Indisponível</span>
+        <p>Este produto esta sem estoque no momento.</p>
+        <span class="reserve-button disabled modal-whatsapp">Indisponivel</span>
         {% endif %}
       </div>
     </div>
