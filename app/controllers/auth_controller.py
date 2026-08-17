@@ -1,3 +1,4 @@
+import math
 import os
 from urllib.parse import quote
 
@@ -190,6 +191,8 @@ def tela_produtos_publicos(
     request: Request,
     categoria_id: int = 0,
     busca: str = "",
+    pagina: int = 1,
+    por_pagina: int = 12,
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_opcional),
 ):
@@ -206,7 +209,17 @@ def tela_produtos_publicos(
     if busca.strip():
         query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
 
-    produtos = query.order_by(Produto.nome).all()
+    total_produtos = query.count()
+    por_pagina = max(por_pagina, 1)
+    total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
+    pagina = min(max(pagina, 1), total_paginas)
+
+    produtos = (
+        query.order_by(Produto.nome)
+        .offset((pagina - 1) * por_pagina)
+        .limit(por_pagina)
+        .all()
+    )
     links_reserva = {
         produto.id: montar_link_reserva_whatsapp(produto)
         for produto in produtos
@@ -223,6 +236,10 @@ def tela_produtos_publicos(
             "categoria_id": categoria_id,
             "busca": busca,
             "links_reserva": links_reserva,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_produtos": total_produtos,
         },
     )
 

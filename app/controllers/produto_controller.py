@@ -58,6 +58,7 @@ def listar_produtos(
     por_pagina = max(por_pagina, 1)
 
     total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
+    pagina = min(pagina, total_paginas)
 
     offset = (pagina - 1) * por_pagina
 
