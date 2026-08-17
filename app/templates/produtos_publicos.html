@@ -97,14 +97,34 @@
                         <a class="modal-close" href="#produtos" aria-label="Fechar">x</a>
                         <span class="modal-kicker">Reserva EasyStore</span>
                         <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
-                        {% if produto.estoque_atual > 0 %}
-                        <p>Produto disponivel para reserva pelo WhatsApp.</p>
-                        <a class="reserve-button modal-whatsapp"
-                           href="{{ links_reserva.get(produto.id) }}"
-                           target="_blank"
-                           rel="noopener noreferrer">
-                            Abrir WhatsApp
-                        </a>
+                                                {% if produto.estoque_atual > 0 %}
+                                                <p>Produto disponivel para reserva pelo WhatsApp.</p>
+                                                {% if produto.categoria and produto.categoria.nome == 'Camisas' %}
+                                                <div class="product-options">
+                                                    <label for="size-{{ produto.id }}">Tamanho</label>
+                                                    <select id="size-{{ produto.id }}" class="option-size">
+                                                        <option value="P">P</option>
+                                                        <option value="M">M</option>
+                                                        <option value="G">G</option>
+                                                        <option value="GG">GG</option>
+                                                    </select>
+
+                                                    <label for="color-{{ produto.id }}">Cor</label>
+                                                    <select id="color-{{ produto.id }}" class="option-color">
+                                                        <option value="Branco">Branco</option>
+                                                        <option value="Preto">Preto</option>
+                                                        <option value="Azul">Azul</option>
+                                                        <option value="Vermelho">Vermelho</option>
+                                                    </select>
+                                                </div>
+                                                {% endif %}
+                                                <a class="reserve-button modal-whatsapp"
+                                                     data-base-href="{{ links_reserva.get(produto.id) }}"
+                                                     href="{{ links_reserva.get(produto.id) }}"
+                                                     target="_blank"
+                                                     rel="noopener noreferrer">
+                                                        Abrir WhatsApp
+                                                </a>
                         {% else %}
                         <p>Este produto esta sem estoque no momento.</p>
                         <span class="reserve-button disabled modal-whatsapp">Indisponivel</span>
