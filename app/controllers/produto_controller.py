@@ -1,5 +1,4 @@
 # controllers/produto_controller.py — CRUD produtos AAPM SENAI
-import math
 import os
 import shutil
 import uuid
@@ -33,8 +32,6 @@ def listar_produtos(
     request: Request,
     busca: str = "",
     categoria_id: int = 0,       # 0 = todas as categorias
-    pagina: int = 1,
-    por_pagina: int = 10,
     mostrar_inativos: bool = False,  # toggle para exibir também produtos inativos
     db: Session = Depends(get_db),
     usuario = Depends(get_usuario_logado)
@@ -51,20 +48,8 @@ def listar_produtos(
     if categoria_id:
         query = query.filter(Produto.categoria_id == categoria_id)
 
-    query = query.order_by(Produto.nome)
-    total_produtos = query.count()
-
-    pagina = max(pagina, 1)
-    por_pagina = max(por_pagina, 1)
-
-    total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
-
-    offset = (pagina - 1) * por_pagina
-
-    produtos = query.offset(offset).limit(por_pagina).all()
-    
+    produtos    = query.order_by(Produto.nome).all()
     categorias  = db.query(Categoria).filter(Categoria.ativo == True).all()
-
 
     return templates.TemplateResponse(
         request,
@@ -77,11 +62,6 @@ def listar_produtos(
             "busca":        busca,
             "categoria_id": categoria_id,
             "mostrar_inativos": mostrar_inativos,
-            "pagina":         pagina,
-            "por_pagina":     por_pagina,
-            "total_paginas":  total_paginas,
-            "total_produtos": total_produtos,
-
             "page_title":   "Produtos",
             "page_subtitle":"Gerencie o catálogo: editar, desativar ou excluir produtos",
             "css_path":     "css/cadastros.css",
@@ -124,7 +104,14 @@ async def criar_produto(
     request: Request,
     nome: str          = Form(...),
     preco: float       = Form(...),
-    plataforma: str    = Form(...),
+    cor: str            = Form(""),
+    capacidade: str     = Form(""),
+    modelo_versao: str   = Form(""),
+    voltagem: str        = Form(""),
+    armazenamento: str   = Form(""),
+    memoria_ram: str     = Form(""),
+    conexao: str         = Form(""),
+    plataforma: str      = Form(...),
     estoque_atual: int = Form(...),
     categoria_id: int  = Form(0),   # 0 = sem categoria
     imagem: UploadFile = File(None), # None = campo opcional
@@ -146,6 +133,13 @@ async def criar_produto(
                 "categorias":   categorias,
                 "erro":         "Já existe um produto com este nome.",
                 "valores":      {"nome": nome, "preco": preco,
+                                   "cor": cor,
+                                   "capacidade": capacidade,
+                                   "modelo_versao": modelo_versao,
+                                   "voltagem": voltagem,
+                                   "armazenamento": armazenamento,
+                                   "memoria_ram": memoria_ram,
+                                   "conexao": conexao,
                                    "plataforma": plataforma,
                                    "estoque_atual": estoque_atual,
                                    "categoria_id": categoria_id},
@@ -163,6 +157,13 @@ async def criar_produto(
     produto = Produto(
         nome          = nome,
         preco         = preco,
+        cor           = cor or None,
+        capacidade    = capacidade or None,
+        modelo_versao = modelo_versao or None,
+        voltagem      = voltagem or None,
+        armazenamento = armazenamento or None,
+        memoria_ram   = memoria_ram or None,
+        conexao       = conexao or None,
         plataforma    = plataforma,
         estoque_atual = estoque_atual,
         categoria_id  = categoria_id or None,  # 0 vira NULL no banco
@@ -199,6 +200,13 @@ def form_editar_produto(
             "usuario":      admin,
             "editando":     editando,
             "categorias":   categorias,
+            "cor":            getattr(editando, "cor", "") or "",
+            "capacidade":     getattr(editando, "capacidade", "") or "",
+            "modelo_versao":  getattr(editando, "modelo_versao", "") or "",
+            "voltagem":       getattr(editando, "voltagem", "") or "",
+            "armazenamento":  getattr(editando, "armazenamento", "") or "",
+            "memoria_ram":    getattr(editando, "memoria_ram", "") or "",
+            "conexao":        getattr(editando, "conexao", "") or "",
             "page_title":   "Editar produto",
             "page_subtitle":"Atualize os detalhes do produto selecionado",
             "css_path":     "css/cadastros.css",
@@ -213,7 +221,14 @@ async def editar_produto(
     request: Request,
     nome: str          = Form(...),
     preco: float       = Form(...),
-    plataforma: str    = Form(...),
+    cor: str            = Form(""),
+    capacidade: str     = Form(""),
+    modelo_versao: str   = Form(""),
+    voltagem: str        = Form(""),
+    armazenamento: str   = Form(""),
+    memoria_ram: str     = Form(""),
+    conexao: str         = Form(""),
+    plataforma: str      = Form(...),
     estoque_atual: int = Form(...),
     categoria_id: int  = Form(0),
     imagem: UploadFile = File(None),
@@ -259,7 +274,14 @@ async def editar_produto(
 
     editando.nome          = nome
     editando.preco         = preco
-    editando.plataforma    = plataforma
+    editando.cor            = cor or None
+    editando.capacidade      = capacidade or None
+    editando.modelo_versao   = modelo_versao or None
+    editando.voltagem        = voltagem or None
+    editando.armazenamento    = armazenamento or None
+    editando.memoria_ram      = memoria_ram or None
+    editando.conexao          = conexao or None
+    editando.plataforma       = plataforma
     editando.estoque_atual = estoque_atual
     editando.categoria_id  = categoria_id or None
 
@@ -295,7 +317,7 @@ def ativar_produto(
     admin = Depends(get_admin)
 ):
     produto = db.query(Produto).filter(Produto.id == produto_id).first()
-
+ 
     if produto:
         produto.ativo = True
         db.commit()
