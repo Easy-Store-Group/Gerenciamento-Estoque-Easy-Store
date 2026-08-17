@@ -1,59 +1,88 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=2">
+  <title>Cadastro | EasyStore</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
     <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}">
     <title>Cadastro - EasyStore</title>
 </head>
-<body>
-<div class="page" id="page">
-  <div class="branding" id="branding">
-    <div class="bg-layer" id="bgLayer"></div>
-    <div class="stars" id="stars"></div>
-    <div class="brand-content">
-      <div class="logo-row">
-        <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore logo" width="500">
-        <span class="brand-name" id="brandName">EasyStore</span>
-      </div>
-      <p class="tagline" id="tagline">Crie sua conta<br>e acompanhe suas compras</p>
-      <p class="sub">Catalogo, categorias e historico em um so lugar</p>
-    </div>
-  </div>
 
-  <div class="form-side">
-    <div class="login-box">
-      <h2>Cadastrar</h2>
-      {% if erro %}
-        <p style="color: red;">{{ erro }}</p>
-      {% endif %}
-      <form action="/auth/register" method="post">
-        <div class="input-group">
-          <label>Nome completo</label>
-          <input type="text" name="nome" placeholder="Seu nome completo" required>
+<body>
+  <main class="page" id="page">
+    <aside class="branding" id="branding" aria-label="EasyStore">
+      <div class="bg-layer" id="bgLayer"></div>
+      <div class="stars" id="stars"></div>
+
+      <div class="brand-content">
+        <div class="logo-row">
+          <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
+          <span class="brand-name" id="brandName">EasyStore</span>
         </div>
-        <div class="input-group">
-          <label>E-mail</label>
-          <input type="email" name="email" placeholder="Digite seu e-mail" required>
-        </div>
-        <div class="input-group">
-          <label>Telefone (opcional)</label>
-          <input type="text" name="telefone" placeholder="(00) 00000-0000">
-        </div>
-        <div class="input-group">
-          <label>Senha</label>
-          <input type="password" name="senha" placeholder="Digite sua senha" minlength="6" required>
-        </div>
+        <p class="tagline" id="tagline">
+          Crie sua conta<br>
+          e acompanhe seu negócio
+        </p>
+        <p class="sub">Catálogo, categorias e histórico em um só lugar!
+          
+        </p>
+      </div>
+    </aside>
+
+    <section class="form-side" aria-labelledby="register-title">
+      <div class="login-box">
+        <p class="form-kicker">Cadastro</p>
+        <h1 id="register-title">Criar conta</h1>
+        {% if erro %}
+        <p class="login-error" id="login-error" role="alert">{{ erro }}</p>
+        {% endif %}
+        <form id="register-form" action="/auth/register" method="post">
           <div class="input-group">
-            <label>Confirmar senha</label>
-            <input type="password" name="confirmar_senha" placeholder="Confirme sua senha" minlength="6" required>
-        <button type="submit" class="btn-confirm">Criar conta</button>
-        <p class="footer-text">Ja tem conta? <a href="/auth/login">Entrar</a></p>
-        <p class="footer-text">Voltar para o <a href="/">Inicio</a></p>
-      </form>
-    </div>
-  </div>
-</div>
-<script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
+            <label for="nome">Nome completo</label>
+            <input id="nome" type="text" name="nome" placeholder="Seu nome completo" required>
+          </div>
+          <div class="input-group">
+            <label for="email">E-mail</label>
+            <input id="email" type="email" name="email" placeholder="Digite seu e-mail" required>
+          </div>
+          <div class="input-group">
+            <label for="telefone">Telefone (opcional)</label>
+            <input id="telefone" type="text" name="telefone" placeholder="(00) 00000-0000">
+          </div>
+          <div class="input-group">
+            <label for="senha">Senha</label>
+            <div class="password-control">
+              <input id="senha" type="password" name="senha" placeholder="Digite sua senha" minlength="6"
+                required>
+              <button type="button" class="password-toggle" id="password-toggle" aria-controls="senha"
+                aria-pressed="false">Mostrar senha</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label for="confirmar_senha">Confirmar senha</label>
+            <div class="password-control">
+              <input id="confirmar_senha" type="password" name="confirmar_senha" placeholder="Confirme sua senha"
+                minlength="6" required>
+              <button type="button" class="password-toggle" id="confirm-password-toggle" aria-controls="confirmar_senha"
+                aria-pressed="false">Mostrar senha</button>
+            </div>
+          </div>
+          <button type="submit" class="btn-confirm">Criar conta</button>
+          <div class="login-links">
+            <p class="footer-text">Já tem conta? <a href="/auth/login">Entrar</a></p>
+            <p class="footer-text"><a href="/">Voltar para o início</a></p>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+  <script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
+  <script src="{{ request.url_for('static', path='js/login.js') }}?v=1" defer></script>
 </body>
+
 </html>
