@@ -118,3 +118,14 @@ def get_cliente(request: Request):
             detail="Acesso restrito para clientes"
         )
     return usuario
+
+
+def get_admin_ou_operador(request: Request):
+    """Permite o PDV apenas para administradores e operadores."""
+    usuario = get_usuario_logado(request)
+    if usuario.get("role") not in ("admin", "operador"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso restrito ao PDV",
+        )
+    return usuario

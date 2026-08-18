@@ -13,8 +13,12 @@ from app.database import get_db
 from app.models.produto import Produto
 from app.models.categoria import Categoria
 from app.models.movimentacao import Movimentacao
+<<<<<<< HEAD
 from app.models.variacao import ProdutoVariacao
 from app.auth import get_usuario_logado, get_admin
+=======
+from app.auth import get_admin
+>>>>>>> 4fa72bb3064da6b5ce9c46a9f99fbbdcdfe41403
 from app.errors import OperacaoInvalidaError
 
 router = APIRouter(prefix="/produtos", tags=["Produtos"])
@@ -39,7 +43,7 @@ def listar_produtos(
     por_pagina: int = 10,
     mostrar_inativos: bool = False,  # toggle para exibir também produtos inativos
     db: Session = Depends(get_db),
-    usuario = Depends(get_usuario_logado)
+    usuario = Depends(get_admin)
 ):
     # Começa sem filtro de ativo e aplica só quando o toggle não está ativado
     query = db.query(Produto)
@@ -57,7 +61,7 @@ def listar_produtos(
     total_produtos = query.count()
 
     pagina = max(pagina, 1)
-    por_pagina = max(por_pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 10)
 
     total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
     pagina = min(pagina, total_paginas)

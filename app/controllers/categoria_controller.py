@@ -2,6 +2,8 @@
 # Operadores apenas visualizam (via select no form de produto).
 # ============================================================
 
+import math
+
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -9,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.categoria import Categoria
-from app.auth import get_admin, get_usuario_logado
+from app.auth import get_admin
 from fastapi import HTTPException
 
 router = APIRouter(prefix="/categorias", tags=["Categorias"])
@@ -24,20 +26,22 @@ templates = Jinja2Templates(directory="app/templates")
 @router.get("/")
 def listar_categorias(
     request: Request,
+    pagina: int = 1,
+    por_pagina: int = 10,
     db: Session = Depends(get_db),
-    usuario = Depends(get_usuario_logado),
+    usuario = Depends(get_admin),
 ):
     """
     Lista todas as categorias ordenadas por nome.
     Inclui a contagem de produtos de cada categoria
     para dar contexto ao admin antes de desativar.
     """
-    # permite visualização por operadores e administradores
-    role = usuario.get("role") if isinstance(usuario, dict) else getattr(usuario, "role", None)
-    if role not in ("admin", "operador"):
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
-    categorias = db.query(Categoria).order_by(Categoria.nome).all()
+    query = db.query(Categoria).order_by(Categoria.nome)
+    total_categorias = query.count()
+    por_pagina = min(max(por_pagina, 1), 10)
+    total_paginas = math.ceil(total_categorias / por_pagina) if total_categorias else 1
+    pagina = min(max(pagina, 1), total_paginas)
+    categorias = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
 
     return templates.TemplateResponse(
         request,
@@ -46,6 +50,10 @@ def listar_categorias(
             "request":      request,
             "usuario":      usuario,
             "categorias":   categorias,
+            "pagina":       pagina,
+            "por_pagina":   por_pagina,
+            "total_paginas": total_paginas,
+            "total_categorias": total_categorias,
             "page_title":   "Categorias",
             "page_subtitle":"Gerencie as categorias do estoque",
             "css_path":     "css/cadastros.css",

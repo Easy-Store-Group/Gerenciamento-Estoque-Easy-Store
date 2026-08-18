@@ -1,3 +1,4 @@
+import math
 import os
 from urllib.parse import quote
 
@@ -34,6 +35,8 @@ def portal_cliente(
     secao: str = "produtos",
     categoria_id: int = 0,
     busca: str = "",
+    pagina: int = 1,
+    por_pagina: int = 12,
     db: Session = Depends(get_db),
     usuario=Depends(get_cliente),
 ):
@@ -53,7 +56,12 @@ def portal_cliente(
         query = query.filter(Produto.categoria_id == categoria_id)
     if busca.strip():
         query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
-    produtos = query.order_by(Produto.nome).all()
+    query = query.order_by(Produto.nome)
+    total_produtos = query.count()
+    por_pagina = min(max(por_pagina, 1), 12)
+    total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
+    pagina = min(max(pagina, 1), total_paginas)
+    produtos = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
     links_reserva = {
         produto.id: montar_link_reserva_whatsapp(produto, cliente.nome)
         for produto in produtos
@@ -83,6 +91,10 @@ def portal_cliente(
             "secao_ativa": secao_ativa,
             "categoria_id": categoria_id,
             "busca": busca,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_produtos": total_produtos,
             "links_reserva": links_reserva,
             "css_path": "css/cliente.css",
         },

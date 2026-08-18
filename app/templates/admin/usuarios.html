@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="table-actions">
-  <div class="detail-pill">Total de usuarios: <strong>{{ usuarios|length }}</strong></div>
+  <div class="detail-pill">Total de usuarios: <strong>{{ total_usuarios }}</strong></div>
   <div class="detail-pill premium-count">Premium ativos: <strong>{{ usuarios|selectattr('cliente_perfil.is_associado')|selectattr('ativo')|list|length }}</strong></div>
   {% if usuario and (usuario.role if usuario is not mapping else usuario.get('role')) == 'admin' %}
   <a href="/usuarios/novo" class="btn btn-primary">Novo usuario</a>
@@ -44,4 +44,11 @@
   </div>
   {% endfor %}
 </div>
+<nav class="pagination" aria-label="Paginação de usuários">
+  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/usuarios?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% for numero in range(1, total_paginas + 1) %}
+  <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/usuarios?por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+  {% endfor %}
+  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/usuarios?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+</nav>
 {% endblock %}

@@ -101,6 +101,13 @@
   {% else %}
   <p class="empty-state">Nenhum produto encontrado.</p>
   {% endif %}
+  <nav class="pagination" aria-label="Paginação de produtos">
+    <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/cliente?secao=produtos&categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+    {% for numero in range(1, total_paginas + 1) %}
+    <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/cliente?secao=produtos&categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+    {% endfor %}
+    <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/cliente?secao=produtos&categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+  </nav>
 </section>
 {% endif %}
 

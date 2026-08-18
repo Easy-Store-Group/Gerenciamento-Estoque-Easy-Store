@@ -118,30 +118,16 @@
                 </div>
                 {% endfor %}
             </div>
-            {% if total_paginas > 1 %}
-            <nav class="pagination" aria-label="Paginação de produtos">
-                {% if pagina > 1 %}
-                <a class="pagination-button" href="/auth/produtos?pagina={{ pagina - 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}{% if categoria_id %}&categoria_id={{ categoria_id }}{% endif %}" aria-label="Página anterior">← Anterior</a>
-                {% else %}
-                <span class="pagination-button is-disabled" aria-disabled="true">← Anterior</span>
-                {% endif %}
-
-                <div class="pagination-pages">
-                    {% for numero in range(1, total_paginas + 1) %}
-                    <a class="pagination-page {% if numero == pagina %}is-current{% endif %}" href="/auth/produtos?pagina={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}{% if categoria_id %}&categoria_id={{ categoria_id }}{% endif %}" {% if numero == pagina %}aria-current="page"{% endif %}>{{ numero }}</a>
-                    {% endfor %}
-                </div>
-
-                {% if pagina < total_paginas %}
-                <a class="pagination-button" href="/auth/produtos?pagina={{ pagina + 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}{% if categoria_id %}&categoria_id={{ categoria_id }}{% endif %}" aria-label="Próxima página">Próxima →</a>
-                {% else %}
-                <span class="pagination-button is-disabled" aria-disabled="true">Próxima →</span>
-                {% endif %}
-            </nav>
-            {% endif %}
             {% else %}
             <p class="empty-state">Nenhum produto encontrado.</p>
             {% endif %}
+            <nav class="pagination" aria-label="Paginação de produtos">
+                <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+                {% for numero in range(1, total_paginas + 1) %}
+                <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+                {% endfor %}
+                <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+            </nav>
         </section>
     </main>
 

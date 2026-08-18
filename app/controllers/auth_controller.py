@@ -1,7 +1,6 @@
 import math
-import os
 from urllib.parse import quote
-
+import os
 from fastapi import APIRouter, Depends, Request, Form,status, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -209,11 +208,11 @@ def tela_produtos_publicos(
     if busca.strip():
         query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
 
+    query = query.order_by(Produto.nome)
     total_produtos = query.count()
-    por_pagina = max(por_pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 12)
     total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
     pagina = min(max(pagina, 1), total_paginas)
-
     produtos = (
         query.order_by(Produto.nome)
         .offset((pagina - 1) * por_pagina)
@@ -235,6 +234,10 @@ def tela_produtos_publicos(
             "categorias": categorias,
             "categoria_id": categoria_id,
             "busca": busca,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_produtos": total_produtos,
             "links_reserva": links_reserva,
             "pagina": pagina,
             "por_pagina": por_pagina,

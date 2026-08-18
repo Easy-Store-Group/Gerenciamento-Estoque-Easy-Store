@@ -1,5 +1,7 @@
 ﻿# rotas acessiveis apenas por admin
 
+import math
+
 from fastapi import APIRouter, Depends, Request, Form, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -8,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.cliente import Cliente
 from app.models.usuario import Usuario
-from app.auth import get_admin, hash_senha, get_usuario_logado
+from app.auth import get_admin, hash_senha
 from fastapi import HTTPException
 
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
@@ -16,13 +18,19 @@ router = APIRouter(prefix="/usuarios", tags=["Usuários"])
 templates = Jinja2Templates(directory="app/templates")
 
 @router.get("/")
-def listar_usuarios(request: Request, db: Session = Depends(get_db), usuario = Depends(get_usuario_logado)):
-    # permite que administradores e operadores vejam a lista de usuários
-    role = usuario.get("role")
-    if role not in ("admin", "operador"):
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
-    usuarios = db.query(Usuario).order_by(Usuario.nome).all()
+def listar_usuarios(
+    request: Request,
+    pagina: int = 1,
+    por_pagina: int = 10,
+    db: Session = Depends(get_db),
+    usuario = Depends(get_admin),
+):
+    query = db.query(Usuario).order_by(Usuario.nome)
+    total_usuarios = query.count()
+    por_pagina = min(max(por_pagina, 1), 10)
+    total_paginas = math.ceil(total_usuarios / por_pagina) if total_usuarios else 1
+    pagina = min(max(pagina, 1), total_paginas)
+    usuarios = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
     return templates.TemplateResponse(
         request,
         "admin/usuarios.html",
@@ -30,6 +38,10 @@ def listar_usuarios(request: Request, db: Session = Depends(get_db), usuario = D
             "request": request,
             "usuario": usuario,
             "usuarios": usuarios,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_usuarios": total_usuarios,
             "page_title": "Usuários",
             "page_subtitle": "Gerencie acessos e status dos usuários",
             "css_path": "css/cadastros.css",

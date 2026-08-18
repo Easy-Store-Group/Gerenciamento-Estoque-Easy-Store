@@ -364,6 +364,38 @@ button {
   padding: 8px 12px;
 }
 
+.pagination {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.pagination-link {
+  background: var(--surface);
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  color: #1d4ed8;
+  font-weight: 700;
+  min-width: 40px;
+  padding: 9px 12px;
+  text-align: center;
+}
+
+.pagination-link:hover,
+.pagination-link.active {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.pagination-link.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 .search-bar {
   align-items: center;
   background: var(--surface);

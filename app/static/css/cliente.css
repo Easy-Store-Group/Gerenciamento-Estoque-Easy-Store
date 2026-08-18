@@ -211,6 +211,28 @@ a {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
 }
 
+.pagination {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: 28px;
+}
+
+.pagination-link {
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  color: #1d4ed8;
+  font-weight: 700;
+  padding: 9px 12px;
+}
+
+.pagination-link.active,
+.pagination-link:hover { background: #2563eb; color: #ffffff; }
+.pagination-link.disabled { opacity: .45; pointer-events: none; }
+
 .product-card {
   background: #f8fafc;
   border: 1px solid var(--cliente-border);

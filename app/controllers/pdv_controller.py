@@ -9,6 +9,7 @@
 # ============================================================
 
 import json
+import math
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request, Form
@@ -21,7 +22,7 @@ from app.models.venda import Venda, ItemVenda
 from app.models.produto import Produto
 from app.models.cliente import Cliente
 from app.models.movimentacao import Movimentacao, Tipo_de_movimentacao
-from app.auth import get_usuario_logado
+from app.auth import get_admin, get_admin_ou_operador
 
 router = APIRouter(prefix="/pdv", tags=["PDV"])
 templates = Jinja2Templates(directory="app/templates")
@@ -67,7 +68,7 @@ def _extrair_produto_id(item: dict) -> int | None:
 def tela_pdv(
     request: Request,
     db: Session = Depends(get_db),
-    usuario = Depends(get_usuario_logado)
+    usuario = Depends(get_admin_ou_operador)
 ):
     """
     Carrega a tela do PDV com todos os produtos ativos
@@ -110,7 +111,7 @@ def finalizar_venda(
     cliente_id: int    = Form(0),    # 0 = sem cliente identificado
     observacao: str    = Form(""),
     db: Session        = Depends(get_db),
-    usuario            = Depends(get_usuario_logado)
+    usuario            = Depends(get_admin_ou_operador)
 ):
 
     try:
@@ -235,7 +236,7 @@ def detalhe_venda(
     venda_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    usuario = Depends(get_usuario_logado)
+    usuario = Depends(get_admin_ou_operador)
 ):
     """Comprovante da venda — exibido imediatamente após finalizar."""
     venda = db.query(Venda).filter(Venda.id == venda_id).first()
@@ -261,16 +262,18 @@ def detalhe_venda(
 @router.get("/historico")
 def historico_vendas(
     request: Request,
+    pagina: int = 1,
+    por_pagina: int = 10,
     db: Session = Depends(get_db),
-    usuario = Depends(get_usuario_logado)
+    usuario = Depends(get_admin)
 ):
     """Histórico de todas as vendas."""
-    vendas = (
-        db.query(Venda)
-        .order_by(Venda.criado_em.desc())
-        .limit(100)
-        .all()
-    )
+    query = db.query(Venda).order_by(Venda.criado_em.desc())
+    total_vendas = query.count()
+    por_pagina = min(max(por_pagina, 1), 10)
+    total_paginas = math.ceil(total_vendas / por_pagina) if total_vendas else 1
+    pagina = min(max(pagina, 1), total_paginas)
+    vendas = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
     return templates.TemplateResponse(
         request,
         "admin/vendas.html",
@@ -278,6 +281,10 @@ def historico_vendas(
             "request": request,
             "usuario": usuario,
             "vendas": vendas,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_vendas": total_vendas,
             "page_title": "Vendas",
             "page_subtitle": "Histórico de vendas do PDV",
             "css_path": "css/vendas.css",
