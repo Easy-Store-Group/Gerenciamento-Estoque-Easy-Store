@@ -1,6 +1,6 @@
 import math
 from urllib.parse import quote
-
+import os
 from fastapi import APIRouter, Depends, Request, Form,status, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
@@ -210,7 +210,7 @@ def tela_produtos_publicos(
 
     query = query.order_by(Produto.nome)
     total_produtos = query.count()
-    por_pagina = max(por_pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 12)
     total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
     pagina = min(max(pagina, 1), total_paginas)
     produtos = (

@@ -58,7 +58,7 @@ def portal_cliente(
         query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
     query = query.order_by(Produto.nome)
     total_produtos = query.count()
-    por_pagina = max(por_pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 12)
     total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
     pagina = min(max(pagina, 1), total_paginas)
     produtos = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()

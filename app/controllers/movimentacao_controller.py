@@ -5,7 +5,7 @@ from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app.auth import get_admin, get_usuario_logado
+from app.auth import get_admin
 from app.database import get_db
 from app.models.movimentacao import Movimentacao, Tipo_de_movimentacao
 from app.models.produto import Produto
@@ -37,7 +37,7 @@ def listar_movimentacoes(
     pagina: int = 1,
     por_pagina: int = 10,
     db: Session = Depends(get_db),
-    usuario=Depends(get_usuario_logado),
+    usuario=Depends(get_admin),
 ):
     query = db.query(Movimentacao).order_by(Movimentacao.criando_em.desc())
 
@@ -47,14 +47,8 @@ def listar_movimentacoes(
     if tipo in {item.value for item in Tipo_de_movimentacao}:
         query = query.filter(Movimentacao.tipo == Tipo_de_movimentacao(tipo))
 
-    # permite visualização por operadores e admins
-    role = usuario.get("role") if isinstance(usuario, dict) else getattr(usuario, "role", None)
-    if role not in ("admin", "operador"):
-        from fastapi import HTTPException
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     total_movimentacoes = query.count()
-    por_pagina = max(por_pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 10)
     total_paginas = math.ceil(total_movimentacoes / por_pagina) if total_movimentacoes else 1
     pagina = min(max(pagina, 1), total_paginas)
     movimentacoes = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
@@ -79,7 +73,7 @@ def listar_movimentacoes(
             "css_path": "css/movimentacoes.css",
             "active": "movimentacoes",
             # mostre botão de nova movimentação somente para admin (operador faz movimentações via PDV)
-            "extra_button": {"href": "/movimentacoes/nova", "label": "Nova movimentação"} if role == "admin" else None,
+            "extra_button": {"href": "/movimentacoes/nova", "label": "Nova movimentação"},
         },
     )
 
@@ -89,7 +83,7 @@ def form_nova_movimentacao(
     request: Request,
     produto_id: int = 0,
     db: Session = Depends(get_db),
-    usuario=Depends(get_usuario_logado),
+    usuario=Depends(get_admin),
 ):
     produtos = db.query(Produto).filter(Produto.ativo == True).order_by(Produto.nome).all()
 
@@ -109,7 +103,7 @@ def registrar_movimentacao(
     preco_unitario: float = Form(...),
     observacao: str = Form(""),
     db: Session = Depends(get_db),
-    usuario=Depends(get_usuario_logado),
+    usuario=Depends(get_admin),
 ):
     produtos = db.query(Produto).filter(Produto.ativo == True).order_by(Produto.nome).all()
 
@@ -175,7 +169,7 @@ def historico_produto(
     produto_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    usuario=Depends(get_usuario_logado),
+    usuario=Depends(get_admin),
 ):
     produto = db.query(Produto).filter(Produto.id == produto_id).first()
 

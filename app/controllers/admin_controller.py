@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.cliente import Cliente
 from app.models.usuario import Usuario
-from app.auth import get_admin, hash_senha, get_usuario_logado
+from app.auth import get_admin, hash_senha
 from fastapi import HTTPException
 
 router = APIRouter(prefix="/usuarios", tags=["Usuários"])
@@ -23,16 +23,11 @@ def listar_usuarios(
     pagina: int = 1,
     por_pagina: int = 10,
     db: Session = Depends(get_db),
-    usuario = Depends(get_usuario_logado),
+    usuario = Depends(get_admin),
 ):
-    # permite que administradores e operadores vejam a lista de usuários
-    role = usuario.get("role")
-    if role not in ("admin", "operador"):
-        raise HTTPException(status_code=403, detail="Acesso negado")
-
     query = db.query(Usuario).order_by(Usuario.nome)
     total_usuarios = query.count()
-    por_pagina = max(por_pagina, 1)
+    por_pagina = min(max(por_pagina, 1), 10)
     total_paginas = math.ceil(total_usuarios / por_pagina) if total_usuarios else 1
     pagina = min(max(pagina, 1), total_paginas)
     usuarios = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()

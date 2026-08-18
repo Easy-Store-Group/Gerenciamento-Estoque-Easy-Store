@@ -3,7 +3,8 @@
 {% set title = "PDV - Ponto de Venda" %}
 {% set page_title = "Ponto de Venda" %}
 {% set active = "pos" %}
-{% set extra_button = {'href': '/pdv/historico', 'label': 'Histórico de Vendas'} %}
+{% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
+{% set extra_button = {'href': '/pdv/historico', 'label': 'Histórico de Vendas'} if role == 'admin' else None %}
 
 {% block content %}
 <div class="pdv-wrapper" data-desconto-associado="{{ desconto_associado }}">
