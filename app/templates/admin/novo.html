@@ -38,7 +38,472 @@
         <input type="file" name="imagem" accept="image/png, image/jpeg, image/webp">
       </div>
     </div>
+
+    <!-- Seção de Variações -->
+    <div class="variacao-section">
+      <div class="variacao-header">
+        <label class="checkbox-label">
+          <input type="checkbox" id="temVariacoes" name="tem_variacoes" onchange="toggleVariacoes()">
+          <span>Este produto tem variações (cor/tamanho)?</span>
+        </label>
+      </div>
+
+      <div id="variacoes-container" class="variacoes-container" style="display: none;">
+        <h3>Adicionar Variações</h3>
+        
+        <div class="variacao-form">
+          <div class="variacao-row">
+            <div class="input-group">
+              <label>Cor</label>
+              <select id="cor-select">
+                <option value="">-- Selecione ou crie uma cor --</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>ou criar nova cor</label>
+              <div class="new-color-input">
+                <input type="text" id="nova-cor-nome" placeholder="Nome da cor">
+                <input type="color" id="nova-cor-hex" title="Selecione uma cor">
+                <button type="button" onclick="criarNovaCor()">+ Cor</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="variacao-row">
+            <div class="input-group">
+              <label>Tamanho</label>
+              <select id="tamanho-select">
+                <option value="">-- Selecione ou crie um tamanho --</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label>ou criar novo tamanho</label>
+              <div class="new-size-input">
+                <input type="text" id="novo-tamanho-nome" placeholder="Ex: P, M, G, GG">
+                <button type="button" onclick="criarNovoTamanho()">+ Tamanho</button>
+              </div>
+            </div>
+          </div>
+          <div class="input-group">
+          <label>Imagem do produto</label>
+          <input type="file" name="imagem" accept="image/png, image/jpeg, image/webp">
+        </div>
+      </div>
+
+          <div class="variacao-row">
+            <div class="input-group">
+              <label>Estoque dessa variação</label>
+              <input type="number" id="estoque-variacao" value="0" min="0">
+            </div>
+            <button type="button" class="btn btn-secondary" onclick="adicionarVariacao()">Adicionar Variação</button>
+          </div>
+        </div>
+        <div id="variacoes-list" class="variacoes-list">
+          <h4>Variações adicionadas:</h4>
+          <div id="lista-variacoes"></div>
+        </div>
+
+        <input type="hidden" id="variacoes-json" name="variacoes_json" value="[]">
+      </div>
+    </div>
+
     <button type="submit" class="btn btn-primary">Cadastrar produto</button>
   </form>
 </div>
+
+<style>
+  .variacao-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #eee;
+  }
+
+  .variacao-header {
+    margin-bottom: 20px;
+  }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+  }
+
+  .variacoes-container {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 15px;
+  }
+
+  .variacoes-container h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 16px;
+  }
+
+  .variacao-form {
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+
+  .variacao-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .variacao-row:last-child {
+    margin-bottom: 0;
+    grid-template-columns: auto auto 1fr;
+  }
+
+  .new-color-input,
+  .new-size-input {
+    display: flex;
+    gap: 8px;
+  }
+
+  .new-color-input input[type="text"],
+  .new-size-input input[type="text"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+
+  .new-color-input input[type="color"] {
+    width: 50px;
+    height: 36px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .new-color-input button,
+  .new-size-input button {
+    padding: 8px 12px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .new-color-input button:hover,
+  .new-size-input button:hover {
+    background: #218838;
+  }
+
+  .input-group input[type="number"] {
+    width: 100%;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    align-self: flex-end;
+  }
+
+  .btn-secondary:hover {
+    background: #5a6268;
+  }
+
+  .variacoes-list {
+    background: white;
+    padding: 15px;
+    border-radius: 6px;
+    display: none;
+  }
+
+  .variacoes-list.show {
+    display: block;
+  }
+
+  .variacoes-list h4 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: #666;
+  }
+
+  .variacao-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .variacao-item-info {
+    flex: 1;
+  }
+
+  .variacao-item-remove {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .variacao-item-remove:hover {
+    background: #c82333;
+  }
+</style>
+
+<script>
+  let variacoesList = [];
+  let cores = [];
+  let tamanhos = [];
+
+  async function carregarDados() {
+    try {
+      const [coresRes, tamanhosRes] = await Promise.all([
+        fetch('/api/cores'),
+        fetch('/api/tamanhos')
+      ]);
+
+      if (!coresRes.ok) {
+        console.error('Erro ao carregar cores:', coresRes.status, coresRes.statusText);
+      }
+      if (!tamanhosRes.ok) {
+        console.error('Erro ao carregar tamanhos:', tamanhosRes.status, tamanhosRes.statusText);
+      }
+
+      cores = await coresRes.json();
+      tamanhos = await tamanhosRes.json();
+
+      atualizarSelectsVariacao();
+    } catch (error) {
+      console.error('Erro ao carregar cores/tamanhos:', error);
+      alert('Erro ao carregar dados. Verifique o console (F12)');
+    }
+  }
+
+  function atualizarSelectsVariacao() {
+    const corSelect = document.getElementById('cor-select');
+    const tamanhoSelect = document.getElementById('tamanho-select');
+
+    corSelect.innerHTML = '<option value="">-- Selecione uma cor --</option>';
+    cores.forEach(cor => {
+      const option = document.createElement('option');
+      option.value = cor.id;
+      option.textContent = cor.nome;
+      corSelect.appendChild(option);
+    });
+
+    tamanhoSelect.innerHTML = '<option value="">-- Selecione um tamanho --</option>';
+    tamanhos.forEach(tamanho => {
+      const option = document.createElement('option');
+      option.value = tamanho.id;
+      option.textContent = tamanho.nome;
+      tamanhoSelect.appendChild(option);
+    });
+  }
+
+  function toggleVariacoes() {
+    const checkbox = document.getElementById('temVariacoes');
+    const container = document.getElementById('variacoes-container');
+    
+    if (checkbox.checked) {
+      container.style.display = 'block';
+      carregarDados();
+    } else {
+      container.style.display = 'none';
+      variacoesList = [];
+      atualizarLista();
+    }
+  }
+
+  async function criarNovaCor() {
+    const nome = document.getElementById('nova-cor-nome').value.trim();
+    let hex = document.getElementById('nova-cor-hex').value;
+
+    if (!nome) {
+      alert('Digite um nome para a cor');
+      return;
+    }
+
+    if (!hex) {
+      hex = '#000000';
+    }
+
+    try {
+      console.log('Criando cor:', { nome, codigo_hex: hex });
+      
+      const response = await fetch('/api/cores', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome, codigo_hex: hex })
+      });
+
+      console.log('Status:', response.status, response.statusText);
+      
+      const text = await response.text();
+      console.log('Resposta:', text);
+      
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Não conseguiu fazer parse de JSON. Resposta:', text);
+        alert('Erro ao criar cor: Resposta inválida do servidor\nAbra o console (F12) para mais detalhes');
+        return;
+      }
+
+      if (response.ok) {
+        const novaCor = data;
+        cores.push(novaCor);
+        atualizarSelectsVariacao();
+        document.getElementById('cor-select').value = novaCor.id;
+        document.getElementById('nova-cor-nome').value = '';
+        document.getElementById('nova-cor-hex').value = '#000000';
+        alert('Cor criada com sucesso!');
+      } else {
+        alert('Erro ao criar cor: ' + (data.detail || data.message || 'Erro desconhecido'));
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+      alert('Erro ao criar cor: ' + error.message + '\nAbra o console (F12) para mais detalhes');
+    }
+  }
+
+  async function criarNovoTamanho() {
+    const nome = document.getElementById('novo-tamanho-nome').value.trim();
+
+    if (!nome) {
+      alert('Digite um nome para o tamanho');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/tamanhos', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nome })
+      });
+
+      const text = await response.text();
+      let data;
+      
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error('Resposta do servidor:', text);
+        alert('Erro ao criar tamanho: Resposta inválida do servidor');
+        return;
+      }
+
+      if (response.ok) {
+        const novoTamanho = data;
+        tamanhos.push(novoTamanho);
+        atualizarSelectsVariacao();
+        document.getElementById('tamanho-select').value = novoTamanho.id;
+        document.getElementById('novo-tamanho-nome').value = '';
+        alert('Tamanho criado com sucesso!');
+      } else {
+        alert('Erro ao criar tamanho: ' + (data.detail || 'Erro desconhecido'));
+      }
+    } catch (error) {
+      console.error('Erro:', error);
+      alert('Erro ao criar tamanho: ' + error.message);
+    }
+  }
+
+  function adicionarVariacao() {
+    const corId = document.getElementById('cor-select').value;
+    const tamanhoId = document.getElementById('tamanho-select').value;
+    const estoque = parseInt(document.getElementById('estoque-variacao').value) || 0;
+
+    // Tamanho é opcional - se não tiver cor, deve ter no mínimo cor
+    if (!corId && !tamanhoId) {
+      alert('Selecione pelo menos uma cor ou um tamanho');
+      return;
+    }
+
+    const cor = cores.find(c => c.id == corId);
+    const tamanho = tamanhos.find(t => t.id == tamanhoId);
+
+    const variacao = {
+      cor_id: corId ? parseInt(corId) : null,
+      tamanho_id: tamanhoId ? parseInt(tamanhoId) : null,
+      estoque_atual: estoque,
+      cor_nome: cor?.nome || '-',
+      tamanho_nome: tamanho?.nome || '-'
+    };
+
+    // Verifica se já existe
+    if (variacoesList.some(v => v.cor_id === variacao.cor_id && v.tamanho_id === variacao.tamanho_id)) {
+      alert('Esta combinação de cor e tamanho já foi adicionada');
+      return;
+    }
+
+    variacoesList.push(variacao);
+    atualizarLista();
+
+    // Limpa os selects
+    document.getElementById('cor-select').value = '';
+    document.getElementById('tamanho-select').value = '';
+    document.getElementById('estoque-variacao').value = '0';
+  }
+
+  function removerVariacao(index) {
+    variacoesList.splice(index, 1);
+    atualizarLista();
+  }
+
+  function atualizarLista() {
+    const lista = document.getElementById('lista-variacoes');
+    const container = document.getElementById('variacoes-list');
+    const json = document.getElementById('variacoes-json');
+
+    if (variacoesList.length === 0) {
+      lista.innerHTML = '<p style="color: #999; font-size: 12px;">Nenhuma variação adicionada</p>';
+      container.classList.remove('show');
+      json.value = '[]';
+    } else {
+      lista.innerHTML = variacoesList.map((v, i) => `
+        <div class="variacao-item">
+          <div class="variacao-item-info">
+            <strong>${v.cor_nome}</strong> | <strong>${v.tamanho_nome}</strong> - Estoque: ${v.estoque_atual}
+          </div>
+          <button type="button" class="variacao-item-remove" onclick="removerVariacao(${i})">Remover</button>
+        </div>
+      `).join('');
+      
+      container.classList.add('show');
+      json.value = JSON.stringify(variacoesList);
+    }
+  }
+
+  // Inicializa
+  document.addEventListener('DOMContentLoaded', () => {
+    atualizarLista();
+  });
+</script>
+
 {% endblock %}

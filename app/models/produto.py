@@ -29,6 +29,9 @@ class Produto(Base):
     categoria_id = Column(Integer, ForeignKey("categorias.id", ondelete="SET NULL"), nullable=True)
 
     categoria = relationship("Categoria", back_populates="produtos")
+    
+    # Variações (cores e tamanhos)
+    variacoes = relationship("ProdutoVariacao", back_populates="produto", cascade="all, delete-orphan")
 
     # metodo 
     @property # faz com que o metodo seja um atributo 

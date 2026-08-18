@@ -2,6 +2,8 @@
 let carrinho = [];
 let todosProdutos = [];
 let descontoAssociado = 0;
+let produtoSelecionado = null;
+let variacoesProduto = [];
 
 // Elementos do DOM
 const inputBusca = document.getElementById('input-busca');
@@ -33,11 +35,12 @@ function inicializarPDV() {
     });
 
     document.querySelectorAll('.produto-card-pdv').forEach(card => {
-        card.addEventListener('click', () => {
+        card.addEventListener('click', async () => {
             const produtoId = Number(card.dataset.id);
             const produto = todosProdutos.find(p => p.produto_id === produtoId);
             if (produto) {
-                adicionarAoCarrinho(produto);
+                // Carrega variações do produto
+                await carregarVariacoesPDV(produto);
             }
         });
 
@@ -66,6 +69,113 @@ function inicializarPDV() {
     atualizarCarrinho();
 }
 
+async function carregarVariacoesPDV(produto) {
+    try {
+        const response = await fetch(`/api/variacoes/produto/${produto.produto_id}`);
+        if (!response.ok) {
+            // Sem variações, adiciona direto
+            adicionarAoCarrinho(produto);
+            return;
+        }
+
+        variacoesProduto = await response.json();
+        
+        if (variacoesProduto.length === 0) {
+            // Sem variações, adiciona direto
+            adicionarAoCarrinho(produto);
+            return;
+        }
+
+        // Tem variações, mostra modal
+        produtoSelecionado = produto;
+        abrirModalVariacoes(produto, variacoesProduto);
+        
+    } catch (error) {
+        console.error('Erro ao carregar variações:', error);
+        adicionarAoCarrinho(produto);
+    }
+}
+
+function abrirModalVariacoes(produto, variacoes) {
+    const modal = document.getElementById('modal-variacoes');
+    const titulo = document.getElementById('modal-titulo');
+    const corpo = document.getElementById('modal-corpo');
+
+    titulo.textContent = `Selecione variações para: ${produto.nome}`;
+    
+    let html = '';
+
+    // Agrupa variações por tipo
+    const cores = new Set();
+    const tamanhos = new Set();
+    
+    variacoes.forEach(v => {
+        if (v.cor) cores.add(JSON.stringify(v.cor));
+        if (v.tamanho) tamanhos.add(JSON.stringify(v.tamanho));
+    });
+
+    // Seleto de tamanhos
+    if (tamanhos.size > 0) {
+        html += '<div class="form-group-modal">';
+        html += '<label for="select-tamanho-pdv">Tamanho</label>';
+        html += '<select id="select-tamanho-pdv" class="form-control">';
+        html += '<option value="">-- Selecione um tamanho --</option>';
+        
+        Array.from(tamanhos).forEach(t => {
+            const tamanho = JSON.parse(t);
+            html += `<option value="${tamanho.id}">${tamanho.nome}</option>`;
+        });
+        
+        html += '</select></div>';
+    }
+
+    // Seleto de cores
+    if (cores.size > 0) {
+        html += '<div class="form-group-modal">';
+        html += '<label for="select-cor-pdv">Cor</label>';
+        html += '<select id="select-cor-pdv" class="form-control">';
+        html += '<option value="">-- Selecione uma cor --</option>';
+        
+        Array.from(cores).forEach(c => {
+            const cor = JSON.parse(c);
+            html += `<option value="${cor.id}">${cor.nome}</option>`;
+        });
+        
+        html += '</select></div>';
+    }
+
+    corpo.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function fecharModalVariacoes() {
+    document.getElementById('modal-variacoes').style.display = 'none';
+    produtoSelecionado = null;
+}
+
+function confirmarVariacoes() {
+    if (!produtoSelecionado) return;
+
+    const tamanhoId = document.getElementById('select-tamanho-pdv')?.value;
+    const corId = document.getElementById('select-cor-pdv')?.value;
+
+    // Encontra a variação correspondente
+    const variacao = variacoesProduto.find(v => {
+        const tempoMesmaTamanho = !tamanhoId || (v.tamanho && v.tamanho.id === parseInt(tamanhoId));
+        const tempoMesmaCor = !corId || (v.cor && v.cor.id === parseInt(corId));
+        return tempoMesmaTamanho && tempoMesmaCor;
+    });
+
+    if (!variacao) {
+        mostrarAlerta('Selecione uma combinação válida de cor e tamanho', 'warning');
+        return;
+    }
+
+    // Adiciona ao carrinho com variação
+    adicionarAoCarrinho(produtoSelecionado, variacao);
+    fecharModalVariacoes();
+}
+
 function filtrarProdutos(termo) {
     document.querySelectorAll('.produto-card-pdv').forEach(card => {
         const nome = card.dataset.nome.toLowerCase();
@@ -73,8 +183,11 @@ function filtrarProdutos(termo) {
     });
 }
 
-function adicionarAoCarrinho(produto) {
-    const itemExistente = carrinho.find(item => item.produto_id === produto.produto_id);
+function adicionarAoCarrinho(produto, variacao = null) {
+    const descricaoVariacao = variacao ? ` [${variacao.cor ? variacao.cor.nome : ''}${variacao.tamanho ? ' - ' + variacao.tamanho.nome : ''}]` : '';
+    const chaveItem = `${produto.produto_id}${variacao ? '_' + variacao.id : ''}`;
+    
+    const itemExistente = carrinho.find(item => item.chave === chaveItem);
 
     if (itemExistente) {
         if (itemExistente.quantidade < produto.estoque) {
@@ -85,8 +198,10 @@ function adicionarAoCarrinho(produto) {
         }
     } else {
         carrinho.push({
+            chave: chaveItem,
             produto_id: produto.produto_id,
-            nome: produto.nome,
+            variacao_id: variacao?.id || null,
+            nome: produto.nome + descricaoVariacao,
             preco: produto.preco,
             estoque: produto.estoque,
             quantidade: 1
@@ -97,13 +212,13 @@ function adicionarAoCarrinho(produto) {
     mostrarAlerta(`${produto.nome} adicionado ao carrinho!`, 'success');
 }
 
-function removerDoCarrinho(produtoId) {
-    carrinho = carrinho.filter(item => item.produto_id !== produtoId);
+function removerDoCarrinho(chaveItem) {
+    carrinho = carrinho.filter(item => item.chave !== chaveItem);
     atualizarCarrinho();
 }
 
-function atualizarQuantidade(produtoId, novaQuantidade) {
-    const item = carrinho.find(item => item.produto_id === produtoId);
+function atualizarQuantidade(chaveItem, novaQuantidade) {
+    const item = carrinho.find(item => item.chave === chaveItem);
     if (!item) return;
 
     const qtd = parseInt(novaQuantidade, 10);
@@ -127,11 +242,11 @@ function atualizarCarrinho() {
                     <div class="item-nome">${item.nome}</div>
                     <div class="item-qtd">
                         <input type="number" min="1" max="${item.estoque}" value="${item.quantidade}"
-                               onchange="atualizarQuantidade(${item.produto_id}, this.value)" style="width: 50px;">
+                               onchange="atualizarQuantidade('${item.chave}', this.value)" style="width: 50px;">
                     </div>
                 </div>
                 <div class="item-preco">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</div>
-                <button type="button" onclick="removerDoCarrinho(${item.produto_id})"
+                <button type="button" onclick="removerDoCarrinho('${item.chave}')"
                         style="background: none; border: none; color: #dc2626; cursor: pointer; font-weight: bold;">✕</button>
             </div>
         `).join('');
@@ -148,6 +263,7 @@ function atualizarTotais() {
     let totalLiquido = subtotalBruto - desconto;
 
     document.getElementById('resumo-subtotal').textContent = `R$ ${subtotalBruto.toFixed(2).replace('.', ',')}`;
+
     document.getElementById('resumo-desconto').textContent = `R$ ${desconto.toFixed(2).replace('.', ',')}`;
     document.getElementById('resumo-total').textContent = `R$ ${totalLiquido.toFixed(2).replace('.', ',')}`;
 
@@ -160,6 +276,7 @@ function serializarCarrinho() {
     return JSON.stringify(
         carrinho.map(item => ({
             produto_id: item.produto_id,
+            variacao_id: item.variacao_id,
             quantidade: item.quantidade
         }))
     );

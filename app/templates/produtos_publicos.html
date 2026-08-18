@@ -99,27 +99,12 @@
                         <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
                                                 {% if produto.estoque_atual > 0 %}
                                                 <p>Produto disponivel para reserva pelo WhatsApp.</p>
-                                                {% if produto.categoria and produto.categoria.nome == 'Camisas' %}
-                                                <div class="product-options">
-                                                    <label for="size-{{ produto.id }}">Tamanho</label>
-                                                    <select id="size-{{ produto.id }}" class="option-size">
-                                                        <option value="P">P</option>
-                                                        <option value="M">M</option>
-                                                        <option value="G">G</option>
-                                                        <option value="GG">GG</option>
-                                                    </select>
-
-                                                    <label for="color-{{ produto.id }}">Cor</label>
-                                                    <select id="color-{{ produto.id }}" class="option-color">
-                                                        <option value="Branco">Branco</option>
-                                                        <option value="Preto">Preto</option>
-                                                        <option value="Azul">Azul</option>
-                                                        <option value="Vermelho">Vermelho</option>
-                                                    </select>
+                                                <div class="product-options" id="options-{{ produto.id }}">
+                                                    <p class="loading-variacoes">Carregando variações...</p>
                                                 </div>
-                                                {% endif %}
                                                 <a class="reserve-button modal-whatsapp"
                                                      data-base-href="{{ links_reserva.get(produto.id) }}"
+                                                     data-produto-id="{{ produto.id }}"
                                                      href="{{ links_reserva.get(produto.id) }}"
                                                      target="_blank"
                                                      rel="noopener noreferrer">
@@ -145,5 +130,139 @@
             </nav>
         </section>
     </main>
+
+    <script>
+        // Carrega variações para cada produto
+        async function carregarVariacoesProduto(produtoId) {
+            try {
+                const response = await fetch(`/api/variacoes/produto/${produtoId}`);
+                if (!response.ok) return;
+                
+                const variacoes = await response.json();
+                const container = document.getElementById(`options-${produtoId}`);
+                
+                if (variacoes.length === 0) {
+                    container.innerHTML = '<p style="color: #999; font-size: 12px;">Sem variações</p>';
+                    return;
+                }
+
+                // Agrupa variações por cor e tamanho
+                const cores = new Set();
+                const tamanhos = new Set();
+                
+                variacoes.forEach(v => {
+                    if (v.cor) cores.add(JSON.stringify(v.cor));
+                    if (v.tamanho) tamanhos.add(JSON.stringify(v.tamanho));
+                });
+
+                let html = '';
+
+                // Seleto de tamanhos
+                if (tamanhos.size > 0) {
+                    html += '<div class="form-group">';
+                    html += `<label for="size-${produtoId}">Tamanho</label>`;
+                    html += `<select id="size-${produtoId}" class="option-tamanho" data-produto-id="${produtoId}">`;
+                    html += '<option value="">-- Selecione um tamanho --</option>';
+                    
+                    Array.from(tamanhos).forEach(t => {
+                        const tamanho = JSON.parse(t);
+                        html += `<option value="${tamanho.id}" data-nome="${tamanho.nome}">${tamanho.nome}</option>`;
+                    });
+                    
+                    html += '</select></div>';
+                }
+
+                // Seleto de cores
+                if (cores.size > 0) {
+                    html += '<div class="form-group">';
+                    html += `<label for="color-${produtoId}">Cor</label>`;
+                    html += `<select id="color-${produtoId}" class="option-cor" data-produto-id="${produtoId}">`;
+                    html += '<option value="">-- Selecione uma cor --</option>';
+                    
+                    Array.from(cores).forEach(c => {
+                        const cor = JSON.parse(c);
+                        html += `<option value="${cor.id}" data-nome="${cor.nome}" style="background-color: ${cor.codigo_hex || '#fff'}">${cor.nome}</option>`;
+                    });
+                    
+                    html += '</select></div>';
+                }
+
+                container.innerHTML = html;
+
+                // Atualiza links de WhatsApp ao selecionar
+                const selectTamanho = document.getElementById(`size-${produtoId}`);
+                const selectCor = document.getElementById(`color-${produtoId}`);
+                const whatsappLink = document.querySelector(`.reserve-button[data-produto-id="${produtoId}"]`);
+
+                const atualizarWhatsapp = () => {
+                    let mensagem = `Gostaria de reservar o produto: `;
+                    const nomeProduto = document.querySelector(`.reserve-modal[id="reservar-${produtoId}"] h3`).textContent;
+                    mensagem += nomeProduto;
+
+                    if (selectTamanho && selectTamanho.value) {
+                        const tamanhonome = selectTamanho.options[selectTamanho.selectedIndex].dataset.nome;
+                        mensagem += ` - Tamanho: ${tamanhonome}`;
+                    }
+
+                    if (selectCor && selectCor.value) {
+                        const corNome = selectCor.options[selectCor.selectedIndex].dataset.nome;
+                        mensagem += ` - Cor: ${corNome}`;
+                    }
+
+                    const baseHref = whatsappLink.dataset.baseHref;
+                    const url = new URL(baseHref);
+                    url.searchParams.set('text', mensagem);
+                    whatsappLink.href = url.toString();
+                };
+
+                if (selectTamanho) selectTamanho.addEventListener('change', atualizarWhatsapp);
+                if (selectCor) selectCor.addEventListener('change', atualizarWhatsapp);
+
+            } catch (error) {
+                console.error('Erro ao carregar variações:', error);
+            }
+        }
+
+        // Carrega variações de todos os produtos quando a página carrega
+        document.addEventListener('DOMContentLoaded', () => {
+            const produtoCards = document.querySelectorAll('.product-card');
+            produtoCards.forEach(card => {
+                const link = card.querySelector('.product-card-link');
+                const modal = link.getAttribute('href');
+                const produtoId = modal.replace('#reservar-', '');
+                carregarVariacoesProduto(produtoId);
+            });
+        });
+    </script>
+
+    <style>
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+            background-color: #f9f9f9;
+        }
+
+        .loading-variacoes {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            padding: 10px;
+        }
+    </style>
 </body>
 </html>

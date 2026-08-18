@@ -10,6 +10,23 @@
 <div class="pdv-wrapper" data-desconto-associado="{{ desconto_associado }}">
     <div id="alert-container"></div>
 
+    <!-- Modal para seleção de variações -->
+    <div id="modal-variacoes" class="modal-variacoes" style="display: none;">
+        <div class="modal-variacoes-content">
+            <div class="modal-variacoes-header">
+                <h3 id="modal-titulo">Selecione Variações</h3>
+                <button class="close-btn" onclick="fecharModalVariacoes()">×</button>
+            </div>
+            <div class="modal-variacoes-body" id="modal-corpo">
+                <!-- Será preenchido dinamicamente -->
+            </div>
+            <div class="modal-variacoes-footer">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalVariacoes()">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmarVariacoes()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+
     <div class="pdv-grid">
         <section class="catalogo-section">
             <div class="search-box">
@@ -82,6 +99,96 @@
     </div>
 </div>
 
-<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=3"></script>
+<style>
+    .modal-variacoes {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-variacoes-content {
+        background: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .modal-variacoes-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-variacoes-header h3 {
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .modal-variacoes-body {
+        padding: 20px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .modal-variacoes-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .form-group-modal {
+        margin-bottom: 15px;
+    }
+
+    .form-group-modal label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 5px;
+        font-size: 14px;
+    }
+
+    .form-group-modal select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+</style>
+
+<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=4"></script>
 <script src="{{ request.url_for('static', path='js/checkout.js') }}"></script>
 {% endblock %}

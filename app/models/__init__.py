@@ -4,6 +4,8 @@ from app.models import produto
 from app.models import movimentacao
 from app.models import cliente
 from app.models import venda
+from app.models import cor_tamanho
+from app.models import variacao
 
 #python -m alembic revision --autogenerate -m "criar tabelas cliente e vendas"
 

@@ -3,6 +3,7 @@ import math
 import os
 import shutil
 import uuid
+import json
 from fastapi import APIRouter, Depends, Request, Form, UploadFile, File, status
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -12,7 +13,10 @@ from app.database import get_db
 from app.models.produto import Produto
 from app.models.categoria import Categoria
 from app.models.movimentacao import Movimentacao
+from app.models.variacao import ProdutoVariacao
+from app.auth import get_usuario_logado, get_admin
 from app.auth import get_admin
+
 from app.errors import OperacaoInvalidaError
 
 router = APIRouter(prefix="/produtos", tags=["Produtos"])
@@ -127,15 +131,15 @@ async def criar_produto(
     preco: float       = Form(...),
     plataforma: str    = Form(...),
     estoque_atual: int = Form(...),
-    categoria_id: int  = Form(0),   # 0 = sem categoria
-    imagem: UploadFile = File(None), # None = campo opcional
+    categoria_id: int  = Form(0),
+    imagem: UploadFile = File(None),
+    variacoes_json: str = Form("[]"),  # JSON das variações
     db: Session        = Depends(get_db),
     admin              = Depends(get_admin)
 ):
     categorias = db.query(Categoria).filter(Categoria.ativo == True).all()
 
     # Verifica duplicidade de nome
-    # ilike() para comparação case-insensitive, evitando produtos "Camiseta" e "camiseta".
     if db.query(Produto).filter(Produto.nome.ilike(nome)).first():
         return templates.TemplateResponse(
             request,
@@ -166,11 +170,56 @@ async def criar_produto(
         preco         = preco,
         plataforma    = plataforma,
         estoque_atual = estoque_atual,
-        categoria_id  = categoria_id or None,  # 0 vira NULL no banco
+        categoria_id  = categoria_id or None,
         imagem_path   = imagem_path,
     )
 
     db.add(produto)
+    db.flush()  # Obtém o ID do produto sem fazer commit
+
+    # Processa variações se houver
+    try:
+        variacoes = json.loads(variacoes_json) if variacoes_json else []
+        
+        if variacoes:
+            estoque_total = 0
+            for var_data in variacoes:
+                variacao = ProdutoVariacao(
+                    produto_id=produto.id,
+                    cor_id=var_data.get('cor_id'),
+                    tamanho_id=var_data.get('tamanho_id'),
+                    estoque_atual=var_data.get('estoque_atual', 0),
+                    ativa=True
+                )
+                db.add(variacao)
+                estoque_total += var_data.get('estoque_atual', 0)
+            
+            # Atualiza estoque total do produto com a soma das variações
+            produto.estoque_atual = estoque_total
+        
+    except (json.JSONDecodeError, ValueError) as e:
+        db.rollback()
+        return templates.TemplateResponse(
+            request,
+            "admin/novo.html",
+            {
+                "request":      request,
+                "usuario":      admin,
+                "editando":     None,
+                "categorias":   categorias,
+                "erro":         "Erro ao processar variações. Tente novamente.",
+                "valores":      {"nome": nome, "preco": preco,
+                                   "plataforma": plataforma,
+                                   "estoque_atual": estoque_atual,
+                                   "categoria_id": categoria_id},
+                "page_title":   "Adicionar produto",
+                "page_subtitle":"Preencha os detalhes do novo item para o catálogo",
+                "css_path":     "css/cadastros.css",
+                "active":       "produtos",
+            },
+            status_code=400
+        )
+
     db.commit()
 
     return RedirectResponse(url="/produtos?criado=ok", status_code=302)
