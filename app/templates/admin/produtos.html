@@ -43,7 +43,9 @@
     <div class="actions">
       {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
       {% if role == 'admin' %}
-      <button type="button" class="btn btn-secondary" onclick='abrirVariacoesProduto({{ produto.id }}, {{ produto.nome|tojson }})'>Variações</button>
+      {% if produto.id in produtos_com_variacoes %}
+      <button type="button" class="btn btn-secondary" data-produto-id="{{ produto.id }}" data-produto-nome="{{ produto.nome }}" onclick="abrirVariacoesProduto(this)">Variações</button>
+      {% endif %}
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
       {% if produto.ativo %}
       <form action="/produtos/{{ produto.id }}/desativar" method="post"><button type="submit" class="btn btn-warning">Desativar</button></form>
@@ -110,7 +112,9 @@
     return String(valor ?? '').replace(/[&<>'"]/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[caractere]);
   }
 
-  async function abrirVariacoesProduto(produtoId, nomeProduto) {
+  async function abrirVariacoesProduto(botao) {
+    const produtoId = Number(botao.dataset.produtoId);
+    const nomeProduto = botao.dataset.produtoNome;
     const modal = document.getElementById('modalVariacoesProduto');
     const titulo = document.getElementById('tituloVariacoesProduto');
     const conteudo = document.getElementById('conteudoVariacoesProduto');
