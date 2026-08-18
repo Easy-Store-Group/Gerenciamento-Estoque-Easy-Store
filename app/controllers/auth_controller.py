@@ -1,5 +1,4 @@
 import math
-import os
 from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, Request, Form,status, HTTPException
@@ -214,7 +213,12 @@ def tela_produtos_publicos(
     por_pagina = max(por_pagina, 1)
     total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
     pagina = min(max(pagina, 1), total_paginas)
-    produtos = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+    produtos = (
+        query.order_by(Produto.nome)
+        .offset((pagina - 1) * por_pagina)
+        .limit(por_pagina)
+        .all()
+    )
     links_reserva = {
         produto.id: montar_link_reserva_whatsapp(produto)
         for produto in produtos
@@ -235,6 +239,10 @@ def tela_produtos_publicos(
             "total_paginas": total_paginas,
             "total_produtos": total_produtos,
             "links_reserva": links_reserva,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_produtos": total_produtos,
         },
     )
 
