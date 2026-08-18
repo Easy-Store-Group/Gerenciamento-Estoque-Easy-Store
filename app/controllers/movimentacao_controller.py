@@ -1,3 +1,5 @@
+import math
+
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -32,6 +34,8 @@ def listar_movimentacoes(
     request: Request,
     produto_id: int = 0,
     tipo: str = "",
+    pagina: int = 1,
+    por_pagina: int = 10,
     db: Session = Depends(get_db),
     usuario=Depends(get_usuario_logado),
 ):
@@ -49,7 +53,11 @@ def listar_movimentacoes(
         from fastapi import HTTPException
         raise HTTPException(status_code=403, detail="Acesso negado")
 
-    movimentacoes = query.limit(200).all()
+    total_movimentacoes = query.count()
+    por_pagina = max(por_pagina, 1)
+    total_paginas = math.ceil(total_movimentacoes / por_pagina) if total_movimentacoes else 1
+    pagina = min(max(pagina, 1), total_paginas)
+    movimentacoes = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
     produtos = db.query(Produto).filter(Produto.ativo == True).order_by(Produto.nome).all()
 
     return templates.TemplateResponse(
@@ -62,6 +70,10 @@ def listar_movimentacoes(
             "produtos": produtos,
             "produto_id": produto_id,
             "tipo": tipo,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_movimentacoes": total_movimentacoes,
             "page_title": "Movimentações",
             "page_subtitle": "Histórico de entradas e saídas do estoque",
             "css_path": "css/movimentacoes.css",

@@ -15,7 +15,7 @@
     </label>
     <button type="submit" class="btn btn-primary">Buscar</button>
   </form>
-  <span class="detail-pill">{{ produtos|length }} produto(s)</span>
+  <span class="detail-pill">Total de produtos: <strong>{{ total_produtos }}</strong></span>
 </div>
 
 {% if produtos %}
@@ -60,4 +60,11 @@
 {% else %}
 <div class="empty-state">Nenhum produto encontrado. Cadastre um novo produto para começar.</div>
 {% endif %}
+<nav class="pagination" aria-label="Paginação de produtos">
+  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/produtos?busca={{ busca }}&categoria_id={{ categoria_id }}&mostrar_inativos={{ 'true' if mostrar_inativos else 'false' }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% for numero in range(1, total_paginas + 1) %}
+  <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/produtos?busca={{ busca }}&categoria_id={{ categoria_id }}&mostrar_inativos={{ 'true' if mostrar_inativos else 'false' }}&por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+  {% endfor %}
+  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/produtos?busca={{ busca }}&categoria_id={{ categoria_id }}&mostrar_inativos={{ 'true' if mostrar_inativos else 'false' }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+</nav>
 {% endblock %}

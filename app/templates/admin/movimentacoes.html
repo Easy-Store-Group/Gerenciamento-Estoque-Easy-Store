@@ -16,7 +16,7 @@
     </select>
     <button type="submit" class="btn btn-primary">Filtrar</button>
   </form>
-  <span class="detail-pill">{{ movimentacoes|length }} registro(s)</span>
+  <span class="detail-pill">Total de registros: <strong>{{ total_movimentacoes }}</strong></span>
   {% if extra_button and extra_button.href %}
   <a href="{{ extra_button.href }}" class="btn btn-primary" style="margin-left:12px;">{{ extra_button.label }}</a>
   {% endif %}
@@ -46,4 +46,11 @@
   <div class="empty-state">Nenhuma movimentação encontrada.</div>
   {% endfor %}
 </div>
+<nav class="pagination" aria-label="Paginação de movimentações">
+  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/movimentacoes?produto_id={{ produto_id }}&tipo={{ tipo }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% for numero in range(1, total_paginas + 1) %}
+  <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/movimentacoes?produto_id={{ produto_id }}&tipo={{ tipo }}&por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+  {% endfor %}
+  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/movimentacoes?produto_id={{ produto_id }}&tipo={{ tipo }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+</nav>
 {% endblock %}

@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="table-actions">
-  <div class="detail-pill">Total de categorias: <strong>{{ categorias|length }}</strong></div>
+  <div class="detail-pill">Total de categorias: <strong>{{ total_categorias }}</strong></div>
   {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
   {% if role == 'admin' %}
   <a href="/categorias/nova" class="btn btn-primary">+Nova categoria</a>
@@ -32,4 +32,11 @@
   </div>
   {% endfor %}
 </div>
+<nav class="pagination" aria-label="Paginação de categorias">
+  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% for numero in range(1, total_paginas + 1) %}
+  <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+  {% endfor %}
+  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+</nav>
 {% endblock %}

@@ -52,4 +52,11 @@
     </table>
   </div>
 </div>
+<nav class="pagination" aria-label="Paginação de vendas">
+  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% for numero in range(1, total_paginas + 1) %}
+  <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+  {% endfor %}
+  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+</nav>
 {% endblock %}
