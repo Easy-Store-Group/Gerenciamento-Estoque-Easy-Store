@@ -169,6 +169,35 @@ def deletar_tamanho(tamanho_id: int, db: Session = Depends(get_db)):
 
 # ==================== VARIAÇÕES ====================
 
+@router.get("/produtos")
+def listar_produtos_api(db: Session = Depends(get_db)):
+    """Lista produtos para os seletores e a gestão de variações."""
+    produtos = (
+        db.query(Produto)
+        .filter(Produto.ativo == True)
+        .order_by(Produto.nome)
+        .all()
+    )
+    return [
+        {"id": produto.id, "nome": produto.nome, "estoque_atual": produto.estoque_atual}
+        for produto in produtos
+    ]
+
+
+@router.get("/produtos/com-variacoes")
+def listar_produtos_com_variacoes(db: Session = Depends(get_db)):
+    """Lista somente produtos que possuem variações ativas."""
+    produtos = (
+        db.query(Produto)
+        .join(ProdutoVariacao, ProdutoVariacao.produto_id == Produto.id)
+        .filter(Produto.ativo == True, ProdutoVariacao.ativa == True)
+        .distinct()
+        .order_by(Produto.nome)
+        .all()
+    )
+    return [{"id": produto.id, "nome": produto.nome} for produto in produtos]
+
+
 class VariacaoCreate(BaseModel):
     produto_id: int
     cor_id: int | None = None

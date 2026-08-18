@@ -725,7 +725,7 @@
     async function carregarVariacoes() {
         try {
             // Carrega produtos para filtro
-            const produtosResponse = await fetch('/api/produtos');
+            const produtosResponse = await fetch('/api/produtos/com-variacoes');
             const produtos = await produtosResponse.json();
             
             const filterSelect = document.getElementById('filterProduto');
@@ -799,7 +799,6 @@
                 <td><span class="status ${v.ativa ? 'ativo' : 'inativo'}">${v.ativa ? 'Ativo' : 'Inativo'}</span></td>
                 <td>
                     <button class="btn btn-sm btn-primary" onclick="abrirModalUploadImagem(${v.id})">Imagem</button>
-                    ${v.imagem ? `<button class="btn btn-sm btn-warning" onclick="deletarImagemVariacao(${v.id})">Remover</button>` : ''}
                     <button class="btn btn-sm btn-danger" onclick="deletarVariacao(${v.id})">Deletar</button>
                 </td>
             `;
@@ -989,25 +988,7 @@
         }
     }
 
-    async function deletarImagemVariacao(variacaoId) {
-        if (confirm('Tem certeza que deseja remover esta imagem?')) {
-            try {
-                const response = await fetch(`/api/variacoes/${variacaoId}/imagem`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    alert('Imagem removida com sucesso!');
-                    carregarVariacoesFiltradas();
-                } else {
-                    alert('Erro ao remover imagem');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Erro ao remover imagem');
-            }
-        }
-    }
+
 
     function visualizarImagem(src) {
         const modal = document.createElement('div');

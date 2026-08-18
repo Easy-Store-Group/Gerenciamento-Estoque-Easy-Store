@@ -69,6 +69,15 @@ def listar_produtos(
     offset = (pagina - 1) * por_pagina
 
     produtos = query.offset(offset).limit(por_pagina).all()
+    produtos_com_variacoes = {
+        produto_id
+        for (produto_id,) in (
+            db.query(ProdutoVariacao.produto_id)
+            .filter(ProdutoVariacao.ativa == True)
+            .distinct()
+            .all()
+        )
+    }
     
     categorias  = db.query(Categoria).filter(Categoria.ativo == True).all()
 
@@ -80,6 +89,7 @@ def listar_produtos(
             "request":      request,
             "usuario":      usuario,
             "produtos":     produtos,
+            "produtos_com_variacoes": produtos_com_variacoes,
             "categorias":   categorias,
             "busca":        busca,
             "categoria_id": categoria_id,
