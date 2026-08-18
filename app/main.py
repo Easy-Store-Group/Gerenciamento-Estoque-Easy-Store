@@ -15,6 +15,7 @@ from app.controllers import movimentacao_controller
 from app.controllers import pdv_controller
 from app.controllers import produto_controller
 from app.controllers import cliente_controller
+from app.controllers import variacao_controller
 from app.database import get_db
 from app.models.categoria import Categoria
 from app.models.cliente import Cliente
@@ -56,6 +57,7 @@ app.include_router(produto_controller.router)
 app.include_router(movimentacao_controller.router)
 app.include_router(pdv_controller.router)
 app.include_router(cliente_controller.router)
+app.include_router(variacao_controller.router)
 
 
 @app.get("/")

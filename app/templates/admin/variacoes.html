@@ -1,0 +1,1030 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Variações de Produtos</h1>
+        <p>Gerencie cores, tamanhos e combinações de seus produtos</p>
+    </div>
+
+    <!-- Abas para navegação -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('cores')">Cores</button>
+        <button class="tab-btn" onclick="switchTab('tamanhos')">Tamanhos</button>
+        <button class="tab-btn" onclick="switchTab('variacoes')">Variações</button>
+    </div>
+
+    <!-- TAB: CORES -->
+    <div id="cores" class="tab-content active">
+        <div class="section-header">
+            <h2>Cadastro de Cores</h2>
+            <button class="btn btn-primary" onclick="abrirModalCor()">+ Adicionar Cor</button>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Código Hex</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="coresTableBody">
+                    <tr><td colspan="5" class="text-center">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB: TAMANHOS -->
+    <div id="tamanhos" class="tab-content">
+        <div class="section-header">
+            <h2>Cadastro de Tamanhos</h2>
+            <button class="btn btn-primary" onclick="abrirModalTamanho()">+ Adicionar Tamanho</button>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="tamanhoTableBody">
+                    <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TAB: VARIAÇÕES -->
+    <div id="variacoes" class="tab-content">
+        <div class="section-header">
+            <h2>Variações de Produtos</h2>
+            <button class="btn btn-primary" onclick="abrirModalVariacao()">+ Adicionar Variação</button>
+        </div>
+
+        <div class="filters">
+            <input type="text" id="searchProduto" placeholder="Buscar por produto..." onkeyup="filtrarVariacoes()">
+            <select id="filterProduto" onchange="carregarVariacoesFiltradas()">
+                <option value="">Todos os produtos</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Produto</th>
+                        <th>Cor</th>
+                        <th>Tamanho</th>
+                        <th>Imagem</th>
+                        <th>Estoque</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="variacaoTableBody">
+                    <tr><td colspan="8" class="text-center">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Cores -->
+<div id="modalCor" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalCorTitle">Adicionar Cor</h2>
+            <button class="close-btn" onclick="fecharModalCor()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="formCor">
+                <div class="form-group">
+                    <label for="corNome">Nome da Cor *</label>
+                    <input type="text" id="corNome" name="nome" required placeholder="Ex: Vermelho, Azul">
+                </div>
+
+                <div class="form-group">
+                    <label for="corHex">Código Hex (Opcional)</label>
+                    <input type="color" id="corHex" name="codigo_hex" placeholder="#FF5733">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalCor()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Cor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Tamanhos -->
+<div id="modalTamanho" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTamanhoTitle">Adicionar Tamanho</h2>
+            <button class="close-btn" onclick="fecharModalTamanho()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="formTamanho">
+                <div class="form-group">
+                    <label for="tamanhoNome">Nome do Tamanho *</label>
+                    <input type="text" id="tamanhoNome" name="nome" required placeholder="Ex: P, M, G, GG, PP, Único">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalTamanho()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Tamanho</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Variações -->
+<div id="modalVariacao" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalVariacaoTitle">Adicionar Variação</h2>
+            <button class="close-btn" onclick="fecharModalVariacao()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="formVariacao">
+                <div class="form-group">
+                    <label for="variacaoProduto">Produto *</label>
+                    <select id="variacaoProduto" name="produto_id" required>
+                        <option value="">Selecione um produto</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="variacaoCor">Cor</label>
+                    <select id="variacaoCor" name="cor_id">
+                        <option value="">Sem cor</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="variacaoTamanho">Tamanho</label>
+                    <select id="variacaoTamanho" name="tamanho_id">
+                        <option value="">Sem tamanho</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="variacaoEstoque">Estoque Inicial</label>
+                    <input type="number" id="variacaoEstoque" name="estoque_atual" value="0" min="0">
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalVariacao()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Salvar Variação</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL: Upload de Imagem da Variação -->
+<div id="modalUploadImagem" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Upload de Imagem - Variação</h2>
+            <button class="close-btn" onclick="fecharModalUploadImagem()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="imagemPreview" class="imagem-preview" style="display: none;">
+                <img id="previewImg" src="" alt="Preview">
+            </div>
+            
+            <form id="formUploadImagem">
+                <div class="form-group">
+                    <label for="fileImagem">Selecione uma imagem *</label>
+                    <input type="file" id="fileImagem" name="file" accept="image/*" required>
+                    <small>Formatos aceitos: JPG, PNG, GIF, WebP (Máx 5MB)</small>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModalUploadImagem()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .imagem-preview {
+        text-align: center;
+        margin-bottom: 20px;
+        padding: 10px;
+        background: #f5f5f5;
+        border-radius: 4px;
+    }
+    
+    .imagem-preview img {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 4px;
+    }
+    
+    .imagem-tabela {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    
+    .imagem-tabela:hover {
+        opacity: 0.8;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+        border-bottom: 2px solid #e0e0e0;
+    }
+
+    .tab-btn {
+        padding: 10px 20px;
+        background: none;
+        border: none;
+        border-bottom: 3px solid transparent;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+        border-bottom-color: #007bff;
+        color: #007bff;
+    }
+
+    .tab-btn:hover {
+        color: #007bff;
+    }
+
+    .tab-content {
+        display: none;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .tab-content.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px 0;
+    }
+
+    .section-header h2 {
+        margin: 0;
+    }
+
+    .filters {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+    }
+
+    .filters input,
+    .filters select {
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .table-container {
+        margin: 20px 0;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }
+
+    .data-table thead {
+        background-color: #f5f5f5;
+        border-bottom: 2px solid #ddd;
+    }
+
+    .data-table th {
+        padding: 15px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 14px;
+        color: #333;
+    }
+
+    .data-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .data-table tbody tr:hover {
+        background-color: #f9f9f9;
+    }
+
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #999;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 20px;
+        border-top: 1px solid #eee;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+
+    .btn-sm {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+
+    .status.ativo {
+        background-color: #d4edda;
+        color: #155724;
+    }
+
+    .status.inativo {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    .color-preview {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+        vertical-align: middle;
+    }
+</style>
+
+<script>
+    // Controle de abas
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        document.getElementById(tabName).classList.add('active');
+        event.target.classList.add('active');
+        
+        if (tabName === 'cores') carregarCores();
+        if (tabName === 'tamanhos') carregarTamanhos();
+        if (tabName === 'variacoes') carregarVariacoes();
+    }
+
+    // ==================== CORES ====================
+    
+    async function carregarCores() {
+        try {
+            const response = await fetch('/api/cores');
+            const cores = await response.json();
+            
+            const tbody = document.getElementById('coresTableBody');
+            tbody.innerHTML = '';
+            
+            cores.forEach(cor => {
+                const row = document.createElement('tr');
+                const colorStyle = cor.codigo_hex ? `style="background-color: ${cor.codigo_hex}; width: 24px; height: 24px; border-radius: 4px;"` : '';
+                
+                row.innerHTML = `
+                    <td>${cor.id}</td>
+                    <td>${cor.nome}</td>
+                    <td><div class="color-preview" ${colorStyle}></div> ${cor.codigo_hex || '-'}</td>
+                    <td><span class="status ${cor.ativa ? 'ativo' : 'inativo'}">${cor.ativa ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editarCor(${cor.id})">Editar</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletarCor(${cor.id})">Deletar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar cores:', error);
+            alert('Erro ao carregar cores');
+        }
+    }
+
+    function abrirModalCor(corId = null) {
+        const form = document.getElementById('formCor');
+        form.reset();
+        document.getElementById('modalCorTitle').textContent = corId ? 'Editar Cor' : 'Adicionar Cor';
+        document.getElementById('formCor').onsubmit = (e) => salvarCor(e, corId);
+        document.getElementById('modalCor').classList.add('active');
+        
+        if (corId) {
+            fetch(`/api/cores`)
+                .then(r => r.json())
+                .then(cores => {
+                    const cor = cores.find(c => c.id === corId);
+                    if (cor) {
+                        document.getElementById('corNome').value = cor.nome;
+                        document.getElementById('corHex').value = cor.codigo_hex || '';
+                    }
+                });
+        }
+    }
+
+    function fecharModalCor() {
+        document.getElementById('modalCor').classList.remove('active');
+    }
+
+    async function salvarCor(e, corId = null) {
+        e.preventDefault();
+        const nome = document.getElementById('corNome').value;
+        const codigo_hex = document.getElementById('corHex').value;
+
+        const method = corId ? 'PUT' : 'POST';
+        const url = corId ? `/api/cores/${corId}` : '/api/cores';
+
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, codigo_hex: codigo_hex || null })
+            });
+
+            if (response.ok) {
+                alert(`Cor ${corId ? 'atualizada' : 'criada'} com sucesso!`);
+                fecharModalCor();
+                carregarCores();
+            } else {
+                alert('Erro ao salvar cor');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao salvar cor');
+        }
+    }
+
+    function editarCor(corId) {
+        abrirModalCor(corId);
+    }
+
+    async function deletarCor(corId) {
+        if (confirm('Tem certeza que deseja deletar esta cor?')) {
+            try {
+                const response = await fetch(`/api/cores/${corId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Cor deletada com sucesso!');
+                    carregarCores();
+                } else {
+                    alert('Erro ao deletar cor');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao deletar cor');
+            }
+        }
+    }
+
+    // ==================== TAMANHOS ====================
+    
+    async function carregarTamanhos() {
+        try {
+            const response = await fetch('/api/tamanhos');
+            const tamanhos = await response.json();
+            
+            const tbody = document.getElementById('tamanhoTableBody');
+            tbody.innerHTML = '';
+            
+            tamanhos.forEach(tamanho => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tamanho.id}</td>
+                    <td>${tamanho.nome}</td>
+                    <td><span class="status ${tamanho.ativa ? 'ativo' : 'inativo'}">${tamanho.ativa ? 'Ativo' : 'Inativo'}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-primary" onclick="editarTamanho(${tamanho.id})">Editar</button>
+                        <button class="btn btn-sm btn-danger" onclick="deletarTamanho(${tamanho.id})">Deletar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar tamanhos:', error);
+            alert('Erro ao carregar tamanhos');
+        }
+    }
+
+    function abrirModalTamanho(tamanhoId = null) {
+        const form = document.getElementById('formTamanho');
+        form.reset();
+        document.getElementById('modalTamanhoTitle').textContent = tamanhoId ? 'Editar Tamanho' : 'Adicionar Tamanho';
+        document.getElementById('formTamanho').onsubmit = (e) => salvarTamanho(e, tamanhoId);
+        document.getElementById('modalTamanho').classList.add('active');
+        
+        if (tamanhoId) {
+            fetch(`/api/tamanhos`)
+                .then(r => r.json())
+                .then(tamanhos => {
+                    const tamanho = tamanhos.find(t => t.id === tamanhoId);
+                    if (tamanho) {
+                        document.getElementById('tamanhoNome').value = tamanho.nome;
+                    }
+                });
+        }
+    }
+
+    function fecharModalTamanho() {
+        document.getElementById('modalTamanho').classList.remove('active');
+    }
+
+    async function salvarTamanho(e, tamanhoId = null) {
+        e.preventDefault();
+        const nome = document.getElementById('tamanhoNome').value;
+
+        const method = tamanhoId ? 'PUT' : 'POST';
+        const url = tamanhoId ? `/api/tamanhos/${tamanhoId}` : '/api/tamanhos';
+
+        try {
+            const response = await fetch(url, {
+                method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome })
+            });
+
+            if (response.ok) {
+                alert(`Tamanho ${tamanhoId ? 'atualizado' : 'criado'} com sucesso!`);
+                fecharModalTamanho();
+                carregarTamanhos();
+            } else {
+                alert('Erro ao salvar tamanho');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao salvar tamanho');
+        }
+    }
+
+    function editarTamanho(tamanhoId) {
+        abrirModalTamanho(tamanhoId);
+    }
+
+    async function deletarTamanho(tamanhoId) {
+        if (confirm('Tem certeza que deseja deletar este tamanho?')) {
+            try {
+                const response = await fetch(`/api/tamanhos/${tamanhoId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Tamanho deletado com sucesso!');
+                    carregarTamanhos();
+                } else {
+                    alert('Erro ao deletar tamanho');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao deletar tamanho');
+            }
+        }
+    }
+
+    // ==================== VARIAÇÕES ====================
+    
+    async function carregarVariacoes() {
+        try {
+            // Carrega produtos para filtro
+            const produtosResponse = await fetch('/api/produtos');
+            const produtos = await produtosResponse.json();
+            
+            const filterSelect = document.getElementById('filterProduto');
+            filterSelect.innerHTML = '<option value="">Todos os produtos</option>';
+            
+            produtos.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.id;
+                option.textContent = p.nome;
+                filterSelect.appendChild(option);
+            });
+
+            carregarVariacoesFiltradas();
+        } catch (error) {
+            console.error('Erro ao carregar variações:', error);
+        }
+    }
+
+    async function carregarVariacoesFiltradas() {
+        try {
+            const produtoFilter = document.getElementById('filterProduto').value;
+            const produtosResponse = await fetch('/api/produtos');
+            const produtos = await produtosResponse.json();
+            
+            let variacoes = [];
+            
+            for (const produto of produtos) {
+                if (produtoFilter && produto.id !== parseInt(produtoFilter)) continue;
+                
+                try {
+                    const response = await fetch(`/api/variacoes/produto/${produto.id}`);
+                    if (response.ok) {
+                        const vars = await response.json();
+                        variacoes.push(...vars.map(v => ({ ...v, nomeProduto: produto.nome })));
+                    }
+                } catch (e) {
+                    // Produto sem variações
+                }
+            }
+            
+            exibirVariacoes(variacoes);
+        } catch (error) {
+            console.error('Erro:', error);
+        }
+    }
+
+    function exibirVariacoes(variacoes) {
+        const tbody = document.getElementById('variacaoTableBody');
+        tbody.innerHTML = '';
+        
+        if (variacoes.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhuma variação encontrada</td></tr>';
+            return;
+        }
+        
+        variacoes.forEach(v => {
+            const row = document.createElement('tr');
+            const corNome = v.cor ? v.cor.nome : '-';
+            const tamanhoNome = v.tamanho ? v.tamanho.nome : '-';
+            const imagemHtml = v.imagem 
+                ? `<img src="${v.imagem}" alt="Variação ${v.id}" class="imagem-tabela" onclick="visualizarImagem('${v.imagem}')">`
+                : '<span style="color: #999;">-</span>';
+            
+            row.innerHTML = `
+                <td>${v.id}</td>
+                <td>${v.nomeProduto}</td>
+                <td>${corNome}</td>
+                <td>${tamanhoNome}</td>
+                <td>${imagemHtml}</td>
+                <td>${v.estoque_atual}</td>
+                <td><span class="status ${v.ativa ? 'ativo' : 'inativo'}">${v.ativa ? 'Ativo' : 'Inativo'}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="abrirModalUploadImagem(${v.id})">Imagem</button>
+                    ${v.imagem ? `<button class="btn btn-sm btn-warning" onclick="deletarImagemVariacao(${v.id})">Remover</button>` : ''}
+                    <button class="btn btn-sm btn-danger" onclick="deletarVariacao(${v.id})">Deletar</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function filtrarVariacoes() {
+        const search = document.getElementById('searchProduto').value.toLowerCase();
+        document.querySelectorAll('#variacaoTableBody tr').forEach(row => {
+            const nomeProduto = row.cells[1]?.textContent.toLowerCase() || '';
+            row.style.display = nomeProduto.includes(search) ? '' : 'none';
+        });
+    }
+
+    async function abrirModalVariacao(variacaoId = null) {
+        // Carrega produtos
+        const produtosResponse = await fetch('/api/produtos');
+        const produtos = await produtosResponse.json();
+        
+        const selectProduto = document.getElementById('variacaoProduto');
+        selectProduto.innerHTML = '<option value="">Selecione um produto</option>';
+        produtos.forEach(p => {
+            const option = document.createElement('option');
+            option.value = p.id;
+            option.textContent = p.nome;
+            selectProduto.appendChild(option);
+        });
+
+        // Carrega cores
+        const coresResponse = await fetch('/api/cores');
+        const cores = await coresResponse.json();
+        
+        const selectCor = document.getElementById('variacaoCor');
+        selectCor.innerHTML = '<option value="">Sem cor</option>';
+        cores.forEach(c => {
+            const option = document.createElement('option');
+            option.value = c.id;
+            option.textContent = c.nome;
+            selectCor.appendChild(option);
+        });
+
+        // Carrega tamanhos
+        const tamanhosResponse = await fetch('/api/tamanhos');
+        const tamanhos = await tamanhosResponse.json();
+        
+        const selectTamanho = document.getElementById('variacaoTamanho');
+        selectTamanho.innerHTML = '<option value="">Sem tamanho</option>';
+        tamanhos.forEach(t => {
+            const option = document.createElement('option');
+            option.value = t.id;
+            option.textContent = t.nome;
+            selectTamanho.appendChild(option);
+        });
+
+        document.getElementById('formVariacao').onsubmit = (e) => salvarVariacao(e, variacaoId);
+        document.getElementById('modalVariacao').classList.add('active');
+    }
+
+    function fecharModalVariacao() {
+        document.getElementById('modalVariacao').classList.remove('active');
+    }
+
+    async function salvarVariacao(e, variacaoId = null) {
+        e.preventDefault();
+        
+        const produto_id = parseInt(document.getElementById('variacaoProduto').value);
+        const cor_id = document.getElementById('variacaoCor').value || null;
+        const tamanho_id = document.getElementById('variacaoTamanho').value || null;
+        const estoque_atual = parseInt(document.getElementById('variacaoEstoque').value) || 0;
+
+        try {
+            const response = await fetch('/api/variacoes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    produto_id,
+                    cor_id: cor_id ? parseInt(cor_id) : null,
+                    tamanho_id: tamanho_id ? parseInt(tamanho_id) : null,
+                    estoque_atual
+                })
+            });
+
+            if (response.ok) {
+                alert('Variação criada com sucesso!');
+                fecharModalVariacao();
+                carregarVariacoesFiltradas();
+            } else {
+                const error = await response.json();
+                alert('Erro: ' + error.detail);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao salvar variação');
+        }
+    }
+
+    async function deletarVariacao(variacaoId) {
+        if (confirm('Tem certeza que deseja deletar esta variação?')) {
+            try {
+                const response = await fetch(`/api/variacoes/${variacaoId}`, { method: 'DELETE' });
+                if (response.ok) {
+                    alert('Variação deletada com sucesso!');
+                    carregarVariacoesFiltradas();
+                } else {
+                    alert('Erro ao deletar variação');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao deletar variação');
+            }
+        }
+    }
+
+    function editarVariacao(variacaoId) {
+        // Pode ser expandido para editar estoque
+        alert('Funcionalidade de edição será implementada');
+    }
+
+    // ==================== UPLOAD DE IMAGEM ====================
+    
+    let variacaoIdAtual = null;
+
+    function abrirModalUploadImagem(variacaoId) {
+        variacaoIdAtual = variacaoId;
+        document.getElementById('fileImagem').value = '';
+        document.getElementById('imagemPreview').style.display = 'none';
+        document.getElementById('formUploadImagem').onsubmit = (e) => fazerUploadImagem(e, variacaoId);
+        document.getElementById('modalUploadImagem').classList.add('active');
+    }
+
+    function fecharModalUploadImagem() {
+        document.getElementById('modalUploadImagem').classList.remove('active');
+        variacaoIdAtual = null;
+    }
+
+    document.getElementById('fileImagem')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                document.getElementById('previewImg').src = event.target.result;
+                document.getElementById('imagemPreview').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    async function fazerUploadImagem(e, variacaoId) {
+        e.preventDefault();
+        
+        const fileInput = document.getElementById('fileImagem');
+        const file = fileInput.files[0];
+        
+        if (!file) {
+            alert('Selecione uma imagem!');
+            return;
+        }
+        
+        // Validar tamanho (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Arquivo muito grande! Máximo 5MB');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        try {
+            const response = await fetch(`/api/variacoes/${variacaoId}/imagem`, {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                alert('Imagem enviada com sucesso!');
+                fecharModalUploadImagem();
+                carregarVariacoesFiltradas();
+            } else {
+                const error = await response.json();
+                alert('Erro: ' + error.detail);
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            alert('Erro ao fazer upload da imagem');
+        }
+    }
+
+    async function deletarImagemVariacao(variacaoId) {
+        if (confirm('Tem certeza que deseja remover esta imagem?')) {
+            try {
+                const response = await fetch(`/api/variacoes/${variacaoId}/imagem`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Imagem removida com sucesso!');
+                    carregarVariacoesFiltradas();
+                } else {
+                    alert('Erro ao remover imagem');
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao remover imagem');
+            }
+        }
+    }
+
+    function visualizarImagem(src) {
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);display:flex;justify-content:center;align-items:center;z-index:2000';
+        
+        const img = document.createElement('img');
+        img.src = src;
+        img.style.cssText = 'max-width:90%;max-height:90%;border-radius:8px;cursor:pointer';
+        img.onclick = () => modal.remove();
+        
+        modal.appendChild(img);
+        document.body.appendChild(modal);
+        modal.onclick = () => modal.remove();
+    }
+
+    // Inicializa na aba de Cores
+    window.addEventListener('load', carregarCores);
+</script>
+
+{% endblock %}
