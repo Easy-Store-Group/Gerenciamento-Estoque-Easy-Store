@@ -441,6 +441,11 @@ def deletar_variacao(variacao_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Variação não encontrada")
     
     produto_id = variacao.produto_id
+    if variacao.imagem:
+        caminho_imagem = os.path.join(UPLOAD_DIR, os.path.basename(variacao.imagem))
+        if os.path.exists(caminho_imagem):
+            os.remove(caminho_imagem)
+
     db.delete(variacao)
     db.flush()
     

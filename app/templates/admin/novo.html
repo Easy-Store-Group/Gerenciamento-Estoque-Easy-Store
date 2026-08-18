@@ -84,12 +84,6 @@
               </div>
             </div>
           </div>
-          <div class="input-group">
-          <label>Imagem do produto</label>
-          <input type="file" name="imagem" accept="image/png, image/jpeg, image/webp">
-        </div>
-      </div>
-
           <div class="variacao-row">
             <div class="input-group">
               <label>Estoque dessa variação</label>
@@ -258,6 +252,18 @@
 
   .variacao-item-info {
     flex: 1;
+  }
+
+  .variacao-imagem-label {
+    display: block;
+    margin-top: 8px;
+    color: #555;
+    font-size: 12px;
+  }
+
+  .variacao-imagem-label input {
+    display: block;
+    margin-top: 4px;
   }
 
   .variacao-item-remove {
@@ -476,6 +482,10 @@
     atualizarLista();
   }
 
+  function definirImagemVariacao(index, input) {
+    variacoesList[index].imagemArquivo = input.files[0] || null;
+  }
+
   function atualizarLista() {
     const lista = document.getElementById('lista-variacoes');
     const container = document.getElementById('variacoes-list');
@@ -490,10 +500,23 @@
         <div class="variacao-item">
           <div class="variacao-item-info">
             <strong>${v.cor_nome}</strong> | <strong>${v.tamanho_nome}</strong> - Estoque: ${v.estoque_atual}
+            <label class="variacao-imagem-label">
+              Imagem desta variação
+              <input type="file" id="imagem-variacao-${i}" name="imagens_variacoes" accept="image/png, image/jpeg, image/webp, image/gif" onchange="definirImagemVariacao(${i}, this)">
+            </label>
           </div>
           <button type="button" class="variacao-item-remove" onclick="removerVariacao(${i})">Remover</button>
         </div>
       `).join('');
+
+      variacoesList.forEach((variacao, i) => {
+        if (!variacao.imagemArquivo) return;
+
+        const input = document.getElementById(`imagem-variacao-${i}`);
+        const transferencia = new DataTransfer();
+        transferencia.items.add(variacao.imagemArquivo);
+        input.files = transferencia.files;
+      });
       
       container.classList.add('show');
       json.value = JSON.stringify(variacoesList);

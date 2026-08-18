@@ -25,7 +25,9 @@ templates = Jinja2Templates(directory="app/templates")
 
 # Pasta onde as imagens serão salvas dentro de /static
 UPLOAD_DIR = "app/static/uploads"
+UPLOAD_VARIACOES_DIR = os.path.join(UPLOAD_DIR, "variacoes")
 os.makedirs(UPLOAD_DIR, exist_ok=True)  # cria a pasta se não existir
+os.makedirs(UPLOAD_VARIACOES_DIR, exist_ok=True)
 
 
 # ============================================================
@@ -124,6 +126,26 @@ def form_novo_produto(
     )
 
 
+@router.get("/variacoes")
+def tela_variacoes(
+    request: Request,
+    admin=Depends(get_admin),
+):
+    """Tela para consultar, anexar e remover imagens de variações."""
+    return templates.TemplateResponse(
+        request,
+        "admin/variacoes.html",
+        {
+            "request": request,
+            "usuario": admin,
+            "page_title": "Variações",
+            "page_subtitle": "Gerencie cores, tamanhos e imagens das variações",
+            "css_path": "css/cadastros.css",
+            "active": "variacoes",
+        },
+    )
+
+
 @router.post("/novo")
 async def criar_produto(
     request: Request,
@@ -134,6 +156,7 @@ async def criar_produto(
     categoria_id: int  = Form(0),
     imagem: UploadFile = File(None),
     variacoes_json: str = Form("[]"),  # JSON das variações
+    imagens_variacoes: list[UploadFile] = File([]),
     db: Session        = Depends(get_db),
     admin              = Depends(get_admin)
 ):
@@ -183,7 +206,7 @@ async def criar_produto(
         
         if variacoes:
             estoque_total = 0
-            for var_data in variacoes:
+            for indice, var_data in enumerate(variacoes):
                 variacao = ProdutoVariacao(
                     produto_id=produto.id,
                     cor_id=var_data.get('cor_id'),
@@ -192,6 +215,9 @@ async def criar_produto(
                     ativa=True
                 )
                 db.add(variacao)
+                db.flush()
+                imagem_variacao = imagens_variacoes[indice] if indice < len(imagens_variacoes) else None
+                variacao.imagem = await _salvar_imagem_variacao(imagem_variacao, variacao.id)
                 estoque_total += var_data.get('estoque_atual', 0)
             
             # Atualiza estoque total do produto com a soma das variações
@@ -408,6 +434,24 @@ async def _salvar_imagem(imagem: UploadFile | None):
 
     # Retorna o path relativo ao /static (para montar a URL)
     return f"uploads/{nome_arquivo}"
+
+
+async def _salvar_imagem_variacao(imagem: UploadFile | None, variacao_id: int):
+    """Salva a imagem de uma variação e retorna sua URL pública."""
+    if not imagem or not imagem.filename:
+        return None
+
+    extensoes_permitidas = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+    _, ext = os.path.splitext(imagem.filename.lower())
+    if ext not in extensoes_permitidas:
+        return None
+
+    nome_arquivo = f"variacao_{variacao_id}_{uuid.uuid4().hex}{ext}"
+    caminho_completo = os.path.join(UPLOAD_VARIACOES_DIR, nome_arquivo)
+    with open(caminho_completo, "wb") as buffer:
+        shutil.copyfileobj(imagem.file, buffer)
+
+    return f"/static/uploads/variacoes/{nome_arquivo}"
 
 
 def _remover_imagem(imagem_path: str | None) -> None:
