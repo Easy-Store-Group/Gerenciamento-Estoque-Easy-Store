@@ -13,12 +13,10 @@ from app.database import get_db
 from app.models.produto import Produto
 from app.models.categoria import Categoria
 from app.models.movimentacao import Movimentacao
-<<<<<<< HEAD
 from app.models.variacao import ProdutoVariacao
 from app.auth import get_usuario_logado, get_admin
-=======
 from app.auth import get_admin
->>>>>>> 4fa72bb3064da6b5ce9c46a9f99fbbdcdfe41403
+
 from app.errors import OperacaoInvalidaError
 
 router = APIRouter(prefix="/produtos", tags=["Produtos"])
