@@ -97,6 +97,7 @@
                         <a class="modal-close" href="#produtos" aria-label="Fechar">x</a>
                         <span class="modal-kicker">Reserva EasyStore</span>
                         <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
+                        <div id="imagem-variacao-{{ produto.id }}" class="imagem-variacao-cliente" hidden></div>
                                                 {% if produto.estoque_atual > 0 %}
                                                 <p>Produto disponivel para reserva pelo WhatsApp.</p>
                                                 <div class="product-options" id="options-{{ produto.id }}">
@@ -172,27 +173,26 @@
                     html += '</select></div>';
                 }
 
-                // Seleto de cores
+                // Cores como bolinhas clicáveis
                 if (cores.size > 0) {
                     html += '<div class="form-group">';
-                    html += `<label for="color-${produtoId}">Cor</label>`;
-                    html += `<select id="color-${produtoId}" class="option-cor" data-produto-id="${produtoId}">`;
-                    html += '<option value="">-- Selecione uma cor --</option>';
-                    
+                    html += '<label>Cor</label>';
+                    html += `<div id="colors-${produtoId}" class="color-options" role="group" aria-label="Escolha uma cor">`;
                     Array.from(cores).forEach(c => {
                         const cor = JSON.parse(c);
-                        html += `<option value="${cor.id}" data-nome="${cor.nome}" style="background-color: ${cor.codigo_hex || '#fff'}">${cor.nome}</option>`;
+                        html += `<button type="button" class="color-option" data-cor-id="${cor.id}" data-cor-nome="${cor.nome}" title="${cor.nome}" aria-label="Cor ${cor.nome}" style="--color: ${cor.codigo_hex || '#ffffff'}"></button>`;
                     });
-                    
-                    html += '</select></div>';
+                    html += '</div></div>';
                 }
 
                 container.innerHTML = html;
 
                 // Atualiza links de WhatsApp ao selecionar
                 const selectTamanho = document.getElementById(`size-${produtoId}`);
-                const selectCor = document.getElementById(`color-${produtoId}`);
+                const colorOptions = document.getElementById(`colors-${produtoId}`);
                 const whatsappLink = document.querySelector(`.reserve-button[data-produto-id="${produtoId}"]`);
+                let corSelecionadaId = null;
+                let corSelecionadaNome = null;
 
                 const atualizarWhatsapp = () => {
                     let mensagem = `Gostaria de reservar o produto: `;
@@ -204,19 +204,40 @@
                         mensagem += ` - Tamanho: ${tamanhonome}`;
                     }
 
-                    if (selectCor && selectCor.value) {
-                        const corNome = selectCor.options[selectCor.selectedIndex].dataset.nome;
-                        mensagem += ` - Cor: ${corNome}`;
+                    if (corSelecionadaNome) {
+                        mensagem += ` - Cor: ${corSelecionadaNome}`;
                     }
 
                     const baseHref = whatsappLink.dataset.baseHref;
                     const url = new URL(baseHref);
                     url.searchParams.set('text', mensagem);
                     whatsappLink.href = url.toString();
+
+                    const variacaoSelecionada = variacoes.find(variacao =>
+                        (!selectTamanho?.value || variacao.tamanho?.id === Number(selectTamanho.value)) &&
+                        (!corSelecionadaId || variacao.cor?.id === corSelecionadaId)
+                    );
+                    const imagemContainer = document.getElementById(`imagem-variacao-${produtoId}`);
+                    if (variacaoSelecionada?.imagem) {
+                        imagemContainer.innerHTML = `<img src="${variacaoSelecionada.imagem}" alt="Imagem da variação selecionada">`;
+                        imagemContainer.hidden = false;
+                    } else {
+                        imagemContainer.hidden = true;
+                        imagemContainer.innerHTML = '';
+                    }
                 };
 
                 if (selectTamanho) selectTamanho.addEventListener('change', atualizarWhatsapp);
-                if (selectCor) selectCor.addEventListener('change', atualizarWhatsapp);
+                if (colorOptions) {
+                    colorOptions.querySelectorAll('.color-option').forEach(botao => {
+                        botao.addEventListener('click', () => {
+                            corSelecionadaId = Number(botao.dataset.corId);
+                            corSelecionadaNome = botao.dataset.corNome;
+                            colorOptions.querySelectorAll('.color-option').forEach(item => item.classList.toggle('is-selected', item === botao));
+                            atualizarWhatsapp();
+                        });
+                    });
+                }
 
             } catch (error) {
                 console.error('Erro ao carregar variações:', error);
@@ -262,6 +283,40 @@
             color: #999;
             text-align: center;
             padding: 10px;
+        }
+
+        .color-options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .color-option {
+            background: var(--color);
+            border: 2px solid rgba(15, 23, 42, .2);
+            border-radius: 50%;
+            cursor: pointer;
+            height: 28px;
+            padding: 0;
+            transition: transform .15s, box-shadow .15s;
+            width: 28px;
+        }
+
+        .color-option:hover,
+        .color-option:focus-visible { transform: scale(1.12); outline: none; }
+
+        .color-option.is-selected { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #2563eb; }
+
+        .imagem-variacao-cliente {
+            margin: 12px 0;
+            text-align: center;
+        }
+
+        .imagem-variacao-cliente img {
+            border-radius: 8px;
+            max-height: 180px;
+            max-width: 100%;
+            object-fit: cover;
         }
     </style>
 </body>

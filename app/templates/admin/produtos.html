@@ -43,6 +43,7 @@
     <div class="actions">
       {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
       {% if role == 'admin' %}
+      <button type="button" class="btn btn-secondary" onclick='abrirVariacoesProduto({{ produto.id }}, {{ produto.nome|tojson }})'>Variações</button>
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
       {% if produto.ativo %}
       <form action="/produtos/{{ produto.id }}/desativar" method="post"><button type="submit" class="btn btn-warning">Desativar</button></form>
@@ -81,5 +82,56 @@
 {% else %}
 <div class="empty-state">Nenhum produto encontrado. Cadastre um novo produto para começar.</div>
 {% endif %}
+
+<div id="modalVariacoesProduto" class="modal-variacoes-produto" aria-hidden="true">
+  <div class="modal-variacoes-produto__card" role="dialog" aria-modal="true" aria-labelledby="tituloVariacoesProduto">
+    <div class="modal-variacoes-produto__header">
+      <div><span>Variações do produto</span><h2 id="tituloVariacoesProduto"></h2></div>
+      <button type="button" class="modal-variacoes-produto__close" onclick="fecharVariacoesProduto()" aria-label="Fechar">&times;</button>
+    </div>
+    <div id="conteudoVariacoesProduto" class="modal-variacoes-produto__body"></div>
+  </div>
+</div>
+
+<style>
+  .modal-variacoes-produto { align-items: center; background: rgba(15,23,42,.55); display: none; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 1000; }
+  .modal-variacoes-produto.is-open { display: flex; }
+  .modal-variacoes-produto__card { background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,.28); max-height: 85vh; max-width: 760px; overflow: auto; width: 100%; }
+  .modal-variacoes-produto__header { align-items: flex-start; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; padding: 20px 24px; }
+  .modal-variacoes-produto__header span { color: #64748b; font-size: .85rem; }.modal-variacoes-produto__header h2 { font-size: 1.25rem; margin: 4px 0 0; }
+  .modal-variacoes-produto__close { background: transparent; border: 0; color: #475569; cursor: pointer; font-size: 2rem; line-height: 1; }.modal-variacoes-produto__body { padding: 20px 24px; }
+  .variacoes-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }.variacao-card { border: 1px solid #e2e8f0; border-radius: 12px; display: grid; gap: 12px; grid-template-columns: 88px 1fr; padding: 12px; }
+  .variacao-card img, .variacao-sem-imagem { background: #f1f5f9; border-radius: 8px; height: 88px; object-fit: cover; width: 88px; }.variacao-sem-imagem { align-items: center; color: #64748b; display: flex; font-size: .75rem; justify-content: center; padding: 8px; text-align: center; }
+  .variacao-card p { color: #475569; font-size: .9rem; margin: 0 0 5px; }.variacao-card strong { color: #0f172a; }.variacao-vazia { color: #64748b; margin: 0; text-align: center; }
+</style>
+
+<script>
+  function escaparHtml(valor) {
+    return String(valor ?? '').replace(/[&<>'"]/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[caractere]);
+  }
+
+  async function abrirVariacoesProduto(produtoId, nomeProduto) {
+    const modal = document.getElementById('modalVariacoesProduto');
+    const titulo = document.getElementById('tituloVariacoesProduto');
+    const conteudo = document.getElementById('conteudoVariacoesProduto');
+    titulo.textContent = nomeProduto;
+    conteudo.innerHTML = '<p class="variacao-vazia">Carregando variações...</p>';
+    modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false');
+    try {
+      const resposta = await fetch(`/api/variacoes/produto/${produtoId}`);
+      if (!resposta.ok) throw new Error('Não foi possível carregar as variações.');
+      const variacoes = await resposta.json();
+      if (!variacoes.length) { conteudo.innerHTML = '<p class="variacao-vazia">Este produto não possui variações cadastradas.</p>'; return; }
+      conteudo.innerHTML = `<div class="variacoes-grid">${variacoes.map(variacao => {
+        const cor = escaparHtml(variacao.cor?.nome || 'Sem cor');
+        const tamanho = escaparHtml(variacao.tamanho?.nome || 'Sem tamanho');
+        const imagem = variacao.imagem ? `<img src="${escaparHtml(variacao.imagem)}" alt="Imagem da variação ${cor} ${tamanho}">` : '<div class="variacao-sem-imagem">Sem imagem da variação</div>';
+        return `<article class="variacao-card">${imagem}<div><p><strong>Cor:</strong> ${cor}</p><p><strong>Tamanho:</strong> ${tamanho}</p><p><strong>Estoque:</strong> ${variacao.estoque_atual}</p><p><strong>Status:</strong> ${variacao.ativa ? 'Ativa' : 'Inativa'}</p></div></article>`;
+      }).join('')}</div>`;
+    } catch (erro) { conteudo.innerHTML = `<p class="variacao-vazia">${escaparHtml(erro.message)}</p>`; }
+  }
+  function fecharVariacoesProduto() { const modal = document.getElementById('modalVariacoesProduto'); modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); }
+  document.getElementById('modalVariacoesProduto').addEventListener('click', evento => { if (evento.target.id === 'modalVariacoesProduto') fecharVariacoesProduto(); });
+</script>
 
 {% endblock %}
