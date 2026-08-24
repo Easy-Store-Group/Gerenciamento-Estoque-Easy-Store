@@ -6,9 +6,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Adicionar classe de estilo ao botão
         btnCheckout.classList.add('btn-checkout-finalizar');
         
-        // Atualizar ícone e texto
+        // Atualizar texto
         const originalText = btnCheckout.textContent.trim();
-        btnCheckout.innerHTML = '<span class="btn-checkout-icon">🛒</span> ' + (originalText || 'Finalizar Venda');
+        btnCheckout.textContent = originalText || 'Finalizar Venda';
         
         // Adicionar eventos
         btnCheckout.addEventListener('click', handleCheckoutClick);
@@ -61,12 +61,10 @@ function updateCheckoutButtonState() {
     
     if (!temItens) {
         btnCheckout.disabled = true;
-        btnCheckout.style.opacity = '0.5';
-        btnCheckout.style.cursor = 'not-allowed';
+        btnCheckout.classList.add('is-disabled');
     } else {
         btnCheckout.disabled = false;
-        btnCheckout.style.opacity = '1';
-        btnCheckout.style.cursor = 'pointer';
+        btnCheckout.classList.remove('is-disabled');
     }
 }
 
@@ -81,15 +79,7 @@ function mostrarAlertaCheckout(mensagem, tipo = 'info') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${tipo}`;
     alertDiv.textContent = mensagem;
-    alertDiv.style.cssText = `
-        padding: 12px 16px;
-        border-radius: 12px;
-        font-size: 13px;
-        font-weight: 500;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        animation: slideIn 0.3s ease-out;
-        margin-bottom: 10px;
-    `;
+    alertDiv.classList.add('alert-enter');
     
     // Cores baseadas no tipo
 // Cores baseadas no tipo (Paleta em tons azuis)
@@ -116,17 +106,13 @@ const cores = {
     }
 };
     
-    const cor = cores[tipo] || cores.info;
-    alertDiv.style.cssText += `
-        background: ${cor.bg};
-        color: ${cor.text};
-        border-left: 4px solid ${cor.border};
-    `;
+    alertDiv.classList.add(`alert-checkout-${tipo}`);
     
     alertContainer.appendChild(alertDiv);
     
     setTimeout(() => {
-        alertDiv.style.animation = 'slideOut 0.3s ease-out';
+        alertDiv.classList.remove('alert-enter');
+        alertDiv.classList.add('alert-exit');
         setTimeout(() => alertDiv.remove(), 300);
     }, 3000);
 }
