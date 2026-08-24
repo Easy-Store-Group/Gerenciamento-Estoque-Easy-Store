@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
   <title>{% block title %}Minha área{% endblock %} - EasyStore</title>
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/cliente.css') }}?v=5">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/cliente.css') }}?v=6">
 </head>
 <body>
   <header class="cliente-header">
@@ -14,7 +14,7 @@
         <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
         <span>EasyStore</span>
       </a>
-      <nav class="cliente-nav">
+      <nav class="cliente-nav" aria-label="Navegação do cliente">
         <a href="/cliente?secao=produtos" class="{% if secao_ativa == 'produtos' %}active{% endif %}">Produtos</a>
         <a href="/cliente?secao=categorias" class="{% if secao_ativa == 'categorias' %}active{% endif %}">Categorias</a>
         <a href="/cliente?secao=compras" class="{% if secao_ativa == 'compras' %}active{% endif %}">Minhas compras</a>

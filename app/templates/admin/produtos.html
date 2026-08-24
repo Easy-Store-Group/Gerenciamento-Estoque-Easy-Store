@@ -1,18 +1,32 @@
-{% extends "admin/base.html" %}
+﻿{% extends "admin/base.html" %}
+
+{% set title = "Produtos - EasyStore" %}
+{% set page_title = "Produtos" %}
+{% set page_subtitle = "Gerencie o catálogo, imagens, estoque e status dos produtos." %}
+{% set active = "produtos" %}
+{% set logo_padrao = request.url_for('static', path='img/logo.png') %}
 
 {% block content %}
 <div class="page-actions">
-  <form class="search-bar" action="/produtos" method="get">
-    <input type="text" name="busca" placeholder="Buscar produto..." value="{{ busca }}">
-    <select name="categoria_id">
+  <form class="search-bar" action="/produtos" method="get" role="search">
+    <label class="sr-only" for="busca-produto">Buscar produto</label>
+    <input id="busca-produto" type="text" name="busca" placeholder="Buscar produto..." value="{{ busca|e }}">
+
+    <label class="sr-only" for="categoria_id">Categoria</label>
+    <select id="categoria_id" name="categoria_id">
       <option value="0">Todas as categorias</option>
       {% for categoria in categorias %}
       <option value="{{ categoria.id }}" {% if categoria.id == categoria_id %}selected{% endif %}>{{ categoria.nome }}</option>
+      {% else %}
+      <option value="0" disabled>Nenhuma categoria cadastrada</option>
       {% endfor %}
     </select>
-    <label style="margin-left:8px; display:inline-flex; align-items:center;">
-      <input type="checkbox" name="mostrar_inativos" value="true" {% if mostrar_inativos %}checked{% endif %} style="margin-right:6px;"> Mostrar inativos
+
+    <label class="inline-check">
+      <input type="checkbox" name="mostrar_inativos" value="true" {% if mostrar_inativos %}checked{% endif %}>
+      Mostrar inativos
     </label>
+
     <button type="submit" class="btn btn-primary">Buscar</button>
   </form>
   <span class="detail-pill">Total de produtos: <strong>{{ total_produtos }}</strong></span>
@@ -25,26 +39,31 @@
     <div>Plataforma</div>
     <div>Categoria</div>
     <div>Estoque</div>
+    <div>Preço</div>
     <div>Ações</div>
   </div>
   {% for produto in produtos %}
+  {% set estoque_baixo = produto.estoque_atual <= 0 %}
   <div class="table-row">
     <div class="product-info">
-      <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
+      <img src="{{ produto.imagem_url or logo_padrao }}" alt="{{ produto.nome | e }}" loading="lazy" onerror="this.onerror=null;this.src='{{ logo_padrao }}';">
       <div>
         <strong>{{ produto.nome }}</strong>
         <span class="status-badge {% if produto.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativo' if produto.ativo else 'Inativo' }}</span>
+        {% if estoque_baixo %}
+        <span class="status-badge inactive">Sem estoque</span>
+        {% endif %}
       </div>
     </div>
     <div>{{ produto.plataforma }}</div>
     <div>{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</div>
     <div>{{ produto.estoque_atual }}</div>
-    <div>{{ produto.preco }}</div>
+    <div>R$ {{ "%.2f"|format(produto.preco)|replace('.', ',') }}</div>
     <div class="actions">
       {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
       {% if role == 'admin' %}
       {% if produto.id in produtos_com_variacoes %}
-      <button type="button" class="btn btn-secondary" data-produto-id="{{ produto.id }}" data-produto-nome="{{ produto.nome }}" onclick="abrirVariacoesProduto(this)">Variações</button>
+      <button type="button" class="btn btn-secondary" data-produto-id="{{ produto.id }}" data-produto-nome="{{ produto.nome | e }}" onclick="abrirVariacoesProduto(this)">Variações</button>
       {% endif %}
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
       {% if produto.ativo %}
@@ -94,18 +113,6 @@
     <div id="conteudoVariacoesProduto" class="modal-variacoes-produto__body"></div>
   </div>
 </div>
-
-<style>
-  .modal-variacoes-produto { align-items: center; background: rgba(15,23,42,.55); display: none; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 1000; }
-  .modal-variacoes-produto.is-open { display: flex; }
-  .modal-variacoes-produto__card { background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,.28); max-height: 85vh; max-width: 760px; overflow: auto; width: 100%; }
-  .modal-variacoes-produto__header { align-items: flex-start; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; padding: 20px 24px; }
-  .modal-variacoes-produto__header span { color: #64748b; font-size: .85rem; }.modal-variacoes-produto__header h2 { font-size: 1.25rem; margin: 4px 0 0; }
-  .modal-variacoes-produto__close { background: transparent; border: 0; color: #475569; cursor: pointer; font-size: 2rem; line-height: 1; }.modal-variacoes-produto__body { padding: 20px 24px; }
-  .variacoes-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }.variacao-card { border: 1px solid #e2e8f0; border-radius: 12px; display: grid; gap: 12px; grid-template-columns: 88px 1fr; padding: 12px; }
-  .variacao-card img, .variacao-sem-imagem { background: #f1f5f9; border-radius: 8px; height: 88px; object-fit: cover; width: 88px; }.variacao-sem-imagem { align-items: center; color: #64748b; display: flex; font-size: .75rem; justify-content: center; padding: 8px; text-align: center; }
-  .variacao-card p { color: #475569; font-size: .9rem; margin: 0 0 5px; }.variacao-card strong { color: #0f172a; }.variacao-vazia { color: #64748b; margin: 0; text-align: center; }
-</style>
 
 <script>
   function escaparHtml(valor) {

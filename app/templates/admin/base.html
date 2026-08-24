@@ -1,18 +1,47 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{{ page_subtitle or 'Painel administrativo EasyStore' }}">
+  <meta property="og:title" content="{{ title or 'EasyStore Admin' }}">
+  <meta property="og:description" content="{{ page_subtitle or 'Painel administrativo EasyStore' }}">
+  <meta property="og:image" content="{{ request.url_for('static', path='img/logo.png') }}">
   <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
   <title>{{ title or 'EasyStore Admin' }}</title>
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/admin.css') }}?v=5">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/admin.css') }}?v=7">
   {% if css_path and css_path != 'css/admin.css' %}
-  <link rel="stylesheet" href="{{ request.url_for('static', path=css_path) }}?v=6">
+  <link rel="stylesheet" href="{{ request.url_for('static', path=css_path) }}?v=7">
   {% endif %}
 </head>
 <body>
+  {% if usuario %}
+    {% if usuario is mapping %}
+      {% set role = usuario.get('role') %}
+      {% set logged_name = usuario.get('nome', usuario.get('sub', 'Usuário')) %}
+    {% else %}
+      {% set role = usuario.role %}
+      {% set logged_name = usuario.nome if usuario.nome else 'Usuário' %}
+    {% endif %}
+  {% else %}
+    {% set role = None %}
+    {% set logged_name = 'Usuário' %}
+  {% endif %}
+
+  <button type="button"
+          class="sidebar-toggle"
+          aria-label="Abrir menu principal"
+          aria-controls="admin-sidebar"
+          aria-expanded="false"
+          data-sidebar-toggle>
+    <span class="sidebar-toggle-icon" aria-hidden="true"></span>
+    <span class="sidebar-toggle-text">Menu</span>
+  </button>
+
+  <div class="sidebar-backdrop" data-sidebar-backdrop hidden></div>
+
   <div class="admin-layout">
-    <aside class="sidebar">
+    <aside class="sidebar" id="admin-sidebar" role="navigation" aria-label="Menu principal" data-sidebar>
       <div class="brand-block">
         <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore" class="brand-logo">
         <div>
@@ -21,36 +50,22 @@
         </div>
       </div>
 
-      {% if usuario %}
-        {% if usuario is mapping %}
-          {% set role = usuario.get('role') %}
-          {% set logged_name = usuario.get('nome', usuario.get('sub', 'Usuário')) %}
-        {% else %}
-          {% set role = usuario.role %}
-          {% set logged_name = usuario.nome if usuario.nome else 'Usuário' %}
-        {% endif %}
-      {% else %}
-        {% set role = None %}
-        {% set logged_name = 'Usuário' %}
-      {% endif %}
-
       <nav class="sidebar-nav">
         {% if role == 'admin' %}
-        <a href="/admin" class="{% if active == 'home' %}active{% endif %}"><span>📊</span>Dashboard</a>
-        <a href="/produtos" class="{% if active == 'produtos' %}active{% endif %}"><span>📦</span>Produtos</a>
-        <a href="/produtos/variacoes" class="{% if active == 'variacoes' %}active{% endif %}"><span>🎨</span>Variações</a>
-        <a href="/categorias" class="{% if active == 'categorias' %}active{% endif %}"><span>🗂️</span>Categorias</a>
-        <a href="/admin/pos" class="{% if active == 'pos' %}active{% endif %}"><span>🛒</span>Ponto de Venda</a>
-        <a href="/usuarios" class="{% if active == 'usuarios' %}active{% endif %}"><span>👥</span>Usuários</a>
-        <a href="/movimentacoes" class="{% if active == 'movimentacoes' %}active{% endif %}"><span>🔃</span>Movimentações</a>
+        <a href="/admin" class="nav-link {% if active == 'home' %}active{% endif %}" {% if active == 'home' %}aria-current="page"{% endif %}>Dashboard</a>
+        <a href="/produtos" class="nav-link {% if active == 'produtos' %}active{% endif %}" {% if active == 'produtos' %}aria-current="page"{% endif %}>Produtos</a>
+        <a href="/produtos/variacoes" class="nav-link {% if active == 'variacoes' %}active{% endif %}" {% if active == 'variacoes' %}aria-current="page"{% endif %}>Variações</a>
+        <a href="/categorias" class="nav-link {% if active == 'categorias' %}active{% endif %}" {% if active == 'categorias' %}aria-current="page"{% endif %}>Categorias</a>
+        <a href="/admin/pos" class="nav-link {% if active == 'pos' %}active{% endif %}" {% if active == 'pos' %}aria-current="page"{% endif %}>Ponto de Venda</a>
+        <a href="/usuarios" class="nav-link {% if active == 'usuarios' %}active{% endif %}" {% if active == 'usuarios' %}aria-current="page"{% endif %}>Usuários</a>
+        <a href="/movimentacoes" class="nav-link {% if active == 'movimentacoes' %}active{% endif %}" {% if active == 'movimentacoes' %}aria-current="page"{% endif %}>Movimentações</a>
         {% elif role == 'operador' %}
-        <a href="/pdv" class="{% if active == 'pos' %}active{% endif %}"><span>🛒</span>Ponto de Venda</a>
+        <a href="/pdv" class="nav-link {% if active == 'pos' %}active{% endif %}" {% if active == 'pos' %}aria-current="page"{% endif %}>Ponto de Venda</a>
         {% endif %}
       </nav>
 
       <div class="sidebar-footer">
         <div class="profile-card">
-          {# logged_name já definido acima quando usuario existe #}
           <span>Logado como</span>
           <strong>{{ logged_name }}</strong>
         </div>
@@ -61,7 +76,7 @@
     <main class="admin-content">
       <header class="topbar">
         <div>
-          <h1>{{ page_title }}</h1>
+          <h1>{{ page_title or 'Painel' }}</h1>
           {% if page_subtitle %}
           <p class="subtitle">{{ page_subtitle }}</p>
           {% endif %}
@@ -76,5 +91,7 @@
       </section>
     </main>
   </div>
+
+  <script src="{{ request.url_for('static', path='js/sidebar.js') }}?v=1" defer></script>
 </body>
 </html>

@@ -1,55 +1,53 @@
-<!DOCTYPE html>
-<html lang="pt-br">
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}">
-  <title>Esqueci a senha</title>
+  <title>Esqueci a senha | EasyStore</title>
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=3">
 </head>
 <body>
-<div class="page" id="page">
-  <!-- BRANDING -->
-  <div class="branding" id="branding">
-    <div class="bg-layer" id="bgLayer"></div>
-    <div class="stars" id="stars"></div>
-    <div class="brand-content">
-      <div class="logo-row">
-        <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore logo" width="500">
-        <span class="brand-name" id="brandName">EasyStore</span>
+  <main class="page" id="page">
+    <aside class="branding" id="branding" aria-label="EasyStore">
+      <div class="bg-layer" id="bgLayer"></div>
+      <div class="stars" id="stars"></div>
+      <div class="brand-content">
+        <div class="logo-row">
+          <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore logo">
+          <span class="brand-name" id="brandName">EasyStore</span>
+        </div>
+        <p class="tagline" id="tagline">Recupere sua conta<br>em poucos passos</p>
+        <p class="sub">Nós enviaremos instruções para redefinir sua senha.</p>
       </div>
-      <p class="tagline" id="tagline">PCs, consoles e jogos<br>em um só lugar</p>
-      <p class="sub">Seu universo gamer começa aqui ✦</p>
-    </div>
-  </div>
+    </aside>
 
-  <!-- FORM SIDE -->
-  <div class="form-side">
-    <div class="login-box">
-      <h2>Esqueci minha senha</h2>
-      {% if erro %}
-        <p style="color: red;">{{ erro }}</p>
-      {% endif %}
+    <section class="form-side" aria-labelledby="forgot-title">
+      <div class="login-box">
+        <h1 id="forgot-title">Esqueci minha senha</h1>
+        {% if erro %}
+        <p class="login-error" role="alert">{{ erro }}</p>
+        {% endif %}
 
-      <form action="/auth/forgot" method="post">
-        <div class="input-group">
-          <label>E-mail</label>
-          <input type="email" name="email" placeholder="Digite o e-mail cadastrado">
+        <form action="/auth/forgot" method="post">
+          <div class="input-group">
+            <label for="email">E-mail</label>
+            <input id="email" type="email" name="email" placeholder="Digite o e-mail cadastrado" autocomplete="email" required>
+          </div>
+          <button type="submit" class="btn-confirm">Enviar instruções</button>
+        </form>
+
+        {% if reset_link %}
+        <div class="reset-dev-box">
+          <p>Link de reset, apenas para desenvolvimento:</p>
+          <a href="{{ reset_link }}" class="btn-confirm">Redefinir senha</a>
         </div>
-        <button type="submit" class="btn-confirm">✦ Enviar instruções</button>
-      </form>
+        {% endif %}
 
-      {% if reset_link %}
-        <div style="margin-top: 20px; text-align: center;">
-          <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Link de reset (apenas para desenvolvimento):</p>
-          <a href="{{ reset_link }}" class="btn-confirm" style="display: inline-block;">Redefinir senha</a>
-        </div>
-      {% endif %}
-
-      <p class="footer-text"><a href="/auth/login">Voltar ao login</a></p>
-    </div>
-  </div>
-</div>
-<script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
+        <p class="footer-text"><a href="/auth/login">Voltar ao login</a></p>
+      </div>
+    </section>
+  </main>
+  <script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
 </body>
 </html>

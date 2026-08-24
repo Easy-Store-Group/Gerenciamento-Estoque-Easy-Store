@@ -1,16 +1,21 @@
-{% extends "admin/base.html" %}
+﻿{% extends "admin/base.html" %}
+
+{% set title = "Categoria - EasyStore" %}
+{% set page_title = "Categoria" %}
+{% set page_subtitle = "Crie ou edite categorias do catálogo." %}
+{% set active = "categorias" %}
 
 {% block content %}
 <div class="form-card">
   <h2>{% if editando %}Editar categoria{% else %}Nova categoria{% endif %}</h2>
   {% if erro %}
-  <div class="alert alert-error">{{ erro }}</div>
+  <div class="alert alert-error" role="alert">{{ erro }}</div>
   {% endif %}
   <form action="{% if editando %}/categorias/{{ editando.id }}/editar{% else %}/categorias/nova{% endif %}" method="post">
     <div class="form-grid single-column">
       <div class="input-group">
-        <label>Nome da categoria</label>
-        <input type="text" name="nome" value="{{ editando.nome if editando else valores.nome if valores else '' }}" required>
+        <label for="nome">Nome da categoria</label>
+        <input id="nome" type="text" name="nome" value="{{ editando.nome if editando else valores.nome if valores else '' | e }}" required>
       </div>
     </div>
     <button type="submit" class="btn btn-primary">{% if editando %}Salvar categoria{% else %}Criar categoria{% endif %}</button>

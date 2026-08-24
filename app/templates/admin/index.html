@@ -1,4 +1,9 @@
-{% extends "admin/base.html" %}
+﻿{% extends "admin/base.html" %}
+
+{% set title = "EasyStore Admin" %}
+{% set page_title = "Dashboard" %}
+{% set page_subtitle = "Resumo operacional do estoque e do PDV." %}
+{% set active = "home" %}
 
 {% block content %}
 <div class="metric-grid">
@@ -19,7 +24,7 @@
   </div>
   <div class="metric-card accent-card">
     <span class="metric-label">Total vendas (7 dias)</span>
-    <strong class="metric-value">R$ {{ "%.2f"|format(total_vendas_7_dias) }}</strong>
+    <strong class="metric-value">R$ {{ "%.2f"|format(total_vendas_7_dias)|replace('.', ',') }}</strong>
     <p class="metric-note">Valor total vendido no PDV nos últimos 7 dias.</p>
   </div>
 </div>
@@ -38,12 +43,14 @@
       {% for dia in vendas_grafico %}
       {% set chart_bar_class = 'chart-bar is-empty' if dia.total == 0 else 'chart-bar' %}
       <div class="chart-column">
-        <div class="chart-value">R$ {{ "%.2f"|format(dia.total) }}</div>
+        <div class="chart-value">R$ {{ "%.2f"|format(dia.total)|replace('.', ',') }}</div>
         <div class="chart-track">
           <div class="{{ chart_bar_class }}" style="height: {{ dia.percentual }}%;"></div>
         </div>
         <span>{{ dia.label }}</span>
       </div>
+      {% else %}
+      <div class="empty-state">Nenhum dado de vendas disponível para o período.</div>
       {% endfor %}
     </div>
   </section>
@@ -67,7 +74,7 @@
       <a class="latest-sales-row" href="/pdv/venda/{{ venda.id }}">
         <div>#{{ venda.id }}</div>
         <div>{{ venda.cliente.nome if venda.cliente else 'Consumidor não identificado' }}</div>
-        <div>R$ {{ "%.2f"|format(venda.total_liquido) }}</div>
+        <div>R$ {{ "%.2f"|format(venda.total_liquido)|replace('.', ',') }}</div>
         <div>{{ venda.criado_em.strftime('%d/%m %H:%M') if venda.criado_em else '-' }}</div>
       </a>
       {% else %}

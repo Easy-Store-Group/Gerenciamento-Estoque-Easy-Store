@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
     <title>Produtos - EasyStore</title>
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}?v=5">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}?v=6">
 </head>
 <body>
     <header class="public-header">
@@ -14,20 +14,17 @@
                 <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
                 <span>EasyStore</span>
             </a>
-
             <nav class="public-nav">
-                <a href="/">Inicio</a>
+                <a href="/">Início</a>
                 <a href="/auth/produtos" class="active">Produtos</a>
                 <a href="/sobre-nos">Sobre</a>
             </nav>
-
             <div class="public-actions">
                 {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
                 {% if role == 'cliente' %}
-                <a href="/cliente" class="btn btn-outline">Minha area</a>
+                <a href="/cliente" class="btn btn-outline">Minha área</a>
                 {% else %}
                 <a href="/auth/login" class="btn btn-outline">Login</a>
-
                 {% endif %}
             </div>
         </div>
@@ -36,9 +33,9 @@
     <main class="public-main">
         <section class="catalog-hero">
             <div>
-                <span class="eyebrow">Catalogo publico</span>
+                <span class="eyebrow">Catálogo público</span>
                 <h1>Produtos EasyStore</h1>
-                <p>Confira nossos jogos, consoles e acessorios disponiveis antes de entrar no sistema.</p>
+                <p>Confira nossos jogos, consoles e acessórios disponíveis antes de entrar no sistema.</p>
             </div>
             <a href="/auth/register" class="hero-link">Criar conta</a>
         </section>
@@ -47,25 +44,25 @@
             <div class="section-header">
                 <div>
                     <h2>Produtos</h2>
-                    <p>Use a busca ou filtre por categoria para encontrar o que voce procura.</p>
+                    <p>Use a busca ou filtre por categoria para encontrar o que você procura.</p>
                 </div>
-
-                <form class="catalog-search" method="get" action="/auth/produtos">
+                <form class="catalog-search" method="get" action="/auth/produtos" role="search">
                     {% if categoria_id %}
                     <input type="hidden" name="categoria_id" value="{{ categoria_id }}">
                     {% endif %}
-                    <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar produto...">
+                    <label class="sr-only" for="busca-produtos-publicos">Buscar produto</label>
+                    <input id="busca-produtos-publicos" type="text" name="busca" value="{{ busca|e }}" placeholder="Buscar produto...">
                     <button type="submit">Buscar</button>
                 </form>
             </div>
 
             {% if categorias %}
             <div class="category-chips">
-                <a href="/auth/produtos{% if busca %}?busca={{ busca }}{% endif %}"
-                   class="chip {% if not categoria_id %}active{% endif %}">Todos</a>
+                <a href="/auth/produtos{% if busca %}?busca={{ busca|urlencode }}{% endif %}" class="chip {% if not categoria_id %}active{% endif %}">Todos</a>
                 {% for cat in categorias %}
-                <a href="/auth/produtos?categoria_id={{ cat.id }}{% if busca %}&busca={{ busca }}{% endif %}"
-                   class="chip {% if categoria_id == cat.id %}active{% endif %}">{{ cat.nome }}</a>
+                <a href="/auth/produtos?categoria_id={{ cat.id }}{% if busca %}&busca={{ busca|urlencode }}{% endif %}" class="chip {% if categoria_id == cat.id %}active{% endif %}">{{ cat.nome }}</a>
+                {% else %}
+                <span class="chip is-disabled">Nenhuma categoria</span>
                 {% endfor %}
             </div>
             {% endif %}
@@ -76,16 +73,16 @@
                 <article class="product-card">
                     <a class="product-card-link" href="#reservar-{{ produto.id }}">
                         <div class="product-image">
-                            <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
+                            <img src="{{ produto.imagem_url }}" alt="{{ produto.nome | e }}">
                         </div>
                         <div class="product-body">
                             <span class="product-category">{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
                             <h3>{{ produto.nome }}</h3>
                             <p class="product-platform">{{ produto.plataforma }}</p>
                             <div class="product-footer">
-                                <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
+                                <strong>R$ {{ "%.2f"|format(produto.preco)|replace('.', ',') }}</strong>
                                 <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">
-                                    {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponivel{% endif %}
+                                    {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponível{% endif %}
                                 </span>
                             </div>
                         </div>
@@ -94,230 +91,138 @@
                 <div class="reserve-modal" id="reservar-{{ produto.id }}">
                     <a class="modal-backdrop" href="#produtos" aria-label="Fechar"></a>
                     <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ produto.id }}">
-                        <a class="modal-close" href="#produtos" aria-label="Fechar">x</a>
+                        <a class="modal-close" href="#produtos" aria-label="Fechar">×</a>
                         <span class="modal-kicker">Reserva EasyStore</span>
                         <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
                         <div id="imagem-variacao-{{ produto.id }}" class="imagem-variacao-cliente" hidden></div>
-                                                {% if produto.estoque_atual > 0 %}
-                                                <p>Produto disponivel para reserva pelo WhatsApp.</p>
-                                                <div class="product-options" id="options-{{ produto.id }}">
-                                                    <p class="loading-variacoes">Carregando variações...</p>
-                                                </div>
-                                                <a class="reserve-button modal-whatsapp"
-                                                     data-base-href="{{ links_reserva.get(produto.id) }}"
-                                                     data-produto-id="{{ produto.id }}"
-                                                     href="{{ links_reserva.get(produto.id) }}"
-                                                     target="_blank"
-                                                     rel="noopener noreferrer">
-                                                        Abrir WhatsApp
-                                                </a>
+                        {% if produto.estoque_atual > 0 %}
+                        <p>Produto disponível para reserva pelo WhatsApp.</p>
+                        <div class="product-options" id="options-{{ produto.id }}">
+                            <p class="loading-variacoes">Carregando variações...</p>
+                        </div>
+                        <a class="reserve-button modal-whatsapp" data-base-href="{{ links_reserva.get(produto.id) | e }}" data-produto-id="{{ produto.id }}" href="{{ links_reserva.get(produto.id) }}" target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>
                         {% else %}
-                        <p>Este produto esta sem estoque no momento.</p>
-                        <span class="reserve-button disabled modal-whatsapp">Indisponivel</span>
+                        <p>Este produto está sem estoque no momento.</p>
+                        <span class="reserve-button disabled modal-whatsapp">Indisponível</span>
                         {% endif %}
                     </div>
                 </div>
+                {% else %}
+                <p class="empty-state">Nenhum produto cadastrado.</p>
                 {% endfor %}
             </div>
             {% else %}
             <p class="empty-state">Nenhum produto encontrado.</p>
             {% endif %}
+
             <nav class="pagination" aria-label="Paginação de produtos">
-                <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+                {% if pagina > 1 %}
+                <a class="pagination-link" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca|urlencode }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+                {% else %}
+                <span class="pagination-link disabled" aria-disabled="true">Anterior</span>
+                {% endif %}
                 {% for numero in range(1, total_paginas + 1) %}
-                <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
+                <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca|urlencode }}&por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
                 {% endfor %}
-                <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+                {% if pagina < total_paginas %}
+                <a class="pagination-link" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca|urlencode }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+                {% else %}
+                <span class="pagination-link disabled" aria-disabled="true">Próxima</span>
+                {% endif %}
             </nav>
         </section>
     </main>
 
     <script>
-        // Carrega variações para cada produto
-        async function carregarVariacoesProduto(produtoId) {
-            try {
-                const response = await fetch(`/api/variacoes/produto/${produtoId}`);
-                if (!response.ok) return;
-                
-                const variacoes = await response.json();
-                const container = document.getElementById(`options-${produtoId}`);
-                
-                if (variacoes.length === 0) {
-                    container.innerHTML = '<p style="color: #999; font-size: 12px;">Sem variações</p>';
-                    return;
-                }
-
-                // Agrupa variações por cor e tamanho
-                const cores = new Set();
-                const tamanhos = new Set();
-                
-                variacoes.forEach(v => {
-                    if (v.cor) cores.add(JSON.stringify(v.cor));
-                    if (v.tamanho) tamanhos.add(JSON.stringify(v.tamanho));
-                });
-
-                let html = '';
-
-                // Seleto de tamanhos
-                if (tamanhos.size > 0) {
-                    html += '<div class="form-group">';
-                    html += `<label for="size-${produtoId}">Tamanho</label>`;
-                    html += `<select id="size-${produtoId}" class="option-tamanho" data-produto-id="${produtoId}">`;
-                    html += '<option value="">-- Selecione um tamanho --</option>';
-                    
-                    Array.from(tamanhos).forEach(t => {
-                        const tamanho = JSON.parse(t);
-                        html += `<option value="${tamanho.id}" data-nome="${tamanho.nome}">${tamanho.nome}</option>`;
-                    });
-                    
-                    html += '</select></div>';
-                }
-
-                // Cores como bolinhas clicáveis
-                if (cores.size > 0) {
-                    html += '<div class="form-group">';
-                    html += '<label>Cor</label>';
-                    html += `<div id="colors-${produtoId}" class="color-options" role="group" aria-label="Escolha uma cor">`;
-                    Array.from(cores).forEach(c => {
-                        const cor = JSON.parse(c);
-                        html += `<button type="button" class="color-option" data-cor-id="${cor.id}" data-cor-nome="${cor.nome}" title="${cor.nome}" aria-label="Cor ${cor.nome}" style="--color: ${cor.codigo_hex || '#ffffff'}"></button>`;
-                    });
-                    html += '</div></div>';
-                }
-
-                container.innerHTML = html;
-
-                // Atualiza links de WhatsApp ao selecionar
-                const selectTamanho = document.getElementById(`size-${produtoId}`);
-                const colorOptions = document.getElementById(`colors-${produtoId}`);
-                const whatsappLink = document.querySelector(`.reserve-button[data-produto-id="${produtoId}"]`);
-                let corSelecionadaId = null;
-                let corSelecionadaNome = null;
-
-                const atualizarWhatsapp = () => {
-                    let mensagem = `Gostaria de reservar o produto: `;
-                    const nomeProduto = document.querySelector(`.reserve-modal[id="reservar-${produtoId}"] h3`).textContent;
-                    mensagem += nomeProduto;
-
-                    if (selectTamanho && selectTamanho.value) {
-                        const tamanhonome = selectTamanho.options[selectTamanho.selectedIndex].dataset.nome;
-                        mensagem += ` - Tamanho: ${tamanhonome}`;
-                    }
-
-                    if (corSelecionadaNome) {
-                        mensagem += ` - Cor: ${corSelecionadaNome}`;
-                    }
-
-                    const baseHref = whatsappLink.dataset.baseHref;
-                    const url = new URL(baseHref);
-                    url.searchParams.set('text', mensagem);
-                    whatsappLink.href = url.toString();
-
-                    const variacaoSelecionada = variacoes.find(variacao =>
-                        (!selectTamanho?.value || variacao.tamanho?.id === Number(selectTamanho.value)) &&
-                        (!corSelecionadaId || variacao.cor?.id === corSelecionadaId)
-                    );
-                    const imagemContainer = document.getElementById(`imagem-variacao-${produtoId}`);
-                    if (variacaoSelecionada?.imagem) {
-                        imagemContainer.innerHTML = `<img src="${variacaoSelecionada.imagem}" alt="Imagem da variação selecionada">`;
-                        imagemContainer.hidden = false;
-                    } else {
-                        imagemContainer.hidden = true;
-                        imagemContainer.innerHTML = '';
-                    }
-                };
-
-                if (selectTamanho) selectTamanho.addEventListener('change', atualizarWhatsapp);
-                if (colorOptions) {
-                    colorOptions.querySelectorAll('.color-option').forEach(botao => {
-                        botao.addEventListener('click', () => {
-                            corSelecionadaId = Number(botao.dataset.corId);
-                            corSelecionadaNome = botao.dataset.corNome;
-                            colorOptions.querySelectorAll('.color-option').forEach(item => item.classList.toggle('is-selected', item === botao));
-                            atualizarWhatsapp();
-                        });
-                    });
-                }
-
-            } catch (error) {
-                console.error('Erro ao carregar variações:', error);
-            }
-        }
-
-        // Carrega variações de todos os produtos quando a página carrega
-        document.addEventListener('DOMContentLoaded', () => {
-            const produtoCards = document.querySelectorAll('.product-card');
-            produtoCards.forEach(card => {
-                const link = card.querySelector('.product-card-link');
-                const modal = link.getAttribute('href');
-                const produtoId = modal.replace('#reservar-', '');
-                carregarVariacoesProduto(produtoId);
+      async function carregarVariacoesProduto(produtoId) {
+        try {
+          const response = await fetch(`/api/variacoes/produto/${produtoId}`);
+          if (!response.ok) return;
+          const variacoes = await response.json();
+          const container = document.getElementById(`options-${produtoId}`);
+          if (!container) return;
+          if (variacoes.length === 0) {
+            container.innerHTML = '<p class="loading-variacoes">Sem variações</p>';
+            return;
+          }
+          const cores = new Set();
+          const tamanhos = new Set();
+          variacoes.forEach(v => { if (v.cor) cores.add(JSON.stringify(v.cor)); if (v.tamanho) tamanhos.add(JSON.stringify(v.tamanho)); });
+          let html = '';
+          if (tamanhos.size > 0) {
+            html += '<div class="form-group">';
+            html += `<label for="size-${produtoId}">Tamanho</label>`;
+            html += `<select id="size-${produtoId}" class="option-tamanho" data-produto-id="${produtoId}">`;
+            html += '<option value="">-- Selecione um tamanho --</option>';
+            Array.from(tamanhos).forEach(t => {
+              const tamanho = JSON.parse(t);
+              html += `<option value="${tamanho.id}" data-nome="${tamanho.nome}">${tamanho.nome}</option>`;
             });
+            html += '</select></div>';
+          }
+          if (cores.size > 0) {
+            html += '<div class="form-group">';
+            html += '<label>Cor</label>';
+            html += `<div id="colors-${produtoId}" class="color-options" role="group" aria-label="Escolha uma cor">`;
+            Array.from(cores).forEach(c => {
+              const cor = JSON.parse(c);
+              html += `<button type="button" class="color-option" data-cor-id="${cor.id}" data-cor-nome="${cor.nome}" title="${cor.nome}" aria-label="Cor ${cor.nome}" style="--color: ${cor.codigo_hex || '#ffffff'}"></button>`;
+            });
+            html += '</div></div>';
+          }
+          container.innerHTML = html;
+          const selectTamanho = document.getElementById(`size-${produtoId}`);
+          const colorOptions = document.getElementById(`colors-${produtoId}`);
+          const whatsappLink = document.querySelector(`.reserve-button[data-produto-id="${produtoId}"]`);
+          let corSelecionadaId = null;
+          let corSelecionadaNome = null;
+          const atualizarWhatsapp = () => {
+            let mensagem = `Gostaria de reservar o produto: `;
+            const nomeProduto = document.querySelector(`.reserve-modal[id="reservar-${produtoId}"] h3`).textContent;
+            mensagem += nomeProduto;
+            if (selectTamanho && selectTamanho.value) {
+              const tamanhonome = selectTamanho.options[selectTamanho.selectedIndex].dataset.nome;
+              mensagem += ` - Tamanho: ${tamanhonome}`;
+            }
+            if (corSelecionadaNome) {
+              mensagem += ` - Cor: ${corSelecionadaNome}`;
+            }
+            const baseHref = whatsappLink.dataset.baseHref;
+            const url = new URL(baseHref);
+            url.searchParams.set('text', mensagem);
+            whatsappLink.href = url.toString();
+            const variacaoSelecionada = variacoes.find(variacao => (!selectTamanho?.value || variacao.tamanho?.id === Number(selectTamanho.value)) && (!corSelecionadaId || variacao.cor?.id === corSelecionadaId));
+            const imagemContainer = document.getElementById(`imagem-variacao-${produtoId}`);
+            if (variacaoSelecionada?.imagem) {
+              imagemContainer.innerHTML = `<img src="${variacaoSelecionada.imagem}" alt="Imagem da variação selecionada">`;
+              imagemContainer.hidden = false;
+            } else {
+              imagemContainer.hidden = true;
+              imagemContainer.innerHTML = '';
+            }
+          };
+          if (selectTamanho) selectTamanho.addEventListener('change', atualizarWhatsapp);
+          if (colorOptions) {
+            colorOptions.querySelectorAll('.color-option').forEach(botao => {
+              botao.addEventListener('click', () => {
+                corSelecionadaId = Number(botao.dataset.corId);
+                corSelecionadaNome = botao.dataset.corNome;
+                colorOptions.querySelectorAll('.color-option').forEach(item => item.classList.toggle('is-selected', item === botao));
+                atualizarWhatsapp();
+              });
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao carregar variações:', error);
+        }
+      }
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.product-card').forEach(card => {
+          const link = card.querySelector('.product-card-link');
+          const produtoId = link.getAttribute('href').replace('#reservar-', '');
+          carregarVariacoesProduto(produtoId);
         });
+      });
     </script>
-
-    <style>
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #333;
-        }
-
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-            background-color: #f9f9f9;
-        }
-
-        .loading-variacoes {
-            font-size: 12px;
-            color: #999;
-            text-align: center;
-            padding: 10px;
-        }
-
-        .color-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .color-option {
-            background: var(--color);
-            border: 2px solid rgba(15, 23, 42, .2);
-            border-radius: 50%;
-            cursor: pointer;
-            height: 28px;
-            padding: 0;
-            transition: transform .15s, box-shadow .15s;
-            width: 28px;
-        }
-
-        .color-option:hover,
-        .color-option:focus-visible { transform: scale(1.12); outline: none; }
-
-        .color-option.is-selected { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #2563eb; }
-
-        .imagem-variacao-cliente {
-            margin: 12px 0;
-            text-align: center;
-        }
-
-        .imagem-variacao-cliente img {
-            border-radius: 8px;
-            max-height: 180px;
-            max-width: 100%;
-            object-fit: cover;
-        }
-    </style>
 </body>
 </html>

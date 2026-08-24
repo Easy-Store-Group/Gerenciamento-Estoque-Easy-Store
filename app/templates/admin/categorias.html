@@ -1,11 +1,16 @@
-{% extends "admin/base.html" %}
+﻿{% extends "admin/base.html" %}
+
+{% set title = "Categorias - EasyStore" %}
+{% set page_title = "Categorias" %}
+{% set page_subtitle = "Organize o catálogo por grupos e estados ativos." %}
+{% set active = "categorias" %}
 
 {% block content %}
 <div class="table-actions">
   <div class="detail-pill">Total de categorias: <strong>{{ total_categorias }}</strong></div>
   {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
   {% if role == 'admin' %}
-  <a href="/categorias/nova" class="btn btn-primary">+Nova categoria</a>
+  <a href="/categorias/nova" class="btn btn-primary">+ Nova categoria</a>
   {% endif %}
 </div>
 
@@ -30,13 +35,25 @@
       {% endif %}
     </div>
   </div>
+  {% else %}
+  <div class="table-row">
+    <div class="empty-state" style="grid-column: 1 / -1;">Nenhuma categoria cadastrada.</div>
+  </div>
   {% endfor %}
 </div>
 <nav class="pagination" aria-label="Paginação de categorias">
-  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% if pagina > 1 %}
+  <a class="pagination-link" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% else %}
+  <span class="pagination-link disabled" aria-disabled="true">Anterior</span>
+  {% endif %}
   {% for numero in range(1, total_paginas + 1) %}
   <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
   {% endfor %}
-  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+  {% if pagina < total_paginas %}
+  <a class="pagination-link" href="/categorias?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+  {% else %}
+  <span class="pagination-link disabled" aria-disabled="true">Próxima</span>
+  {% endif %}
 </nav>
 {% endblock %}

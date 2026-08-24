@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}
+﻿{% extends "admin/base.html" %}
 
 {% set title = "PDV - Ponto de Venda" %}
 {% set page_title = "Ponto de Venda" %}
@@ -6,121 +6,126 @@
 {% set active = "pos" %}
 {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
 {% set extra_button = {'href': '/pdv/historico', 'label': 'Histórico de Vendas'} if role == 'admin' else None %}
+{% set logo_padrao = request.url_for('static', path='img/logo.png') %}
 
 {% block content %}
 <div class="pdv-wrapper" data-desconto-associado="{{ desconto_associado }}">
-    <div id="alert-container"></div>
+  <div id="alert-container" aria-live="polite" aria-atomic="true"></div>
 
-    <div id="modal-variacoes" class="modal-variacoes">
-        <div class="modal-variacoes-content" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
-            <div class="modal-variacoes-header">
-                <h3 id="modal-titulo">Selecione Variações</h3>
-                <button type="button" class="close-btn" onclick="fecharModalVariacoes()" aria-label="Fechar modal">
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M18 6 6 18M6 6l12 12"></path>
-                    </svg>
-                </button>
+  <div id="modal-variacoes" class="modal-variacoes" aria-hidden="true">
+    <div class="modal-variacoes-content" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+      <div class="modal-variacoes-header">
+        <h3 id="modal-titulo">Selecione variações</h3>
+        <button type="button" class="close-btn" onclick="fecharModalVariacoes()" aria-label="Fechar modal">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M18 6 6 18M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-variacoes-body" id="modal-corpo"></div>
+      <div class="modal-variacoes-footer">
+        <button type="button" class="btn btn-secondary" onclick="fecharModalVariacoes()">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="confirmarVariacoes()">Adicionar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="pdv-grid">
+    <section class="catalogo-section" aria-labelledby="catalogo-title">
+      <div class="sr-only"><h2 id="catalogo-title">Catálogo de produtos</h2></div>
+
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"></path>
+        </svg>
+        <label for="input-busca" class="sr-only">Buscar produto</label>
+        <input type="text" id="input-busca" class="form-control" placeholder="Digite para buscar um produto..." autocomplete="off">
+      </div>
+
+      <div class="produtos-grid" aria-live="polite">
+        {% for produto in produtos %}
+        {% set produto_sem_estoque = produto.estoque_atual <= 0 %}
+        <button type="button" class="produto-card-pdv" data-id="{{ produto.id }}" data-img="{{ produto.imagem_url | default('', true) | e }}" data-nome="{{ produto.nome | e }}" data-preco="{{ produto.preco }}" data-estoque="{{ produto.estoque_atual }}" {% if produto_sem_estoque %}disabled aria-disabled="true"{% endif %}>
+          <div class="produto-card-media">
+            <img src="{{ produto.imagem_url or logo_padrao }}" alt="{{ produto.nome | e }}" class="prod-img" loading="lazy" onerror="this.onerror=null;this.src='{{ logo_padrao }}';">
+          </div>
+          <div class="produto-card-info">
+            <p class="prod-nome">{{ produto.nome }}</p>
+            <div class="produto-badges">
+              {% if produto_sem_estoque %}
+              <span class="badge badge-out">Sem estoque</span>
+              {% else %}
+              <span class="badge badge-in">Disponível</span>
+              {% endif %}
             </div>
-            <div class="modal-variacoes-body" id="modal-corpo">
-            </div>
-            <div class="modal-variacoes-footer">
-                <button type="button" class="btn btn-secondary" onclick="fecharModalVariacoes()">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="confirmarVariacoes()">Adicionar</button>
-            </div>
+          </div>
+          <div class="produto-card-hover-info">
+            <span class="produto-stock-label">Estoque atual</span>
+            <span class="prod-estoque">{{ produto.estoque_atual }} un</span>
+          </div>
+          <p class="prod-preco">R$ {{ "%.2f"|format(produto.preco)|replace('.', ',') }}</p>
+        </button>
+        {% else %}
+        <div class="catalogo-vazio">
+          Nenhum produto disponível para venda.
         </div>
-    </div>
+        {% endfor %}
+      </div>
+    </section>
 
-    <div class="pdv-grid">
-        <section class="catalogo-section">
-            <div class="search-box">
-                <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"></path>
-                </svg>
-                <input type="text" id="input-busca" class="form-control" placeholder="Digite para buscar um produto..." autocomplete="off">
-            </div>
+    <aside class="carrinho-lateral" aria-labelledby="carrinho-title">
+      <div class="carrinho-header">
+        <span>Caixa</span>
+        <h3 id="carrinho-title">Carrinho de compras</h3>
+      </div>
 
-            <div class="produtos-grid">
-                {% for produto in produtos %}
-                <div class="produto-card-pdv"
-                     data-id="{{ produto.id }}"
-                     data-img="{{ produto.imagem_url }}"
-                     data-nome="{{ produto.nome }}"
-                     data-preco="{{ produto.preco }}"
-                     data-estoque="{{ produto.estoque_atual }}">
-                    <div class="produto-card-media">
-                        <img src="{{ produto.imagem_url or request.url_for('static', path='img/logo.png') }}"
-                             alt="{{ produto.nome }}"
-                             class="prod-img"
-                             loading="lazy"
-                             onerror="this.onerror=null;this.src='{{ request.url_for('static', path='img/logo.png') }}';">
-                    </div>
-                    <div class="produto-card-info">
-                        <p class="prod-nome">{{ produto.nome }}</p>
-                    </div>
-                    <div class="produto-card-hover-info">
-                        <span class="produto-stock-label">Estoque atual</span>
-                        <span class="prod-estoque">Estoque: {{ produto.estoque_atual }} un</span>
-                    </div>
-                    <p class="prod-preco">R$ {{ "%.2f"|format(produto.preco) }}</p>
-                </div>
-                {% else %}
-                <div class="catalogo-vazio">
-                    Nenhum produto disponível para venda.
-                </div>
-                {% endfor %}
-            </div>
-        </section>
+      <form id="form-finalizar" action="/pdv/finalizar" method="POST">
+        <input type="hidden" name="carrinho_json" id="carrinho_json">
 
-        <aside class="carrinho-lateral">
-            <div class="carrinho-header">
-                <span>Caixa</span>
-                <h3>Carrinho de Compras</h3>
-            </div>
+        <div class="campo-cliente">
+          <label for="cliente_id">Cliente</label>
+          <select name="cliente_id" id="cliente_id" class="form-control" onchange="atualizarTotais()">
+            <option value="0">Consumidor não identificado</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id }}" data-associado="{{ 'true' if cliente.is_associado else 'false' }}">
+              {{ cliente.nome }}{% if cliente.is_associado %} (Associado - {{ desconto_associado }}%){% endif %}
+            </option>
+            {% else %}
+            <option value="0" disabled>Nenhum cliente cadastrado</option>
+            {% endfor %}
+          </select>
+        </div>
 
-            <form id="form-finalizar" action="/pdv/finalizar" method="POST">
-                <input type="hidden" name="carrinho_json" id="carrinho_json">
+        <div class="carrinho-itens" id="container-itens-carrinho" aria-live="polite"></div>
 
-                <div class="campo-cliente">
-                    <label for="cliente_id">Cliente</label>
-                    <select name="cliente_id" id="cliente_id" class="form-control" onchange="atualizarTotais()">
-                        <option value="0">Consumidor Não Identificado</option>
-                        {% for cliente in clientes %}
-                        <option value="{{ cliente.id }}" data-associado="{{ 'true' if cliente.is_associado else 'false' }}">
-                            {{ cliente.nome }} {% if cliente.is_associado %}(Associado -{{ desconto_associado }}%){% endif %}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
+        <div class="campo-observacao">
+          <label for="observacao-venda" class="sr-only">Observações da venda</label>
+          <input type="text" id="observacao-venda" name="observacao" class="form-control" placeholder="Observações da venda...">
+        </div>
 
-                <div class="carrinho-itens" id="container-itens-carrinho"></div>
+        <div class="resumo-valores" aria-label="Resumo da venda">
+          <div class="linha-resumo">
+            <span>Subtotal bruto:</span>
+            <span id="resumo-subtotal">R$ 0,00</span>
+          </div>
+          <div class="linha-resumo linha-resumo-desconto">
+            <span>Desconto aplicado:</span>
+            <span id="resumo-desconto">R$ 0,00</span>
+          </div>
+          <div class="linha-resumo total">
+            <span>Total líquido:</span>
+            <span id="resumo-total">R$ 0,00</span>
+          </div>
+        </div>
 
-                <div class="campo-observacao">
-                    <input type="text" name="observacao" class="form-control" placeholder="Observações da venda...">
-                </div>
-
-                <div class="resumo-valores">
-                    <div class="linha-resumo">
-                        <span>Subtotal Bruto:</span>
-                        <span id="resumo-subtotal">R$ 0,00</span>
-                    </div>
-                    <div class="linha-resumo linha-resumo-desconto">
-                        <span>Desconto Aplicado:</span>
-                        <span id="resumo-desconto">R$ 0,00</span>
-                    </div>
-                    <div class="linha-resumo total">
-                        <span>Total Líquido:</span>
-                        <span id="resumo-total">R$ 0,00</span>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-large">
-                    Finalizar Venda
-                </button>
-            </form>
-        </aside>
-    </div>
+        <button type="submit" class="btn btn-primary btn-large">
+          Finalizar venda
+        </button>
+      </form>
+    </aside>
+  </div>
 </div>
 
-<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=6"></script>
-<script src="{{ request.url_for('static', path='js/checkout.js') }}?v=6"></script>
+<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=7"></script>
+<script src="{{ request.url_for('static', path='js/checkout.js') }}?v=7"></script>
 {% endblock %}

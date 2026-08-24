@@ -1,22 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
     <title>EasyStore - Produtos com qualidade e garantia</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
     <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
 </head>
-
 <body>
-    <!-- Navigation Bar -->
     <nav class="navbar" aria-label="Navegação principal">
         <div class="navbar-container">
             <a class="navbar-logo" href="/" aria-label="EasyStore - página inicial">
@@ -35,50 +26,28 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <main>
         <section class="hero section-enter" aria-labelledby="hero-title">
             <div class="hero-container">
                 <div class="hero-content">
                     <p class="hero-eyebrow">Loja de confiança</p>
-                    <h1 class="hero-title" id="hero-title">
-                        Produtos com <span class="highlight">qualidade</span>, garantia e estilo
-                    </h1>
-                    <p class="hero-subtitle">
-                        Na EasyStore, você encontra itens escolhidos com cuidado para entregar conforto, durabilidade e
-                        uma experiência de compra segura. Tudo pensado para valorizar seu dia a dia com confiança.
-                    </p>
-
+                    <h1 class="hero-title" id="hero-title">Produtos com <span class="highlight">qualidade</span>, garantia e estilo</h1>
+                    <p class="hero-subtitle">Na EasyStore, você encontra itens escolhidos com cuidado para entregar conforto, durabilidade e uma experiência de compra segura.</p>
                     <div class="hero-badges">
                         <span>Produtos com garantia</span>
                         <span>Retirada na loja</span>
                         <span>Atendimento confiável</span>
                     </div>
-
                     <div class="hero-buttons">
                         <a href="/auth/produtos" class="btn btn-primary">
                             <span>Reservar produto</span>
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                <polyline points="12 5 19 12 12 19"></polyline>
-                            </svg>
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
                         </a>
                     </div>
-
                     <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">+10k</span>
-                            <span class="stat-label">Produtos</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">100%</span>
-                            <span class="stat-label">Confiança</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">Na loja</span>
-                            <span class="stat-label">Retirada</span>
-                        </div>
+                        <div class="stat-item"><span class="stat-number">+10k</span><span class="stat-label">Produtos</span></div>
+                        <div class="stat-item"><span class="stat-number">100%</span><span class="stat-label">Confiança</span></div>
+                        <div class="stat-item"><span class="stat-number">Na loja</span><span class="stat-label">Retirada</span></div>
                     </div>
                 </div>
 
@@ -100,35 +69,25 @@
                     <h2 id="services-title">Por que escolher a EasyStore?</h2>
                     <p>Qualidade, praticidade e confiança em cada visita.</p>
                 </div>
-
                 <div class="services-grid">
                     <div class="service-card">
-                        <div class="service-icon" aria-hidden="true">
-                            <img src="{{ request.url_for('static', path='img/box.png') }}" alt="">
-                        </div>
+                        <div class="service-icon" aria-hidden="true"><img src="{{ request.url_for('static', path='img/box.png') }}" alt=""></div>
                         <h3>Produtos selecionados</h3>
                         <p>Itens com acabamento premium, boa variedade e excelente custo-benefício.</p>
                         <div class="service-badge">Qualidade</div>
                     </div>
-
                     <div class="service-card">
-                        <div class="service-icon" aria-hidden="true">
-                            <img src="{{ request.url_for('static', path='img/caminhao.png') }}" alt="">
-                        </div>
+                        <div class="service-icon" aria-hidden="true"><img src="{{ request.url_for('static', path='img/caminhao.png') }}" alt=""></div>
                         <h3>Reserva rápida</h3>
                         <p>Escolha o que deseja e reserve para buscar na loja quando for mais conveniente.</p>
                         <div class="service-badge">Praticidade</div>
                     </div>
-
                     <div class="service-card">
-                        <div class="service-icon" aria-hidden="true">
-                            <img src="{{ request.url_for('static', path='img/dinheiro.png') }}" alt="">
-                        </div>
+                        <div class="service-icon" aria-hidden="true"><img src="{{ request.url_for('static', path='img/dinheiro.png') }}" alt=""></div>
                         <h3>Garantia e suporte</h3>
                         <p>Prezamos pela satisfação do cliente com atendimento ágil e confiança total.</p>
                         <div class="service-badge">Segurança</div>
                     </div>
-
                 </div>
             </div>
         </section>
@@ -138,66 +97,6 @@
                 <h2>Reserve o que você ama e retire na loja</h2>
                 <p>Variedade, qualidade e garantia em uma experiência prática para você conhecer e buscar na hora.</p>
                 <a href="/auth/register" class="btn btn-primary btn-large">Reservar agora</a>
-            </div>
-        </section>
-
-        <section class="story-section section-enter" aria-labelledby="story-title">
-            <div class="story-container">
-                <div class="story-intro home-reveal">
-                    <p class="section-kicker">Sobre a EasyStore</p>
-                    <h2 id="story-title">Uma loja pensada para surpreender e fidelizar clientes.</h2>
-                    <p>A EasyStore nasceu para oferecer uma experiência de compra prática, moderna e confiável. Além de
-                        mostrar produtos de qualidade, permitimos que o cliente reserve o item e retire na loja com rapidez e segurança.</p>
-                    <a href="/sobre-nos" class="text-link">Conheça nossa história <span
-                            aria-hidden="true">→</span></a>
-                </div>
-                <div class="story-values" aria-label="Pilares da EasyStore">
-                    <article class="value-item home-reveal">
-                        <span class="value-number">01</span>
-                        <h3>Produtos com valor</h3>
-                        <p>Escolha itens que unem funcionalidade, design e durabilidade no dia a dia.</p>
-                    </article>
-                    <article class="value-item home-reveal">
-                        <span class="value-number">02</span>
-                        <h3>Reserva simples</h3>
-                        <p>Reserve o produto e venha buscar na loja quando for mais conveniente.</p>
-                    </article>
-                    <article class="value-item home-reveal">
-                        <span class="value-number">03</span>
-                        <h3>Confiança que faz diferença</h3>
-                        <p>Prezamos por atendimento humano, garantia e transparência em cada detalhe.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
-
-        <section class="journey-section section-enter" aria-labelledby="journey-title">
-            <div class="journey-container">
-                <div class="section-header home-reveal">
-                    <p class="section-kicker">Como funciona</p>
-                    <h2 id="journey-title">Escolha, reserve e retire na loja.</h2>
-                    <p>Um processo simples para você encontrar o que deseja sem burocracia.</p>
-                </div>
-                <ol class="journey-steps">
-                    <li class="home-reveal"><span>1</span>
-                        <div>
-                            <h3>Escolha</h3>
-                            <p>Explore produtos de qualidade e encontre o ideal para você.</p>
-                        </div>
-                    </li>
-                    <li class="home-reveal"><span>2</span>
-                        <div>
-                            <h3>Reserve</h3>
-                            <p>Confirme seu item e deixe preparado para retirada na loja.</p>
-                        </div>
-                    </li>
-                    <li class="home-reveal"><span>3</span>
-                        <div>
-                            <h3>Retire</h3>
-                            <p>Venha buscar seu produto com rapidez, segurança e atendimento.</p>
-                        </div>
-                    </li>
-                </ol>
             </div>
         </section>
     </main>
@@ -213,20 +112,14 @@
                     <h4>Links</h4>
                     <ul>
                         <li><a href="/sobre-nos">Sobre</a></li>
-                        <li><a target="_blank"
-                                href="https://github.com/Easy-Store-Group/Gerenciamento-Estoque-Easy-Store">GitHub</a>
-                        </li>
+                        <li><a target="_blank" rel="noopener noreferrer" href="https://github.com/Easy-Store-Group/Gerenciamento-Estoque-Easy-Store">GitHub</a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
                     <h4>Contatos</h4>
                     <ul>
-                        <li>
-                            <p>11 94002-8922</p>
-                        </li>
-                        <li>
-                            <p>EasyStore@gmail.com</p>
-                        </li>
+                        <li><p>11 94002-8922</p></li>
+                        <li><p>EasyStore@gmail.com</p></li>
                     </ul>
                 </div>
             </div>
@@ -235,7 +128,5 @@
             </div>
         </div>
     </footer>
-
 </body>
-
 </html>

@@ -33,6 +33,7 @@ body {
 }
 
 body {
+  margin: 0;
   overflow-x: hidden;
 }
 
@@ -52,13 +53,61 @@ button {
   min-height: 100vh;
 }
 
+.sidebar-toggle {
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid #dbeafe;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px rgb(27, 79, 201);
+  color: var(--text);
+  display: none;
+  gap: 10px;
+  left: 16px;
+  padding: 12px 16px;
+  position: fixed;
+  top: 16px;
+  z-index: 1400;
+}
+
+.sidebar-toggle-icon {
+  display: inline-block;
+  height: 2px;
+  position: relative;
+  width: 18px;
+}
+
+.sidebar-toggle-icon::before,
+.sidebar-toggle-icon::after,
+.sidebar-toggle-icon {
+  background: currentColor;
+}
+
+.sidebar-toggle-icon::before,
+.sidebar-toggle-icon::after {
+  content: "";
+  display: block;
+  height: 2px;
+  left: 0;
+  position: absolute;
+  width: 18px;
+}
+
+.sidebar-toggle-icon::before { top: -6px; }
+.sidebar-toggle-icon::after { top: 6px; }
+
+.sidebar-backdrop {
+  background: rgba(15, 23, 42, 0.42);
+  inset: 0;
+  position: fixed;
+  z-index: 1200;
+}
+
 .sidebar {
-  background: linear-gradient(180deg, #0e1f4d 0%, #17294f 100%);
+  background: linear-gradient(180deg, #12304f 0%, #183b63 100%);
   display: flex;
   flex-direction: column;
   gap: 28px;
   padding: 32px 24px;
-  /* keep sidebar visible on tall pages: occupy full viewport height */
   position: sticky;
   top: 0;
   height: 100vh;
@@ -81,10 +130,7 @@ button {
 }
 
 .brand-block strong {
-  background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-primary) 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff;
 }
 
 .brand-block span {
@@ -100,18 +146,18 @@ button {
 
 .sidebar-nav a {
   align-items: center;
-  border-radius: 16px;
-  color: #dbeafe;
+  border-radius: 14px;
+  color: #e2e8f0;
   display: flex;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 13px 14px;
   transition: background var(--transition), transform var(--transition);
 }
 
 .sidebar-nav a:hover,
 .sidebar-nav a.active {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(2px);
+  background: rgba(255, 255, 255, 0.09);
+  transform: translateX(0);
 }
 
 .sidebar-nav span {
@@ -144,7 +190,7 @@ button {
 }
 
 .logout-btn {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   color: #f8fafc;
   font-weight: 600;
@@ -153,6 +199,8 @@ button {
 }
 
 .admin-content {
+  background: var(--bg);
+  min-height: 100vh;
   padding: 30px 36px;
 }
 
@@ -162,6 +210,7 @@ button {
   gap: 18px;
   justify-content: space-between;
   margin-bottom: 28px;
+  padding-top: 6px;
 }
 
 .topbar h1 {
@@ -450,13 +499,34 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .sidebar-toggle {
+    display: inline-flex;
+  }
+
+  .sidebar-backdrop {
+    display: none;
+  }
+
   .sidebar {
-    flex-direction: row;
-    min-height: auto;
-    overflow-x: auto;
-    padding: 18px;
-    position: static;
-    height: auto;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    bottom: 0;
+    left: 0;
+    max-width: 320px;
+    padding-top: 76px;
+    position: fixed;
+    top: 0;
+    transform: translateX(-102%);
+    transition: transform var(--transition);
+    width: min(86vw, 320px);
+    z-index: 1300;
+  }
+
+  .admin-layout.is-sidebar-open .sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop.is-open {
+    display: block;
   }
 
   .sidebar-footer {
@@ -482,5 +552,9 @@ button {
   .search-bar {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .admin-content {
+    padding: 72px 16px 24px;
   }
 }

@@ -1,6 +1,9 @@
-{% extends "admin/base.html" %}
+﻿{% extends "admin/base.html" %}
 {% set css_path = 'css/vendas.css' %}
 {% set active = active or 'pos' %}
+{% set title = 'Vendas - EasyStore' %}
+{% set page_title = 'Vendas' %}
+{% set page_subtitle = 'Histórico de vendas e operações de caixa.' %}
 
 {% block content %}
 <div class="vendas-container">
@@ -12,9 +15,9 @@
     <div class="vendas-actions">
       {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
       {% if role == 'admin' %}
-      <a href="/admin/pos" style="background: linear-gradient(90deg,#157ED3,#1967A7);" class="btn-small btn-primary">Nova venda</a>
+      <a href="/admin/pos" class="btn-small btn-primary">Nova venda</a>
       {% elif role == 'operador' %}
-      <a href="/pdv" style="background: linear-gradient(90deg,#157ED3,#1967A7);" class="btn-small btn-primary">Nova venda</a>
+      <a href="/pdv" class="btn-small btn-primary">Nova venda</a>
       {% endif %}
     </div>
   </div>
@@ -39,7 +42,7 @@
           <td>{{ venda.criado_em.strftime('%d/%m/%Y %H:%M') if venda.criado_em else '-' }}</td>
           <td>{{ venda.cliente.nome if venda.cliente else 'Consumidor não identificado' }}</td>
           <td>{{ venda.itens|length }}</td>
-          <td>R$ {{ "%.2f"|format(venda.total_liquido) }}</td>
+          <td>R$ {{ "%.2f"|format(venda.total_liquido)|replace('.', ',') }}</td>
           <td>{{ "%.0f"|format(venda.desconto_percentual) }}%</td>
           <td><a href="/pdv/venda/{{ venda.id }}" class="btn-small">Ver</a></td>
         </tr>
@@ -53,10 +56,18 @@
   </div>
 </div>
 <nav class="pagination" aria-label="Paginação de vendas">
-  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% if pagina > 1 %}
+  <a class="pagination-link" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
+  {% else %}
+  <span class="pagination-link disabled" aria-disabled="true">Anterior</span>
+  {% endif %}
   {% for numero in range(1, total_paginas + 1) %}
   <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
   {% endfor %}
-  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+  {% if pagina < total_paginas %}
+  <a class="pagination-link" href="/pdv/historico?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
+  {% else %}
+  <span class="pagination-link disabled" aria-disabled="true">Próxima</span>
+  {% endif %}
 </nav>
 {% endblock %}
