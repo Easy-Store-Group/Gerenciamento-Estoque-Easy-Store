@@ -5,7 +5,9 @@
 # 1. GET /pdv            → tela com produtos + campo de cliente
 # 2. O carrinho vive no JavaScript (memória do navegador)
 # 3. POST /pdv/finalizar → recebe um JSON com os itens
-#                          cria Venda + ItensVenda + Movimentacao + baixa estoque
+#                          cria Venda + ItensVenda + Movimentacao
+#                          + baixa estoque
+#                          + pagamento (somente para ADMIN)
 # ============================================================
 
 import json
@@ -18,21 +20,35 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+
 from app.models.venda import Venda, ItemVenda
 from app.models.produto import Produto
 from app.models.cliente import Cliente
 from app.models.movimentacao import Movimentacao, Tipo_de_movimentacao
-from app.auth import get_admin, get_admin_ou_operador
+from app.models.pagamento import Pagamento
+
+from app.auth import (
+    get_admin,
+    get_admin_ou_operador,
+)
 
 router = APIRouter(prefix="/pdv", tags=["PDV"])
+
 templates = Jinja2Templates(directory="app/templates")
 
 DESCONTO_ASSOCIADO = 5.0  # percentual fixo
 
 
+# ============================================================
+# FUNÇÕES AUXILIARES
+# ============================================================
+
 def _redirect_pdv(db: Session, url: str) -> RedirectResponse:
     db.rollback()
-    return RedirectResponse(url=url, status_code=302)
+    return RedirectResponse(
+        url=url,
+        status_code=302
+    )
 
 
 def _parse_carrinho_json(raw: str) -> list:
@@ -51,38 +67,61 @@ def _parse_carrinho_json(raw: str) -> list:
 
 
 def _extrair_produto_id(item: dict) -> int | None:
-    for chave in ("produto_id", "id", "productId"):
+
+    for chave in (
+        "produto_id",
+        "id",
+        "productId"
+    ):
+
         valor = item.get(chave)
+
         if valor is None or valor == "":
             continue
+
         try:
             produto_id = int(valor)
+
         except (TypeError, ValueError):
             continue
+
         if produto_id > 0:
             return produto_id
+
     return None
 
+
+# ============================================================
+# TELA DO PDV
+# ============================================================
 
 @router.get("/")
 def tela_pdv(
     request: Request,
     db: Session = Depends(get_db),
-    usuario = Depends(get_admin_ou_operador)
+    usuario=Depends(get_admin_ou_operador)
 ):
+
     """
     Carrega a tela do PDV com todos os produtos ativos
     e a lista de clientes para o campo de busca.
     """
-    produtos  = (
+
+    produtos = (
         db.query(Produto)
-        .filter(Produto.ativo == True, Produto.estoque_atual > 0)
+        .filter(
+            Produto.ativo == True,
+            Produto.estoque_atual > 0
+        )
         .order_by(Produto.nome)
         .all()
     )
-    clientes  = (
+
+    clientes = (
         db.query(Cliente)
-        .filter(Cliente.ativo == True)
+        .filter(
+            Cliente.ativo == True
+        )
         .order_by(Cliente.nome)
         .all()
     )
@@ -91,139 +130,448 @@ def tela_pdv(
         request,
         "admin/pos.html",
         {
-            "request":             request,
-            "usuario":             usuario,
-            "produtos":            produtos,
-            "clientes":            clientes,
-            "css_path":            "css/pos.css",
-            "active":              "pos",
-            "page_title":          "Ponto de Venda",
-            "page_subtitle":       "Monte o carrinho e finalize a venda",
-            "desconto_associado":  DESCONTO_ASSOCIADO,
+            "request": request,
+            "usuario": usuario,
+            "produtos": produtos,
+            "clientes": clientes,
+            "css_path": "css/pos.css",
+            "active": "pos",
+            "page_title": "Ponto de Venda",
+            "page_subtitle": "Monte o carrinho e finalize a venda",
+            "desconto_associado": DESCONTO_ASSOCIADO,
         }
     )
 
 
+# ============================================================
+# FINALIZAR VENDA
+# ============================================================
+
 @router.post("/finalizar")
 def finalizar_venda(
     request: Request,
-    carrinho_json: str = Form(...),  # JSON serializado pelo JS
-    cliente_id: int    = Form(0),    # 0 = sem cliente identificado
-    observacao: str    = Form(""),
-    db: Session        = Depends(get_db),
-    usuario            = Depends(get_admin_ou_operador)
+
+    carrinho_json: str = Form(...),
+
+    cliente_id: int = Form(0),
+
+    observacao: str = Form(""),
+
+    # --------------------------------------------------------
+    # Campos de pagamento.
+    #
+    # Esses campos só existem na tela quando o usuário é ADMIN.
+    # Para operador eles ficam como None.
+    # --------------------------------------------------------
+
+    forma_pagamento: str | None = Form(None),
+
+    valor_recebido: float | None = Form(None),
+
+    db: Session = Depends(get_db),
+
+    usuario=Depends(get_admin_ou_operador)
 ):
 
+    # ========================================================
+    # IDENTIFICA SE É ADMIN
+    # ========================================================
+
+    role_usuario = usuario.get("role")
+
+    eh_admin = role_usuario == "admin"
+
+
+    # ========================================================
+    # VALIDA PAGAMENTO
+    # SOMENTE ADMIN PODE INFORMAR PAGAMENTO
+    # ========================================================
+
+    if eh_admin:
+
+        formas_validas = {
+            "dinheiro",
+            "pix",
+            "cartao_credito",
+            "cartao_debito",
+        }
+
+        if not forma_pagamento:
+
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=forma_pagamento"
+            )
+
+        if forma_pagamento not in formas_validas:
+
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=forma_pagamento_invalida"
+            )
+
+    else:
+
+        # Operador não possui forma de pagamento.
+        forma_pagamento = None
+        valor_recebido = None
+
+
+    # ========================================================
+    # LÊ O CARRINHO
+    # ========================================================
+
     try:
-        itens = _parse_carrinho_json(carrinho_json.strip())
-    except (json.JSONDecodeError, ValueError, AttributeError):
-        return _redirect_pdv(db, "/pdv?erro=json")
+
+        itens = _parse_carrinho_json(
+            carrinho_json.strip()
+        )
+
+    except (
+        json.JSONDecodeError,
+        ValueError,
+        AttributeError
+    ):
+
+        return _redirect_pdv(
+            db,
+            "/pdv?erro=json"
+        )
+
 
     if not itens:
-        return _redirect_pdv(db, "/pdv?erro=vazio")
 
-    # Busca o cliente e verifica se é associado
-    cliente             = None
+        return _redirect_pdv(
+            db,
+            "/pdv?erro=vazio"
+        )
+
+
+    # ========================================================
+    # CLIENTE E DESCONTO
+    # ========================================================
+
+    cliente = None
+
     desconto_percentual = 0.0
-    cliente_id_valido   = None
+
+    cliente_id_valido = None
+
 
     if cliente_id:
-        cliente = db.query(Cliente).filter(
-            Cliente.id == cliente_id,
-            Cliente.ativo == True
-        ).first()
+
+        cliente = (
+            db.query(Cliente)
+            .filter(
+                Cliente.id == cliente_id,
+                Cliente.ativo == True
+            )
+            .first()
+        )
+
 
         if cliente:
+
             cliente_id_valido = cliente.id
+
             if cliente.is_associado:
+
                 desconto_percentual = DESCONTO_ASSOCIADO
 
-    # ── Valida estoque e calcula totais ──────────────────────
+
+    # ========================================================
+    # VALIDA ESTOQUE E CALCULA TOTAL
+    # ========================================================
+
     total_bruto = 0.0
+
     itens_validados = []
 
+
     for item in itens:
+
         if not isinstance(item, dict):
-            return _redirect_pdv(db, "/pdv?erro=item_invalido")
+
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=item_invalido"
+            )
+
 
         produto_id = _extrair_produto_id(item)
+
+
         if produto_id is None:
-            return _redirect_pdv(db, "/pdv?erro=item_invalido")
+
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=item_invalido"
+            )
+
 
         try:
-            qtd = int(item.get("quantidade", 0))
-        except (TypeError, ValueError):
-            return _redirect_pdv(db, "/pdv?erro=quantidade")
+
+            qtd = int(
+                item.get(
+                    "quantidade",
+                    0
+                )
+            )
+
+        except (
+            TypeError,
+            ValueError
+        ):
+
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=quantidade"
+            )
+
 
         if qtd <= 0:
-            return _redirect_pdv(db, "/pdv?erro=quantidade")
 
-        produto = db.query(Produto).filter(
-            Produto.id == produto_id,
-            Produto.ativo == True
-        ).with_for_update().first()
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=quantidade"
+            )
+
+
+        produto = (
+            db.query(Produto)
+            .filter(
+                Produto.id == produto_id,
+                Produto.ativo == True
+            )
+            .with_for_update()
+            .first()
+        )
+
 
         if not produto:
+
             return _redirect_pdv(
                 db,
-                f"/pdv?erro=produto_inexistente&id={produto_id}",
+                f"/pdv?erro=produto_inexistente&id={produto_id}"
             )
+
 
         if produto.estoque_atual < qtd:
+
             return _redirect_pdv(
                 db,
-                f"/pdv?erro=estoque&produto={quote(produto.nome)}",
+                f"/pdv?erro=estoque&produto={quote(produto.nome)}"
             )
 
-        subtotal    = produto.preco * qtd
+
+        subtotal = (
+            produto.preco * qtd
+        )
+
         total_bruto += subtotal
 
-        itens_validados.append({
-            "produto":       produto,
-            "quantidade":    qtd,
-            "preco":         produto.preco,
-            "produto_nome":  produto.nome,
-        })
 
-    # ── Calcula desconto e total final
-    desconto_valor = total_bruto * (desconto_percentual / 100)
-    total_liquido  = total_bruto - desconto_valor
-
-    # ── Persiste tudo em uma única transação
-    try:
-        venda = Venda(
-            cliente_id          = cliente_id_valido,
-            usuario_id          = usuario.get("id"),
-            desconto_percentual = desconto_percentual,
-            total_bruto         = round(total_bruto, 2),
-            total_liquido       = round(total_liquido, 2),
-            observacao          = observacao or None,
+        itens_validados.append(
+            {
+                "produto": produto,
+                "quantidade": qtd,
+                "preco": produto.preco,
+                "produto_nome": produto.nome,
+            }
         )
+
+
+    # ========================================================
+    # CALCULA DESCONTO
+    # ========================================================
+
+    desconto_valor = (
+        total_bruto *
+        (desconto_percentual / 100)
+    )
+
+    total_liquido = (
+        total_bruto -
+        desconto_valor
+    )
+
+
+    total_liquido = round(
+        total_liquido,
+        2
+    )
+
+
+    # ========================================================
+    # VALIDA VALOR RECEBIDO
+    # SOMENTE DINHEIRO
+    # ========================================================
+
+    troco = 0.0
+
+
+    if eh_admin and forma_pagamento == "dinheiro":
+
+        if valor_recebido is None:
+
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=valor_recebido"
+            )
+
+
+        if valor_recebido < total_liquido:
+
+            return _redirect_pdv(
+                db,
+                "/pdv?erro=valor_insuficiente"
+            )
+
+
+        troco = round(
+            valor_recebido - total_liquido,
+            2
+        )
+
+
+    # ========================================================
+    # PERSISTE TUDO EM UMA ÚNICA TRANSAÇÃO
+    # ========================================================
+
+    try:
+
+        # ----------------------------------------------------
+        # CRIA A VENDA
+        # ----------------------------------------------------
+
+        venda = Venda(
+            cliente_id=cliente_id_valido,
+
+            usuario_id=usuario.get("id"),
+
+            desconto_percentual=desconto_percentual,
+
+            total_bruto=round(
+                total_bruto,
+                2
+            ),
+
+            total_liquido=total_liquido,
+
+            observacao=observacao or None,
+        )
+
+
         db.add(venda)
-        db.flush()  # gera o venda.id sem commitar ainda
+
+        # Gera o ID da venda
+        db.flush()
+
+
+        # ----------------------------------------------------
+        # ITENS DA VENDA
+        # ----------------------------------------------------
 
         for item in itens_validados:
-            db.add(ItemVenda(
-                venda_id       = venda.id,
-                produto_id     = item["produto"].id,
-                produto_nome   = item["produto_nome"],
-                quantidade     = item["quantidade"],
-                preco_unitario = item["preco"],
-            ))
-            item["produto"].estoque_atual -= item["quantidade"]
-            db.add(Movimentacao(
-                tipo=Tipo_de_movimentacao.SAIDA,
-                quantidade=item["quantidade"],
-                preco_unitario=item["preco"],
-                observacao=f"Venda PDV #{venda.id}",
-                produto_id=item["produto"].id,
-                usuario_id=usuario.get("id"),
-            ))
+
+            db.add(
+                ItemVenda(
+                    venda_id=venda.id,
+
+                    produto_id=item["produto"].id,
+
+                    produto_nome=item["produto_nome"],
+
+                    quantidade=item["quantidade"],
+
+                    preco_unitario=item["preco"],
+                )
+            )
+
+
+            # Baixa estoque
+
+            item["produto"].estoque_atual -= (
+                item["quantidade"]
+            )
+
+
+            # ------------------------------------------------
+            # MOVIMENTAÇÃO DE ESTOQUE
+            # ------------------------------------------------
+
+            db.add(
+                Movimentacao(
+                    tipo=Tipo_de_movimentacao.SAIDA,
+
+                    quantidade=item["quantidade"],
+
+                    preco_unitario=item["preco"],
+
+                    observacao=f"Venda PDV #{venda.id}",
+
+                    produto_id=item["produto"].id,
+
+                    usuario_id=usuario.get("id"),
+                )
+            )
+
+
+        # ====================================================
+        # PAGAMENTO
+        # SOMENTE ADMIN
+        # ====================================================
+
+        if eh_admin:
+
+            pagamento = Pagamento(
+
+                venda_id=venda.id,
+
+                forma=forma_pagamento,
+
+                valor=total_liquido,
+
+                valor_recebido=(
+                    round(
+                        valor_recebido,
+                        2
+                    )
+                    if forma_pagamento == "dinheiro"
+                    else None
+                ),
+
+                troco=(
+                    troco
+                    if forma_pagamento == "dinheiro"
+                    else None
+                ),
+            )
+
+
+            db.add(pagamento)
+
+
+        # ----------------------------------------------------
+        # COMMIT
+        # ----------------------------------------------------
 
         db.commit()
+
+
     except Exception:
+
         db.rollback()
-        return RedirectResponse(url="/pdv?erro=salvar", status_code=302)
+
+        return RedirectResponse(
+            url="/pdv?erro=salvar",
+            status_code=302
+        )
+
+
+    # ========================================================
+    # REDIRECIONA PARA O COMPROVANTE
+    # ========================================================
 
     return RedirectResponse(
         url=f"/pdv/venda/{venda.id}?sucesso=ok",
@@ -231,63 +579,169 @@ def finalizar_venda(
     )
 
 
+# ============================================================
+# DETALHE DA VENDA
+# ============================================================
+
 @router.get("/venda/{venda_id}")
 def detalhe_venda(
     venda_id: int,
+
     request: Request,
+
     db: Session = Depends(get_db),
-    usuario = Depends(get_admin_ou_operador)
+
+    usuario=Depends(get_admin_ou_operador)
 ):
-    """Comprovante da venda — exibido imediatamente após finalizar."""
-    venda = db.query(Venda).filter(Venda.id == venda_id).first()
+
+    """
+    Comprovante da venda — exibido imediatamente após finalizar.
+    """
+
+    venda = (
+        db.query(Venda)
+        .filter(
+            Venda.id == venda_id
+        )
+        .first()
+    )
+
 
     if not venda:
-        return RedirectResponse(url="/pdv", status_code=302)
+
+        return RedirectResponse(
+            url="/pdv",
+            status_code=302
+        )
+
 
     return templates.TemplateResponse(
         request,
         "admin/comprovante.html",
         {
             "request": request,
+
             "usuario": usuario,
+
             "venda": venda,
-            "page_title": f"Venda #{venda.id}",
-            "page_subtitle": "Comprovante da venda finalizada",
-            "css_path": "css/vendas.css",
+
+            "page_title":
+                f"Venda #{venda.id}",
+
+            "page_subtitle":
+                "Comprovante da venda finalizada",
+
+            "css_path":
+                "css/vendas.css",
+
             "active": "pos",
         }
     )
 
 
+# ============================================================
+# HISTÓRICO DE VENDAS
+# ============================================================
+
 @router.get("/historico")
 def historico_vendas(
     request: Request,
+
     pagina: int = 1,
+
     por_pagina: int = 10,
+
     db: Session = Depends(get_db),
-    usuario = Depends(get_admin)
+
+    usuario=Depends(get_admin)
 ):
-    """Histórico de todas as vendas."""
-    query = db.query(Venda).order_by(Venda.criado_em.desc())
+
+    """
+    Histórico de todas as vendas.
+    Somente administradores.
+    """
+
+    query = (
+        db.query(Venda)
+        .order_by(
+            Venda.criado_em.desc()
+        )
+    )
+
+
     total_vendas = query.count()
-    por_pagina = min(max(por_pagina, 1), 10)
-    total_paginas = math.ceil(total_vendas / por_pagina) if total_vendas else 1
-    pagina = min(max(pagina, 1), total_paginas)
-    vendas = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+
+
+    por_pagina = min(
+        max(
+            por_pagina,
+            1
+        ),
+        10
+    )
+
+
+    total_paginas = (
+        math.ceil(
+            total_vendas /
+            por_pagina
+        )
+        if total_vendas
+        else 1
+    )
+
+
+    pagina = min(
+        max(
+            pagina,
+            1
+        ),
+        total_paginas
+    )
+
+
+    vendas = (
+        query
+        .offset(
+            (pagina - 1) *
+            por_pagina
+        )
+        .limit(
+            por_pagina
+        )
+        .all()
+    )
+
+
     return templates.TemplateResponse(
         request,
         "admin/vendas.html",
         {
             "request": request,
+
             "usuario": usuario,
+
             "vendas": vendas,
+
             "pagina": pagina,
+
             "por_pagina": por_pagina,
-            "total_paginas": total_paginas,
-            "total_vendas": total_vendas,
-            "page_title": "Vendas",
-            "page_subtitle": "Histórico de vendas do PDV",
-            "css_path": "css/vendas.css",
+
+            "total_paginas":
+                total_paginas,
+
+            "total_vendas":
+                total_vendas,
+
+            "page_title":
+                "Vendas",
+
+            "page_subtitle":
+                "Histórico de vendas do PDV",
+
+            "css_path":
+                "css/vendas.css",
+
             "active": "pos",
         }
     )

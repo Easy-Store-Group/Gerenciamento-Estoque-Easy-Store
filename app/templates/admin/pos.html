@@ -1,4 +1,4 @@
-{% extends "admin/base.html" %}
+﻿{% extends "admin/base.html" %}
 
 {% set title = "PDV - Ponto de Venda" %}
 {% set page_title = "Ponto de Venda" %}
@@ -21,106 +21,495 @@
                     </svg>
                 </button>
             </div>
+
             <div class="modal-variacoes-body" id="modal-corpo">
             </div>
+
             <div class="modal-variacoes-footer">
-                <button type="button" class="btn btn-secondary" onclick="fecharModalVariacoes()">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="confirmarVariacoes()">Adicionar</button>
+                <button type="button" class="btn btn-secondary" onclick="fecharModalVariacoes()">
+                    Cancelar
+                </button>
+
+                <button type="button" class="btn btn-primary" onclick="confirmarVariacoes()">
+                    Adicionar
+                </button>
             </div>
         </div>
     </div>
 
     <div class="pdv-grid">
+
         <section class="catalogo-section">
+
             <div class="search-box">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                     <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"></path>
                 </svg>
-                <input type="text" id="input-busca" class="form-control" placeholder="Digite para buscar um produto..." autocomplete="off">
+
+                <input
+                    type="text"
+                    id="input-busca"
+                    class="form-control"
+                    placeholder="Digite para buscar um produto..."
+                    autocomplete="off"
+                >
             </div>
 
             <div class="produtos-grid">
+
                 {% for produto in produtos %}
-                <div class="produto-card-pdv"
-                     data-id="{{ produto.id }}"
-                     data-img="{{ produto.imagem_url }}"
-                     data-nome="{{ produto.nome }}"
-                     data-preco="{{ produto.preco }}"
-                     data-estoque="{{ produto.estoque_atual }}">
+
+                <div
+                    class="produto-card-pdv"
+                    data-id="{{ produto.id }}"
+                    data-img="{{ produto.imagem_url }}"
+                    data-nome="{{ produto.nome }}"
+                    data-preco="{{ produto.preco }}"
+                    data-estoque="{{ produto.estoque_atual }}"
+                >
+
                     <div class="produto-card-media">
-                        <img src="{{ produto.imagem_url or request.url_for('static', path='img/logo.png') }}"
-                             alt="{{ produto.nome }}"
-                             class="prod-img"
-                             loading="lazy"
-                             onerror="this.onerror=null;this.src='{{ request.url_for('static', path='img/logo.png') }}';">
+                        <img
+                            src="{{ produto.imagem_url or request.url_for('static', path='img/logo.png') }}"
+                            alt="{{ produto.nome }}"
+                            class="prod-img"
+                            loading="lazy"
+                            onerror="this.onerror=null;this.src='{{ request.url_for('static', path='img/logo.png') }}';"
+                        >
                     </div>
+
                     <div class="produto-card-info">
                         <p class="prod-nome">{{ produto.nome }}</p>
                     </div>
+
                     <div class="produto-card-hover-info">
                         <span class="produto-stock-label">Estoque atual</span>
-                        <span class="prod-estoque">Estoque: {{ produto.estoque_atual }} un</span>
+                        <span class="prod-estoque">
+                            Estoque: {{ produto.estoque_atual }} un
+                        </span>
                     </div>
-                    <p class="prod-preco">R$ {{ "%.2f"|format(produto.preco) }}</p>
+
+                    <p class="prod-preco">
+                        R$ {{ "%.2f"|format(produto.preco) }}
+                    </p>
+
                 </div>
+
                 {% else %}
+
                 <div class="catalogo-vazio">
                     Nenhum produto disponível para venda.
                 </div>
+
                 {% endfor %}
+
             </div>
         </section>
 
+
         <aside class="carrinho-lateral">
+
             <div class="carrinho-header">
                 <span>Caixa</span>
                 <h3>Carrinho de Compras</h3>
             </div>
 
+
             <form id="form-finalizar" action="/pdv/finalizar" method="POST">
-                <input type="hidden" name="carrinho_json" id="carrinho_json">
+
+                <input
+                    type="hidden"
+                    name="carrinho_json"
+                    id="carrinho_json"
+                >
+
+
+                <!-- CLIENTE -->
 
                 <div class="campo-cliente">
-                    <label for="cliente_id">Cliente</label>
-                    <select name="cliente_id" id="cliente_id" class="form-control" onchange="atualizarTotais()">
-                        <option value="0">Consumidor Não Identificado</option>
-                        {% for cliente in clientes %}
-                        <option value="{{ cliente.id }}" data-associado="{{ 'true' if cliente.is_associado else 'false' }}">
-                            {{ cliente.nome }} {% if cliente.is_associado %}(Associado -{{ desconto_associado }}%){% endif %}
+
+                    <label for="cliente_id">
+                        Cliente
+                    </label>
+
+                    <select
+                        name="cliente_id"
+                        id="cliente_id"
+                        class="form-control"
+                        onchange="atualizarTotais()"
+                    >
+
+                        <option value="0">
+                            Consumidor Não Identificado
                         </option>
+
+                        {% for cliente in clientes %}
+
+                        <option
+                            value="{{ cliente.id }}"
+                            data-associado="{{ 'true' if cliente.is_associado else 'false' }}"
+                        >
+                            {{ cliente.nome }}
+
+                            {% if cliente.is_associado %}
+                                (Associado -{{ desconto_associado }}%)
+                            {% endif %}
+
+                        </option>
+
                         {% endfor %}
+
                     </select>
+
                 </div>
 
-                <div class="carrinho-itens" id="container-itens-carrinho"></div>
+
+                <!-- ITENS DO CARRINHO -->
+
+                <div
+                    class="carrinho-itens"
+                    id="container-itens-carrinho"
+                ></div>
+
+
+                <!-- OBSERVAÇÃO -->
 
                 <div class="campo-observacao">
-                    <input type="text" name="observacao" class="form-control" placeholder="Observações da venda...">
+
+                    <input
+                        type="text"
+                        name="observacao"
+                        class="form-control"
+                        placeholder="Observações da venda..."
+                    >
+
                 </div>
+
+
+                <!-- RESUMO -->
 
                 <div class="resumo-valores">
+
                     <div class="linha-resumo">
-                        <span>Subtotal Bruto:</span>
-                        <span id="resumo-subtotal">R$ 0,00</span>
+
+                        <span>
+                            Subtotal Bruto:
+                        </span>
+
+                        <span id="resumo-subtotal">
+                            R$ 0,00
+                        </span>
+
                     </div>
+
+
                     <div class="linha-resumo linha-resumo-desconto">
-                        <span>Desconto Aplicado:</span>
-                        <span id="resumo-desconto">R$ 0,00</span>
+
+                        <span>
+                            Desconto Aplicado:
+                        </span>
+
+                        <span id="resumo-desconto">
+                            R$ 0,00
+                        </span>
+
                     </div>
+
+
                     <div class="linha-resumo total">
-                        <span>Total Líquido:</span>
-                        <span id="resumo-total">R$ 0,00</span>
+
+                        <span>
+                            Total Líquido:
+                        </span>
+
+                        <span id="resumo-total">
+                            R$ 0,00
+                        </span>
+
                     </div>
+
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-large">
+
+                <!-- =====================================================
+                     FORMAS DE PAGAMENTO
+                     SOMENTE PARA ADMINISTRADORES
+                     ===================================================== -->
+
+                {% if role == 'admin' %}
+
+                <div
+                    class="area-pagamento-admin"
+                    id="area-pagamento-admin"
+                >
+
+                    <div class="pagamento-titulo">
+                        <span>Forma de pagamento</span>
+                    </div>
+
+
+                    <div class="campo-pagamento">
+
+                        <label for="forma_pagamento">
+                            Pagamento
+                        </label>
+
+                        <select
+                            name="forma_pagamento"
+                            id="forma_pagamento"
+                            class="form-control"
+                        >
+
+                            <option value="dinheiro">
+                                Dinheiro
+                            </option>
+
+                            <option value="pix">
+                                Pix
+                            </option>
+
+                            <option value="cartao_credito">
+                                Cartão de Crédito
+                            </option>
+
+                            <option value="cartao_debito">
+                                Cartão de Débito
+                            </option>
+
+                        </select>
+
+                    </div>
+
+
+                    <!-- VALOR RECEBIDO -->
+
+                    <div
+                        class="campo-pagamento"
+                        id="campo-valor-recebido"
+                    >
+
+                        <label for="valor_recebido">
+                            Valor recebido
+                        </label>
+
+                        <input
+                            type="number"
+                            name="valor_recebido"
+                            id="valor_recebido"
+                            class="form-control"
+                            min="0"
+                            step="0.01"
+                            placeholder="R$ 0,00"
+                        >
+
+                    </div>
+
+
+                    <!-- TROCO -->
+
+                    <div
+                        class="linha-pagamento-troco"
+                        id="linha-troco"
+                    >
+
+                        <span>
+                            Troco:
+                        </span>
+
+                        <strong id="valor-troco">
+                            R$ 0,00
+                        </strong>
+
+                    </div>
+
+                </div>
+
+                {% endif %}
+
+
+                <!-- FINALIZAR VENDA -->
+
+                <button
+                    type="submit"
+                    class="btn btn-primary btn-large"
+                >
                     Finalizar Venda
                 </button>
+
             </form>
+
         </aside>
+
     </div>
 </div>
 
+
 <script src="{{ request.url_for('static', path='js/pdv.js') }}?v=6"></script>
+
 <script src="{{ request.url_for('static', path='js/checkout.js') }}?v=6"></script>
+
+
+{% if role == 'admin' %}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const formaPagamento =
+        document.getElementById("forma_pagamento");
+
+    const campoValorRecebido =
+        document.getElementById("campo-valor-recebido");
+
+    const valorRecebido =
+        document.getElementById("valor_recebido");
+
+    const valorTroco =
+        document.getElementById("valor-troco");
+
+
+    function obterTotal() {
+
+        const elemento =
+            document.getElementById("resumo-total");
+
+        if (!elemento) {
+            return 0;
+        }
+
+        const texto =
+            elemento.textContent
+                .replace("R$", "")
+                .replace(/\./g, "")
+                .replace(",", ".")
+                .trim();
+
+        const total = parseFloat(texto);
+
+        return isNaN(total) ? 0 : total;
+    }
+
+
+    function atualizarPagamento() {
+
+        if (!formaPagamento) {
+            return;
+        }
+
+        const forma =
+            formaPagamento.value;
+
+
+        /*
+         * Somente dinheiro precisa
+         * de valor recebido e troco.
+         */
+
+        if (forma === "dinheiro") {
+
+            if (campoValorRecebido) {
+                campoValorRecebido.style.display = "";
+            }
+
+            calcularTroco();
+
+        } else {
+
+            if (campoValorRecebido) {
+                campoValorRecebido.style.display = "none";
+            }
+
+            if (valorRecebido) {
+                valorRecebido.value = "";
+            }
+
+            if (valorTroco) {
+                valorTroco.textContent = "R$ 0,00";
+            }
+
+        }
+
+    }
+
+
+    function calcularTroco() {
+
+        const total =
+            obterTotal();
+
+        const recebido =
+            parseFloat(valorRecebido?.value || 0);
+
+        let troco =
+            recebido - total;
+
+        if (troco < 0 || isNaN(troco)) {
+            troco = 0;
+        }
+
+        if (valorTroco) {
+
+            valorTroco.textContent =
+                "R$ " +
+                troco.toFixed(2)
+                    .replace(".", ",");
+
+        }
+
+    }
+
+
+    if (formaPagamento) {
+
+        formaPagamento.addEventListener(
+            "change",
+            atualizarPagamento
+        );
+
+    }
+
+
+    if (valorRecebido) {
+
+        valorRecebido.addEventListener(
+            "input",
+            calcularTroco
+        );
+
+    }
+
+
+    /*
+     * Atualiza o troco quando o total da venda
+     * mudar.
+     */
+
+    const resumoTotal =
+        document.getElementById("resumo-total");
+
+    if (resumoTotal) {
+
+        const observer =
+            new MutationObserver(function () {
+                calcularTroco();
+            });
+
+        observer.observe(
+            resumoTotal,
+            {
+                childList: true,
+                subtree: true,
+                characterData: true
+            }
+        );
+
+    }
+
+
+    atualizarPagamento();
+
+});
+</script>
+
+{% endif %}
+
 {% endblock %}
