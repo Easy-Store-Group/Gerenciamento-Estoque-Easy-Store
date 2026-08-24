@@ -1,7 +1,8 @@
-﻿{% extends "admin/base.html" %}
+{% extends "admin/base.html" %}
 
 {% set title = "PDV - Ponto de Venda" %}
 {% set page_title = "Ponto de Venda" %}
+{% set page_subtitle = "Venda rápida, catálogo e carrinho em uma única tela." %}
 {% set active = "pos" %}
 {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
 {% set extra_button = {'href': '/pdv/historico', 'label': 'Histórico de Vendas'} if role == 'admin' else None %}
@@ -10,15 +11,17 @@
 <div class="pdv-wrapper" data-desconto-associado="{{ desconto_associado }}">
     <div id="alert-container"></div>
 
-    <!-- Modal para seleção de variações -->
-    <div id="modal-variacoes" class="modal-variacoes" style="display: none;">
-        <div class="modal-variacoes-content">
+    <div id="modal-variacoes" class="modal-variacoes">
+        <div class="modal-variacoes-content" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
             <div class="modal-variacoes-header">
                 <h3 id="modal-titulo">Selecione Variações</h3>
-                <button class="close-btn" onclick="fecharModalVariacoes()">×</button>
+                <button type="button" class="close-btn" onclick="fecharModalVariacoes()" aria-label="Fechar modal">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M18 6 6 18M6 6l12 12"></path>
+                    </svg>
+                </button>
             </div>
             <div class="modal-variacoes-body" id="modal-corpo">
-                <!-- Será preenchido dinamicamente -->
             </div>
             <div class="modal-variacoes-footer">
                 <button type="button" class="btn btn-secondary" onclick="fecharModalVariacoes()">Cancelar</button>
@@ -30,7 +33,10 @@
     <div class="pdv-grid">
         <section class="catalogo-section">
             <div class="search-box">
-                <input type="text" id="input-busca" class="form-control" placeholder="🔍 Digite para buscar um produto...">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m21 21-4.35-4.35M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Z"></path>
+                </svg>
+                <input type="text" id="input-busca" class="form-control" placeholder="Digite para buscar um produto..." autocomplete="off">
             </div>
 
             <div class="produtos-grid">
@@ -41,24 +47,40 @@
                      data-nome="{{ produto.nome }}"
                      data-preco="{{ produto.preco }}"
                      data-estoque="{{ produto.estoque_atual }}">
-                    <div>
-                        <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}" class="prod-img"   >
+                    <div class="produto-card-media">
+                        <img src="{{ produto.imagem_url or request.url_for('static', path='img/logo.png') }}"
+                             alt="{{ produto.nome }}"
+                             class="prod-img"
+                             loading="lazy"
+                             onerror="this.onerror=null;this.src='{{ request.url_for('static', path='img/logo.png') }}';">
+                    </div>
+                    <div class="produto-card-info">
                         <p class="prod-nome">{{ produto.nome }}</p>
-                        <p class="prod-estoque">Estoque: {{ produto.estoque_atual }} un</p>
+                    </div>
+                    <div class="produto-card-hover-info">
+                        <span class="produto-stock-label">Estoque atual</span>
+                        <span class="prod-estoque">Estoque: {{ produto.estoque_atual }} un</span>
                     </div>
                     <p class="prod-preco">R$ {{ "%.2f"|format(produto.preco) }}</p>
+                </div>
+                {% else %}
+                <div class="catalogo-vazio">
+                    Nenhum produto disponível para venda.
                 </div>
                 {% endfor %}
             </div>
         </section>
 
         <aside class="carrinho-lateral">
-            <h3>Carrinho de Compras</h3>
+            <div class="carrinho-header">
+                <span>Caixa</span>
+                <h3>Carrinho de Compras</h3>
+            </div>
 
             <form id="form-finalizar" action="/pdv/finalizar" method="POST">
                 <input type="hidden" name="carrinho_json" id="carrinho_json">
 
-                <div style="margin-top: 15px;">
+                <div class="campo-cliente">
                     <label for="cliente_id">Cliente</label>
                     <select name="cliente_id" id="cliente_id" class="form-control" onchange="atualizarTotais()">
                         <option value="0">Consumidor Não Identificado</option>
@@ -72,7 +94,7 @@
 
                 <div class="carrinho-itens" id="container-itens-carrinho"></div>
 
-                <div style="margin-bottom: 15px;">
+                <div class="campo-observacao">
                     <input type="text" name="observacao" class="form-control" placeholder="Observações da venda...">
                 </div>
 
@@ -81,7 +103,7 @@
                         <span>Subtotal Bruto:</span>
                         <span id="resumo-subtotal">R$ 0,00</span>
                     </div>
-                    <div class="linha-resumo" style="color: #047857;">
+                    <div class="linha-resumo linha-resumo-desconto">
                         <span>Desconto Aplicado:</span>
                         <span id="resumo-desconto">R$ 0,00</span>
                     </div>
@@ -92,103 +114,13 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-large">
-                    Finalizar Venda 🛒
+                    Finalizar Venda
                 </button>
             </form>
         </aside>
     </div>
 </div>
 
-<style>
-    .modal-variacoes {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .modal-variacoes-content {
-        background: white;
-        border-radius: 8px;
-        width: 90%;
-        max-width: 500px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-
-    .modal-variacoes-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 20px;
-        border-bottom: 1px solid #eee;
-    }
-
-    .modal-variacoes-header h3 {
-        margin: 0;
-    }
-
-    .close-btn {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: #999;
-    }
-
-    .modal-variacoes-body {
-        padding: 20px;
-        max-height: 400px;
-        overflow-y: auto;
-    }
-
-    .modal-variacoes-footer {
-        display: flex;
-        justify-content: flex-end;
-        gap: 10px;
-        padding: 20px;
-        border-top: 1px solid #eee;
-    }
-
-    .form-group-modal {
-        margin-bottom: 15px;
-    }
-
-    .form-group-modal label {
-        display: block;
-        font-weight: 500;
-        margin-bottom: 5px;
-        font-size: 14px;
-    }
-
-    .form-group-modal select {
-        width: 100%;
-        padding: 8px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-    }
-
-    .btn-secondary {
-        background-color: #6c757d;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        font-weight: 500;
-    }
-
-    .btn-secondary:hover {
-        background-color: #5a6268;
-    }
-</style>
-
-<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=4"></script>
-<script src="{{ request.url_for('static', path='js/checkout.js') }}"></script>
+<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=6"></script>
+<script src="{{ request.url_for('static', path='js/checkout.js') }}?v=6"></script>
 {% endblock %}

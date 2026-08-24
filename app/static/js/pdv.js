@@ -43,8 +43,6 @@ function inicializarPDV() {
                 await carregarVariacoesPDV(produto);
             }
         });
-
-        card.style.cursor = 'pointer';
     });
 
     inputBusca.addEventListener('input', (e) => {
@@ -68,7 +66,6 @@ function inicializarPDV() {
 
     atualizarCarrinho();
 }
-
 async function carregarVariacoesPDV(produto) {
     try {
         const response = await fetch(`/api/variacoes/produto/${produto.produto_id}`);
@@ -95,7 +92,6 @@ async function carregarVariacoesPDV(produto) {
         adicionarAoCarrinho(produto);
     }
 }
-
 function abrirModalVariacoes(produto, variacoes) {
     const modal = document.getElementById('modal-variacoes');
     const titulo = document.getElementById('modal-titulo');
@@ -145,11 +141,11 @@ function abrirModalVariacoes(produto, variacoes) {
     }
 
     corpo.innerHTML = html;
-    modal.style.display = 'flex';
+    modal.classList.add('is-open');
 }
 
 function fecharModalVariacoes() {
-    document.getElementById('modal-variacoes').style.display = 'none';
+    document.getElementById('modal-variacoes').classList.remove('is-open');
     produtoSelecionado = null;
 }
 
@@ -241,13 +237,12 @@ function atualizarCarrinho() {
                 <div class="item-info">
                     <div class="item-nome">${item.nome}</div>
                     <div class="item-qtd">
-                        <input type="number" min="1" max="${item.estoque}" value="${item.quantidade}"
-                               onchange="atualizarQuantidade('${item.chave}', this.value)" style="width: 50px;">
+                        <input type="number" class="item-quantidade" min="1" max="${item.estoque}" value="${item.quantidade}"
+                               onchange="atualizarQuantidade('${item.chave}', this.value)">
                     </div>
                 </div>
                 <div class="item-preco">R$ ${(item.preco * item.quantidade).toFixed(2).replace('.', ',')}</div>
-                <button type="button" onclick="removerDoCarrinho('${item.chave}')"
-                        style="background: none; border: none; color: #dc2626; cursor: pointer; font-weight: bold;">✕</button>
+                <button type="button" class="btn-remover-item" onclick="removerDoCarrinho('${item.chave}')" aria-label="Remover item">&times;</button>
             </div>
         `).join('');
     }
@@ -317,12 +312,13 @@ function mostrarAlerta(mensagem, tipo = 'success') {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${tipo}`;
     alertDiv.textContent = mensagem;
-    alertDiv.style.animation = 'slideIn 0.3s ease-out';
+    alertDiv.classList.add('alert-enter');
 
     alertContainer.appendChild(alertDiv);
 
     setTimeout(() => {
-        alertDiv.style.animation = 'slideOut 0.3s ease-out';
+        alertDiv.classList.remove('alert-enter');
+        alertDiv.classList.add('alert-exit');
         setTimeout(() => alertDiv.remove(), 300);
     }, 3000);
 }
@@ -358,18 +354,3 @@ async function finalizarVenda() {
         if (btn) btn.disabled = false;
     }
 }
-
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideOut {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-    }
-`;
-document.head.appendChild(style);
