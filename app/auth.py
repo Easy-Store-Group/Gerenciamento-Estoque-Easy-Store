@@ -99,6 +99,20 @@ def get_admin(request : Request):
         )
     return usuario
 
+def get_admin_pagamento(request: Request):
+    """
+    Permite acesso às formas de pagamento somente para administradores.
+    """
+
+    usuario = get_usuario_logado(request)
+
+    if usuario.get("role") != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Somente administradores podem acessar as formas de pagamento"
+        )
+
+    return usuario
 
 def get_operador(request: Request):
     usuario = get_usuario_logado(request)
