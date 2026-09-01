@@ -167,11 +167,13 @@
 }
 
 .produto-card-hover-info {
-  background-color: rgba(248, 250, 252, 0);
+  background-color: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(2px);
   inset: auto 0 44px 0;
   opacity: 0;
   padding: 14px 12px 12px;
   position: absolute;
+  z-index: 10;
   transform: translateY(10px);
   transition: opacity var(--pos-transition), transform var(--pos-transition);
 }
