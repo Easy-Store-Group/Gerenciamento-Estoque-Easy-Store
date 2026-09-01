@@ -49,7 +49,7 @@
 }
 
 .pagination-button {
-  background: linear-gradient(135deg, var(--primary), #1d4ed8);
+  background-color: var(--primary);
   border-color: var(--primary);
   box-shadow: 0 8px 16px rgba(37, 99, 235, 0.2);
   color: #fff;
@@ -68,7 +68,7 @@
 }
 
 .pagination-button:hover {
-  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  background-color: #1d4ed8;
   border-color: #1d4ed8;
   box-shadow: 0 12px 20px rgba(37, 99, 235, 0.28);
   color: #fff;

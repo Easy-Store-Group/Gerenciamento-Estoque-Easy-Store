@@ -45,8 +45,12 @@
           <input type="email" name="email" placeholder="Digite seu e-mail" required>
         </div>
         <div class="input-group">
-          <label>Senha</label>
-          <input type="password" name="senha" placeholder="••••••••" required>
+          <label for="senha">Senha</label>
+          <div class="password-control">
+            <input id="senha" type="password" name="senha" placeholder="••••••••" required>
+            <button type="button" class="password-toggle" id="password-toggle" aria-controls="senha"
+              aria-pressed="false">Mostrar senha</button>
+          </div>
         </div>
         <button type="submit" class="btn-confirm">✦ Confirmar</button>
         <p class="footer-text">Não tem conta? <a href="/auth/register">Cadastre-se</a></p>

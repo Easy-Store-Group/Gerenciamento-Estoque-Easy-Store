@@ -60,7 +60,7 @@ body {
 }
 
 .bg-layer {
-  background: linear-gradient(135deg, #1a8fe8 0%, #0b00a0 100%);
+  background-color: #1a8fe8;
   inset: 0;
   position: absolute;
 }
@@ -255,7 +255,7 @@ body {
 }
 
 .btn-confirm {
-  background: linear-gradient(135deg, var(--login-primary), var(--login-primary-dark));
+  background-color: var(--login-primary);
   border: 0;
   border-radius: 8px;
   box-shadow: 0 10px 22px rgba(37, 117, 252, 0.26);
@@ -272,7 +272,7 @@ body {
 }
 
 .btn-confirm:hover {
-  background: linear-gradient(135deg, #3385ff, #1e68e0);
+  background-color: #3385ff;
   box-shadow: 0 10px 24px rgba(37, 117, 252, 0.32);
   transform: translateY(-1px);
 }

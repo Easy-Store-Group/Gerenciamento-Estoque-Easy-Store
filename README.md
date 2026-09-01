@@ -35,3 +35,11 @@
 - **Jinja2** — templates HTML
 - **Chart.js** — gráficos no dashboard
 - **Vanilla JS + CSS** — frontend responsivo
+
+## Como Executar a Aplicação
+
+Certifique-se de estar na raiz do projeto (`GERENCIAMENTO-ESTOQUE-EASY-STORE`) e execute:
+
+```bash
+python -m uvicorn app.main:app --reload
+```

@@ -142,7 +142,7 @@
 
 .produto-card-media {
   align-items: center;
-  background: linear-gradient(180deg, #f8fafc 0%, #edf2f7 100%);
+  background-color: #f8fafc;
   display: flex;
   height: 132px;
   justify-content: center;
@@ -167,7 +167,7 @@
 }
 
 .produto-card-hover-info {
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0), rgba(15, 23, 42, 0.92));
+  background-color: rgba(248, 250, 252, 0);
   inset: auto 0 44px 0;
   opacity: 0;
   padding: 14px 12px 12px;
