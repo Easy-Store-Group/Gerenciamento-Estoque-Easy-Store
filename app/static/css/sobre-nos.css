@@ -91,6 +91,15 @@ a {
     background: #eff6ff;
 }
 
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+}
+
 .public-main {
     margin: 0 auto;
     max-width: 1200px;
@@ -99,7 +108,7 @@ a {
 
 .about-hero {
     align-items: center;
-    background: linear-gradient(135deg, #060055, #157ed3);
+    background-color: #060055;
     border-radius: 22px;
     box-shadow: var(--shadow);
     color: white;

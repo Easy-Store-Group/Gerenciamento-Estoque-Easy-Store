@@ -108,7 +108,7 @@ a {
 
 .catalog-hero {
     align-items: center;
-    background: linear-gradient(135deg, #060055, #157ed3);
+    background-color: #060055;
     border-radius: 22px;
     box-shadow: var(--shadow);
     color: white;
@@ -496,7 +496,7 @@ a {
 }
 
 .pagination-button {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    background-color: var(--primary);
     border-color: var(--primary);
     box-shadow: 0 8px 16px rgba(21, 126, 211, 0.22);
     color: #fff;
@@ -515,7 +515,7 @@ a {
 }
 
 .pagination-button:hover {
-    background: linear-gradient(135deg, var(--primary-dark), #0b4b82);
+    background-color: var(--primary-dark);
     border-color: var(--primary-dark);
     box-shadow: 0 12px 20px rgba(21, 126, 211, 0.3);
     color: #fff;

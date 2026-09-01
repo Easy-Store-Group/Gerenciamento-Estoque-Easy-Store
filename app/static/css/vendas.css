@@ -52,7 +52,7 @@
 }
 
 .btn-small.btn-primary {
-  background: linear-gradient(90deg,#157ED3,#1967A7);
+  background-color: #157ED3;
   color: #fff;
   border: none;
 }

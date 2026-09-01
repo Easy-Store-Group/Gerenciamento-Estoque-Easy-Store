@@ -112,11 +112,7 @@ button {
     font-weight: 800;
     letter-spacing: -0.04em;
     
-    background: linear-gradient(
-        135deg,
-        var(--color-dark) 0%,
-        var(--color-primary) 100%
-    );
+    background-color: var(--color-dark);
 
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -173,7 +169,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #f4f8ff 0%, var(--color-white) 52%, #f6fbff 100%);
+    background-color: var(--color-white);
     position: relative;
     overflow: hidden;
 }
@@ -185,7 +181,7 @@ button {
     right: -20%;
     width: 600px;
     height: 600px;
-    background: radial-gradient(circle, rgba(21, 126, 211, 0.1) 0%, transparent 70%);
+    background-color: rgba(21, 126, 211, 0.1);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -197,7 +193,7 @@ button {
     left: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(6, 0, 85, 0.05) 0%, transparent 70%);
+    background-color: rgba(6, 0, 85, 0.05);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -401,7 +397,7 @@ button {
     place-items: center;
     transform: translate(-50%, -50%);
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 28%, #4bb1ff, var(--color-primary) 42%, var(--color-dark) 100%);
+    background-color: var(--color-primary);
     box-shadow: 0 32px 80px rgba(6, 0, 85, 0.24), inset 0 1px 0 rgba(255,255,255,.32);
 }
 
@@ -527,7 +523,7 @@ button {
 
 .services {
     padding: 100px 20px;
-    background: linear-gradient(180deg, var(--color-white) 0%, var(--color-gray-light) 100%);
+    background-color: var(--color-white);
 }
 
 .services-container {
@@ -578,7 +574,7 @@ button {
     left: -100%;
     width: 100%;
     height: 4px;
-    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+    background-color: var(--color-primary);
     transition: var(--transition);
 }
 
@@ -672,7 +668,7 @@ button {
 
 .feature-card {
     padding: 40px 30px;
-    background: linear-gradient(135deg, var(--color-gray-light) 0%, var(--color-white) 100%);
+    background-color: var(--color-gray-light);
     border-radius: var(--radius-lg);
     text-align: center;
     transition: var(--transition);
@@ -684,7 +680,7 @@ button {
     grid-column: 1 / -1;
     max-width: none;
     padding: 50px;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    background-color: var(--color-primary);
     color: var(--color-white);
 }
 
@@ -730,7 +726,7 @@ button {
 
 .cta-section {
     padding: 80px 20px;
-    background: linear-gradient(135deg, var(--color-dark) 0%, var(--color-primary-dark) 100%);
+    background-color: var(--color-dark);
     text-align: center;
 }
 
@@ -833,7 +829,7 @@ button {
 .value-number { grid-row: span 2; color: var(--color-primary); font-size: 13px; font-weight: 800; }
 .value-item h3 { margin-bottom: 8px; color: var(--color-text); font-size: 19px; }
 .value-item p { color: var(--color-gray-dark); font-size: 14px; line-height: 1.7; }
-.journey-section { background: linear-gradient(135deg, #eef7ff, #f8fbff); }
+.journey-section { background-color: #eef7ff; }
 .journey-section .section-header { text-align: left; margin-bottom: 56px; }
 .journey-section .section-header p:last-child { margin: 16px 0 0; }
 .journey-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; list-style: none; counter-reset: step; }
@@ -900,10 +896,7 @@ button {
 
 .auth-required-page {
     min-height: 100vh;
-    background:
-        radial-gradient(circle at 20% 20%, rgba(21, 126, 211, 0.16), transparent 28%),
-        radial-gradient(circle at 82% 18%, rgba(6, 0, 85, 0.12), transparent 26%),
-        linear-gradient(135deg, var(--color-gray-light) 0%, var(--color-white) 100%);
+    background-color: var(--color-gray-light);
 }
 
 .auth-required {

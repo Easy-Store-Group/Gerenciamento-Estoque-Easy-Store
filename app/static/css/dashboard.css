@@ -119,7 +119,7 @@
 }
 
 .chart-bar {
-  background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+  background-color: #3b82f6;
   border-radius: 0;
   box-shadow: none;
   max-width: 44px;

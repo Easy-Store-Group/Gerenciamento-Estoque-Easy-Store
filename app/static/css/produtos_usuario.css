@@ -35,7 +35,7 @@ body {
 
 .bg-layer.crystal { 
     position: absolute; inset: 0; 
-    background: linear-gradient(135deg, #00cfff 0%, #0066cc 50%, #003d99 100%); 
+    background-color: #00cfff; 
     z-index: 0;
 }
 
@@ -135,7 +135,7 @@ body {
 
 .btn-action { height: 60px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
 .btn-cancel { background: #ff4b5c; color: white; }
-.btn-confirm { background: linear-gradient(135deg, #2575fc, #1a5fd4); color: white; }
+.btn-confirm { background-color: #2575fc; color: white; }
 
 .btn-action:hover { transform: translateY(-3px); filter: brightness(1.1); }
 /* Ajuste do cabeçalho da tabela */
@@ -188,7 +188,7 @@ body {
 
 .btn-action { height: 60px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
 .btn-cancel { background: #ff4b5c; color: white; }
-.btn-confirm { background: linear-gradient(135deg, #2575fc, #1a5fd4); color: white; }
+.btn-confirm { background-color: #2575fc; color: white; }
 
 .btn-action:hover { transform: translateY(-3px); filter: brightness(1.1); }
 
