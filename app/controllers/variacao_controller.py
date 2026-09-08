@@ -203,6 +203,7 @@ class VariacaoCreate(BaseModel):
     cor_id: int | None = None
     tamanho_id: int | None = None
     estoque_atual: int = 0
+    preco: float = 0.0
 
 
 class VariacaoResponse(BaseModel):
@@ -213,6 +214,7 @@ class VariacaoResponse(BaseModel):
     estoque_atual: int
     ativa: bool
     imagem: str | None = None
+    preco: float | None = None
 
 
 @router.post("/variacoes")
@@ -257,6 +259,7 @@ def criar_variacao(
         cor_id=variacao.cor_id,
         tamanho_id=variacao.tamanho_id,
         estoque_atual=variacao.estoque_atual,
+        preco=variacao.preco,
         ativa=True
     )
     
@@ -291,6 +294,7 @@ def listar_variacoes_produto(produto_id: int, db: Session = Depends(get_db)):
             "cor": {"id": v.cor.id, "nome": v.cor.nome, "codigo_hex": v.cor.codigo_hex} if v.cor else None,
             "tamanho": {"id": v.tamanho_obj.id, "nome": v.tamanho_obj.nome} if v.tamanho_obj else None,
             "estoque_atual": v.estoque_atual,
+            "preco": float(v.preco or 0),
             "ativa": v.ativa,
             "imagem": v.imagem
         })
@@ -311,6 +315,7 @@ def obter_variacao(variacao_id: int, db: Session = Depends(get_db)):
         "cor": {"id": variacao.cor.id, "nome": variacao.cor.nome} if variacao.cor else None,
         "tamanho": {"id": variacao.tamanho_obj.id, "nome": variacao.tamanho_obj.nome} if variacao.tamanho_obj else None,
         "estoque_atual": variacao.estoque_atual,
+        "preco": float(variacao.preco or 0),
         "ativa": variacao.ativa,
         "imagem": variacao.imagem
     }
@@ -321,9 +326,10 @@ def atualizar_variacao(
     variacao_id: int,
     estoque: int | None = None,
     ativa: bool | None = None,
+    preco: float | None = None,
     db: Session = Depends(get_db)
 ):
-    """Atualiza estoque ou status de uma variação"""
+    """Atualiza estoque, preço ou status de uma variação"""
     variacao = db.query(ProdutoVariacao).filter(ProdutoVariacao.id == variacao_id).first()
     
     if not variacao:
@@ -331,6 +337,9 @@ def atualizar_variacao(
     
     if estoque is not None:
         variacao.estoque_atual = estoque
+    
+    if preco is not None:
+        variacao.preco = float(preco)
     
     if ativa is not None:
         variacao.ativa = ativa

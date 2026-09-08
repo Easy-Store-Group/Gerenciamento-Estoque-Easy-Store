@@ -89,6 +89,10 @@
               <label>Estoque dessa variação</label>
               <input type="number" id="estoque-variacao" value="0" min="0">
             </div>
+            <div class="input-group">
+              <label>Preço dessa variação</label>
+              <input type="number" id="preco-variacao" value="0" min="0" step="0.01">
+            </div>
             <button type="button" class="btn btn-secondary" onclick="adicionarVariacao()">Adicionar Variação</button>
           </div>
         </div>
@@ -444,6 +448,7 @@
     const corId = document.getElementById('cor-select').value;
     const tamanhoId = document.getElementById('tamanho-select').value;
     const estoque = parseInt(document.getElementById('estoque-variacao').value) || 0;
+    const preco = parseFloat(document.getElementById('preco-variacao').value) || 0;
 
     // Tamanho é opcional - se não tiver cor, deve ter no mínimo cor
     if (!corId && !tamanhoId) {
@@ -458,6 +463,7 @@
       cor_id: corId ? parseInt(corId) : null,
       tamanho_id: tamanhoId ? parseInt(tamanhoId) : null,
       estoque_atual: estoque,
+      preco: preco,
       cor_nome: cor?.nome || '-',
       tamanho_nome: tamanho?.nome || '-'
     };
@@ -475,6 +481,7 @@
     document.getElementById('cor-select').value = '';
     document.getElementById('tamanho-select').value = '';
     document.getElementById('estoque-variacao').value = '0';
+    document.getElementById('preco-variacao').value = '0';
   }
 
   function removerVariacao(index) {
@@ -499,7 +506,7 @@
       lista.innerHTML = variacoesList.map((v, i) => `
         <div class="variacao-item">
           <div class="variacao-item-info">
-            <strong>${v.cor_nome}</strong> | <strong>${v.tamanho_nome}</strong> - Estoque: ${v.estoque_atual}
+            <strong>${v.cor_nome}</strong> | <strong>${v.tamanho_nome}</strong> - Estoque: ${v.estoque_atual} - Preço: R$ ${Number(v.preco || 0).toFixed(2)}
             <label class="variacao-imagem-label">
               Imagem desta variação
               <input type="file" id="imagem-variacao-${i}" name="imagens_variacoes" accept="image/png, image/jpeg, image/webp, image/gif" onchange="definirImagemVariacao(${i}, this)">
