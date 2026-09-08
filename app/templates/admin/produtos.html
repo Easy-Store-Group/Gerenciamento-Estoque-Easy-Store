@@ -48,11 +48,11 @@
       {% endif %}
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
       {% if produto.ativo %}
-      <form action="/produtos/{{ produto.id }}/desativar" method="post"><button type="submit" class="btn btn-warning">Desativar</button></form>
+      <form action="/produtos/{{ produto.id }}/desativar" method="post" data-confirm="Tem certeza que deseja desativar este produto?"><button type="submit" class="btn btn-warning">Desativar</button></form>
       {% else %}
-      <form action="/produtos/{{ produto.id }}/ativar" method="post"><button type="submit" class="btn btn-success">Ativar</button></form>
+      <form action="/produtos/{{ produto.id }}/ativar" method="post" data-confirm="Tem certeza que deseja ativar este produto?"><button type="submit" class="btn btn-success">Ativar</button></form>
       {% endif %}
-      <form action="/produtos/{{ produto.id }}/deletar" method="post"><button type="submit" class="btn btn-danger">Excluir</button></form>
+      <form action="/produtos/{{ produto.id }}/deletar" method="post" data-confirm="Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita."><button type="submit" class="btn btn-danger">Excluir</button></form>
       {% else %}
       <span class="muted">Ações administrativas ocultas</span>
       {% endif %}
@@ -81,6 +81,42 @@
   {% endif %}
 </nav>
 {% endif %}
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const checkbox = document.querySelector('input[name="mostrar_inativos"]');
+    if (!checkbox) return;
+
+    function updatePaginationLinks() {
+      const checked = checkbox.checked;
+      document.querySelectorAll('.pagination a[href]').forEach(a => {
+        try {
+          const url = new URL(a.getAttribute('href'), window.location.origin);
+          if (checked) {
+            url.searchParams.set('mostrar_inativos', 'true');
+          } else {
+            url.searchParams.delete('mostrar_inativos');
+          }
+          a.setAttribute('href', url.pathname + url.search);
+        } catch (e) {
+          // ignore malformed hrefs
+        }
+      });
+    }
+
+    // update links on load
+    updatePaginationLinks();
+
+    // update when checkbox toggled
+    checkbox.addEventListener('change', () => {
+      // also submit the search form when toggled to refresh results
+      const form = checkbox.closest('form');
+      if (form) form.requestSubmit();
+      updatePaginationLinks();
+    });
+  });
+</script>
+{% endblock %}
 {% else %}
 <div class="empty-state">Nenhum produto encontrado. Cadastre um novo produto para começar.</div>
 {% endif %}

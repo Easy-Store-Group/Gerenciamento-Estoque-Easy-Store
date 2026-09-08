@@ -36,7 +36,7 @@
     <div class="actions">
       {% if usuario and (usuario.role if usuario is not mapping else usuario.get('role')) == 'admin' %}
       <a href="/usuarios/{{ u.id }}/editar" class="btn btn-secondary">Editar</a>
-      <form action="/usuarios/{{ u.id }}/toggle-ativo" method="post"><button type="submit" class="btn btn-warning">{% if u.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
+      <form action="/usuarios/{{ u.id }}/toggle-ativo" method="post" data-confirm="Tem certeza que deseja alterar o status deste usuário?"><button type="submit" class="btn btn-warning">{% if u.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
       {% else %}
       <span class="muted">Somente administradores</span>
       {% endif %}

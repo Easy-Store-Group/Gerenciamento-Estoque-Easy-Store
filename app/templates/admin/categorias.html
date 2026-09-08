@@ -24,7 +24,7 @@
     <div class="actions">
       {% if role == 'admin' %}
       <a href="/categorias/{{ categoria.id }}/editar" class="btn btn-secondary">Editar</a>
-      <form action="/categorias/{{ categoria.id }}/toggle-ativo" method="post"><button type="submit" class="btn btn-warning">{% if categoria.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
+      <form action="/categorias/{{ categoria.id }}/toggle-ativo" method="post" data-confirm="Tem certeza que deseja alterar o status desta categoria?"><button type="submit" class="btn btn-warning">{% if categoria.ativo %}Desativar{% else %}Ativar{% endif %}</button></form>
       {% else %}
       <span class="muted">Ações administrativas ocultas</span>
       {% endif %}
