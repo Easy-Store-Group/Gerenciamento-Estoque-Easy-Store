@@ -17,6 +17,27 @@ const carrinhoJsonInput = document.getElementById('carrinho_json');
 document.addEventListener('DOMContentLoaded', () => {
     carregarDescontoAssociado();
     exibirErroDaUrl();
+    // Habilita submissão do formulário de busca/por_pagina quando existir
+    const formBusca = document.querySelector('form.search-box');
+    if (formBusca) {
+        formBusca.addEventListener('submit', (ev) => {
+            ev.preventDefault();
+            const params = new URLSearchParams(window.location.search);
+            const termo = formBusca.querySelector('input[name="busca"]')?.value || '';
+            const porPagina = formBusca.querySelector('select[name="por_pagina"]')?.value || '';
+            params.set('busca', termo);
+            if (porPagina) params.set('por_pagina', porPagina);
+            params.set('pagina', '1');
+            window.location.search = params.toString();
+        });
+
+        // quando trocar por_pagina, recarrega na página 1
+        const sel = formBusca.querySelector('select[name="por_pagina"]');
+        if (sel) {
+            sel.addEventListener('change', () => formBusca.requestSubmit());
+        }
+    }
+
     inicializarPDV();
 });
 
@@ -45,10 +66,12 @@ function inicializarPDV() {
         });
     });
 
-    inputBusca.addEventListener('input', (e) => {
-        const termo = e.target.value.toLowerCase();
-        filtrarProdutos(termo);
-    });
+    if (inputBusca) {
+        inputBusca.addEventListener('input', (e) => {
+            const termo = e.target.value.toLowerCase();
+            filtrarProdutos(termo);
+        });
+    }
 
     clienteSelect.addEventListener('change', atualizarTotais);
 

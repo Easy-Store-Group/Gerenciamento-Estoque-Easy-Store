@@ -1,0 +1,62 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="table-actions">
+  <form method="get" class="filter-form">
+    <input type="text" name="busca" placeholder="Buscar nome, e-mail ou telefone" value="{{ busca }}" />
+    <select name="ativo">
+      <option value="-1" {% if ativo == -1 %}selected{% endif %}>Todos</option>
+      <option value="1" {% if ativo == 1 %}selected{% endif %}>Ativos</option>
+      <option value="0" {% if ativo == 0 %}selected{% endif %}>Inativos</option>
+    </select>
+    <select name="ordenar">
+      <option value="nome" {% if ordenar == 'nome' %}selected{% endif %}>Nome</option>
+      <option value="email" {% if ordenar == 'email' %}selected{% endif %}>E-mail</option>
+      <option value="criado_em" {% if ordenar == 'criado_em' %}selected{% endif %}>Data cadastro</option>
+    </select>
+    <select name="ordem">
+      <option value="asc" {% if ordem == 'asc' %}selected{% endif %}>Asc</option>
+      <option value="desc" {% if ordem == 'desc' %}selected{% endif %}>Desc</option>
+    </select>
+    <select name="por_pagina">
+      <option value="10" {% if por_pagina == 10 %}selected{% endif %}>10</option>
+      <option value="25" {% if por_pagina == 25 %}selected{% endif %}>25</option>
+      <option value="50" {% if por_pagina == 50 %}selected{% endif %}>50</option>
+    </select>
+    <button class="btn btn-primary">Aplicar</button>
+  </form>
+
+  <div class="detail-pill">Total de clientes: <strong>{{ total }}</strong></div>
+  <a href="/admin/pos" class="btn btn-secondary">Ir ao PDV</a>
+</div>
+
+<div class="table-card users-table">
+  <div class="table-row header">
+    <div>Nome</div>
+    <div>E-mail</div>
+    <div>Telefone</div>
+    <div>Premium</div>
+    <div>Status</div>
+    <div>Cadastro</div>
+  </div>
+  {% for c in clientes %}
+  <div class="table-row">
+    <div>{{ c.nome }}</div>
+    <div>{{ c.email or '-' }}</div>
+    <div>{{ c.telefone or '-' }}</div>
+    <div>{% if c.is_associado %}<span class="plan-badge premium">Sim</span>{% else %}Não{% endif %}</div>
+    <div><span class="status-badge {% if c.ativo %}active{% else %}inactive{% endif %}">{{ 'Ativo' if c.ativo else 'Inativo' }}</span></div>
+    <div>{{ c.criado_em.strftime('%d/%m/%Y') if c.criado_em else '-' }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<nav class="pagination" aria-label="Paginação de clientes">
+  <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="?por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}&busca={{ busca }}&ativo={{ ativo }}&ordenar={{ ordenar }}&ordem={{ ordem }}">Anterior</a>
+  {% for numero in range(1, total_paginas + 1) %}
+  <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="?por_pagina={{ por_pagina }}&pagina={{ numero }}&busca={{ busca }}&ativo={{ ativo }}&ordenar={{ ordenar }}&ordem={{ ordem }}">{{ numero }}</a>
+  {% endfor %}
+  <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="?por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}&busca={{ busca }}&ativo={{ ativo }}&ordenar={{ ordenar }}&ordem={{ ordem }}">Próxima</a>
+</nav>
+
+{% endblock %}
