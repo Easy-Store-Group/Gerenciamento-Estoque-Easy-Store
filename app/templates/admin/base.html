@@ -6,6 +6,7 @@
   <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
   <title>{{ title or 'EasyStore Admin' }}</title>
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/admin.css') }}?v=5">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/confirm.css') }}?v=1">
   {% if css_path and css_path != 'css/admin.css' %}
   <link rel="stylesheet" href="{{ request.url_for('static', path=css_path) }}?v=7">
   {% endif %}
@@ -124,5 +125,18 @@
       });
     });
   </script>
+  <!-- Confirmation modal markup (used by confirm.js) -->
+  <div id="confirm-overlay" class="confirm-overlay" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <h3 id="confirm-title" class="confirm-title">Confirmar ação</h3>
+      <div id="confirm-message" class="confirm-message">Tem certeza que deseja prosseguir?</div>
+      <div class="confirm-actions">
+        <button id="confirm-cancel" class="confirm-btn cancel">Cancelar</button>
+        <button id="confirm-confirm" class="confirm-btn confirm primary">Sim, confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ request.url_for('static', path='js/confirm.js') }}?v=2"></script>
 </body>
 </html>

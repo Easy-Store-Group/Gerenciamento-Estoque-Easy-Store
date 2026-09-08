@@ -1,0 +1,27 @@
+/* Styles for custom confirmation modal */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.confirm-overlay.is-open { display: flex; }
+.confirm-modal {
+  background: #fff;
+  border-radius: 10px;
+  max-width: 480px;
+  width: 90%;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(2,6,23,0.4);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+}
+.confirm-title { font-weight: 700; margin: 0 0 8px; font-size: 1.05rem; color: #0f172a; }
+.confirm-message { color: #334155; margin-bottom: 16px; }
+.confirm-actions { display:flex; gap:8px; justify-content:flex-end; }
+.confirm-btn { padding: 8px 14px; border-radius: 8px; border: 0; cursor: pointer; font-weight:600; }
+.confirm-btn.cancel { background: transparent; color: #475569; }
+.confirm-btn.confirm { background: var(--danger, #ef4444); color: #fff; }
+.confirm-btn.confirm.primary { background: var(--primary, #2563eb); color: #fff; box-shadow: 0 12px 30px rgba(37,99,235,0.18); }

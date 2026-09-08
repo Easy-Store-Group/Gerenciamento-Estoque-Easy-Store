@@ -3,6 +3,7 @@
 {% block content %}
 <div class="page-actions">
   <form class="search-bar" action="/produtos" method="get">
+    <input type="hidden" name="pagina" value="1">
     <input type="text" name="busca" placeholder="Buscar produto..." value="{{ busca }}">
     <select name="categoria_id">
       <option value="0">Todas as categorias</option>
@@ -48,11 +49,11 @@
       {% endif %}
       <a href="/produtos/{{ produto.id }}/editar" class="btn btn-secondary">Editar</a>
       {% if produto.ativo %}
-      <form action="/produtos/{{ produto.id }}/desativar" method="post"><button type="submit" class="btn btn-warning">Desativar</button></form>
+      <form action="/produtos/{{ produto.id }}/desativar" method="post" data-confirm="Tem certeza que deseja desativar este produto?"><button type="submit" class="btn btn-warning">Desativar</button></form>
       {% else %}
-      <form action="/produtos/{{ produto.id }}/ativar" method="post"><button type="submit" class="btn btn-success">Ativar</button></form>
+      <form action="/produtos/{{ produto.id }}/ativar" method="post" data-confirm="Tem certeza que deseja ativar este produto?"><button type="submit" class="btn btn-success">Ativar</button></form>
       {% endif %}
-      <form action="/produtos/{{ produto.id }}/deletar" method="post"><button type="submit" class="btn btn-danger">Excluir</button></form>
+      <form action="/produtos/{{ produto.id }}/deletar" method="post" data-confirm="Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita."><button type="submit" class="btn btn-danger">Excluir</button></form>
       {% else %}
       <span class="muted">Ações administrativas ocultas</span>
       {% endif %}
@@ -81,6 +82,51 @@
   {% endif %}
 </nav>
 {% endif %}
+{% block scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const checkbox = document.querySelector('input[name="mostrar_inativos"]');
+    const form = document.querySelector('.search-bar');
+    if (!checkbox || !form) return;
+
+    const syncCheckboxFromQuery = () => {
+      const params = new URLSearchParams(window.location.search);
+      const checked = params.get('mostrar_inativos') === 'true' || params.get('mostrar_inativos') === '1' || params.get('mostrar_inativos') === 'on';
+      checkbox.checked = checked;
+    };
+
+    const syncPaginationLinks = () => {
+      document.querySelectorAll('.pagination a[href]').forEach(a => {
+        try {
+          const url = new URL(a.getAttribute('href'), window.location.origin);
+          if (checkbox.checked) {
+            url.searchParams.set('mostrar_inativos', 'true');
+          } else {
+            url.searchParams.delete('mostrar_inativos');
+          }
+          a.setAttribute('href', url.pathname + url.search);
+        } catch (e) {
+          // ignore malformed hrefs
+        }
+      });
+    };
+
+    const resetPageOnSearch = () => {
+      const hiddenPage = form.querySelector('input[name="pagina"]');
+      if (hiddenPage) hiddenPage.value = '1';
+    };
+
+    syncCheckboxFromQuery();
+    syncPaginationLinks();
+
+    checkbox.addEventListener('change', function () {
+      resetPageOnSearch();
+      syncPaginationLinks();
+      form.requestSubmit();
+    });
+  });
+</script>
+{% endblock %}
 {% else %}
 <div class="empty-state">Nenhum produto encontrado. Cadastre um novo produto para começar.</div>
 {% endif %}
