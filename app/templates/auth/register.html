@@ -2,87 +2,86 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=2">
-  <title>Cadastro | EasyStore</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}">
-    <title>Cadastro - EasyStore</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=3">
+    <title>Cadastro | EasyStore</title>
 </head>
 
 <body>
   <main class="page" id="page">
-    <aside class="branding" id="branding" aria-label="EasyStore">
-      <div class="bg-layer" id="bgLayer"></div>
-      <div class="stars" id="stars"></div>
-
+    <!-- BRANDING SIDE -->
+    <aside class="branding" aria-label="EasyStore Branding">
       <div class="brand-content">
         <div class="logo-row">
-          <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
-          <span class="brand-name" id="brandName">EasyStore</span>
+          <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo">
+          <span class="brand-name">EasyStore</span>
         </div>
-        <p class="tagline" id="tagline">
-          Crie sua conta<br>
-          e acompanhe seu negócio
-        </p>
-        <p class="sub">Catálogo, categorias e histórico em um só lugar!
-          
-        </p>
+        <p class="tagline">Crie sua conta<br>e acompanhe seu negócio</p>
+        <p class="sub">Catálogo, categorias e histórico em um só lugar.</p>
       </div>
     </aside>
 
+    <!-- FORM SIDE -->
     <section class="form-side" aria-labelledby="register-title">
       <div class="login-box">
-        <p class="form-kicker">Cadastro</p>
         <h1 id="register-title">Criar conta</h1>
+        
         {% if erro %}
-        <p class="login-error" id="login-error" role="alert">{{ erro }}</p>
+          <div class="login-error" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span>{{ erro }}</span>
+          </div>
         {% endif %}
-        <form id="register-form" action="/auth/register" method="post">
+        
+        <form id="register-form" action="/auth/register" method="post" novalidate>
           <div class="input-group">
             <label for="nome">Nome completo</label>
-            <input id="nome" type="text" name="nome" placeholder="Seu nome completo" required>
+            <input id="nome" type="text" name="nome" placeholder="Seu nome" required>
           </div>
+          
           <div class="input-group">
             <label for="email">E-mail</label>
-            <input id="email" type="email" name="email" placeholder="Digite seu e-mail" required>
+            <input id="email" type="email" name="email" placeholder="nome@empresa.com" required>
           </div>
+          
           <div class="input-group">
             <label for="telefone">Telefone (opcional)</label>
             <input id="telefone" type="text" name="telefone" placeholder="(00) 00000-0000">
           </div>
+          
           <div class="input-group">
             <label for="senha">Senha</label>
             <div class="password-control">
-              <input id="senha" type="password" name="senha" placeholder="Digite sua senha" minlength="6"
-                required>
-              <button type="button" class="password-toggle" id="password-toggle" aria-controls="senha"
-                aria-pressed="false">Mostrar senha</button>
+              <input id="senha" type="password" name="senha" placeholder="Crie uma senha" minlength="6" required>
+              <button type="button" class="password-toggle" aria-controls="senha" aria-pressed="false" aria-label="Mostrar senha" title="Mostrar senha"></button>
             </div>
           </div>
+          
           <div class="input-group">
             <label for="confirmar_senha">Confirmar senha</label>
             <div class="password-control">
-              <input id="confirmar_senha" type="password" name="confirmar_senha" placeholder="Confirme sua senha"
-                minlength="6" required>
-              <button type="button" class="password-toggle" id="confirm-password-toggle" aria-controls="confirmar_senha"
-                aria-pressed="false">Mostrar senha</button>
+              <input id="confirmar_senha" type="password" name="confirmar_senha" placeholder="Repita a senha" minlength="6" required>
+              <button type="button" class="password-toggle" aria-controls="confirmar_senha" aria-pressed="false" aria-label="Mostrar senha" title="Mostrar senha"></button>
             </div>
           </div>
+          
           <button type="submit" class="btn-confirm">Criar conta</button>
+          
           <div class="login-links">
             <p class="footer-text">Já tem conta? <a href="/auth/login">Entrar</a></p>
-            <p class="footer-text"><a href="/">Voltar para o início</a></p>
+            <p class="footer-text"><a href="/">Voltar para o Início</a></p>
           </div>
         </form>
       </div>
     </section>
   </main>
-  <script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
-  <script src="{{ request.url_for('static', path='js/login.js') }}?v=1" defer></script>
+  
+  <script src="{{ request.url_for('static', path='js/login.js') }}?v=3" defer></script>
 </body>
-
 </html>

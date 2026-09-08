@@ -4,52 +4,60 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}">
-  <title>Esqueci a senha</title>
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=3">
+  <title>Esqueci a senha | EasyStore</title>
 </head>
 <body>
-<div class="page" id="page">
+<main class="page" id="page">
   <!-- BRANDING -->
-  <div class="branding" id="branding">
-    <div class="bg-layer" id="bgLayer"></div>
-    <div class="stars" id="stars"></div>
+  <aside class="branding" aria-label="EasyStore Branding">
     <div class="brand-content">
       <div class="logo-row">
-        <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore logo" width="500">
-        <span class="brand-name" id="brandName">EasyStore</span>
+        <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore logo">
+        <span class="brand-name">EasyStore</span>
       </div>
-      <p class="tagline" id="tagline">PCs, consoles e jogos<br>em um só lugar</p>
-      <p class="sub">Seu universo gamer começa aqui ✦</p>
+      <p class="tagline">Gestão inteligente<br>para o seu negócio</p>
+      <p class="sub">Controle de estoque, vendas e catálogo de forma simples e eficiente.</p>
     </div>
-  </div>
+  </aside>
 
   <!-- FORM SIDE -->
-  <div class="form-side">
+  <section class="form-side" aria-labelledby="forgot-title">
     <div class="login-box">
-      <h2>Esqueci minha senha</h2>
+      <h1 id="forgot-title">Esqueci minha senha</h1>
+      
       {% if erro %}
-        <p style="color: red;">{{ erro }}</p>
+        <div class="login-error" role="alert">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <span>{{ erro }}</span>
+        </div>
       {% endif %}
 
-      <form action="/auth/forgot" method="post">
+      <form id="forgot-form" action="/auth/forgot" method="post">
         <div class="input-group">
-          <label>E-mail</label>
-          <input type="email" name="email" placeholder="Digite o e-mail cadastrado">
+          <label for="email">E-mail</label>
+          <input id="email" type="email" name="email" placeholder="Digite o e-mail cadastrado" required>
         </div>
-        <button type="submit" class="btn-confirm">✦ Enviar instruções</button>
+        <button type="submit" class="btn-confirm">Enviar instruções</button>
       </form>
 
       {% if reset_link %}
-        <div style="margin-top: 20px; text-align: center;">
-          <p style="font-size: 12px; color: #666; margin-bottom: 10px;">Link de reset (apenas para desenvolvimento):</p>
-          <a href="{{ reset_link }}" class="btn-confirm" style="display: inline-block;">Redefinir senha</a>
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color); text-align: center;">
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px; font-weight: 600; text-transform: uppercase;">Link de reset (Apenas Dev)</p>
+          <a href="{{ reset_link }}" class="btn-confirm" style="display: inline-flex; text-decoration: none;">Redefinir senha</a>
         </div>
       {% endif %}
 
-      <p class="footer-text"><a href="/auth/login">Voltar ao login</a></p>
+      <div class="login-links">
+        <p class="footer-text"><a href="/auth/login">Voltar ao login</a></p>
+      </div>
     </div>
-  </div>
-</div>
-<script src="{{ request.url_for('static', path='js/stars.js') }}"></script>
+  </section>
+</main>
+<script src="{{ request.url_for('static', path='js/login.js') }}?v=3" defer></script>
 </body>
 </html>
