@@ -3,6 +3,7 @@
 {% block content %}
 <div class="page-actions">
   <form class="search-bar" action="/produtos" method="get">
+    <input type="hidden" name="pagina" value="1">
     <input type="text" name="busca" placeholder="Buscar produto..." value="{{ busca }}">
     <select name="categoria_id">
       <option value="0">Todas as categorias</option>
@@ -85,14 +86,20 @@
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     const checkbox = document.querySelector('input[name="mostrar_inativos"]');
-    if (!checkbox) return;
+    const form = document.querySelector('.search-bar');
+    if (!checkbox || !form) return;
 
-    function updatePaginationLinks() {
-      const checked = checkbox.checked;
+    const syncCheckboxFromQuery = () => {
+      const params = new URLSearchParams(window.location.search);
+      const checked = params.get('mostrar_inativos') === 'true' || params.get('mostrar_inativos') === '1' || params.get('mostrar_inativos') === 'on';
+      checkbox.checked = checked;
+    };
+
+    const syncPaginationLinks = () => {
       document.querySelectorAll('.pagination a[href]').forEach(a => {
         try {
           const url = new URL(a.getAttribute('href'), window.location.origin);
-          if (checked) {
+          if (checkbox.checked) {
             url.searchParams.set('mostrar_inativos', 'true');
           } else {
             url.searchParams.delete('mostrar_inativos');
@@ -102,17 +109,20 @@
           // ignore malformed hrefs
         }
       });
-    }
+    };
 
-    // update links on load
-    updatePaginationLinks();
+    const resetPageOnSearch = () => {
+      const hiddenPage = form.querySelector('input[name="pagina"]');
+      if (hiddenPage) hiddenPage.value = '1';
+    };
 
-    // update when checkbox toggled
-    checkbox.addEventListener('change', () => {
-      // also submit the search form when toggled to refresh results
-      const form = checkbox.closest('form');
-      if (form) form.requestSubmit();
-      updatePaginationLinks();
+    syncCheckboxFromQuery();
+    syncPaginationLinks();
+
+    checkbox.addEventListener('change', function () {
+      resetPageOnSearch();
+      syncPaginationLinks();
+      form.requestSubmit();
     });
   });
 </script>
