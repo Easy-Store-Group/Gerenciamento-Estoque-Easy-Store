@@ -57,7 +57,7 @@ button {
   display: flex;
   flex-direction: column;
   gap: 28px;
-  padding: 32px 24px;
+  padding: 24px 16px;
   /* keep sidebar visible on tall pages: occupy full viewport height */
   position: sticky;
   top: 0;
@@ -68,16 +68,17 @@ button {
 .brand-block {
   align-items: center;
   display: flex;
-  gap: 14px;
+  gap: 12px;
 }
 
 .brand-logo {
-  background: #ffffff;
+  background: #0e1f4d;
   border-radius: 16px;
-  height: 48px;
+  height: 56px;
   object-fit: contain;
-  padding: 8px;
-  width: 48px;
+  padding: 4px;
+  width: 56px;
+  flex-shrink: 0;
 }
 
 .brand-block strong {
@@ -85,12 +86,18 @@ button {
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .brand-block span {
-  color: #cbd5e1;
+  color: #94a3b8;
   display: block;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-top: 2px;
+  letter-spacing: 0.3px;
 }
 
 .sidebar-nav {
@@ -99,12 +106,12 @@ button {
 }
 
 .sidebar-nav a {
-  align-items: center;
+  align-items: flex-start;
   border-radius: 16px;
   color: #dbeafe;
   display: flex;
-  gap: 12px;
-  padding: 14px 16px;
+  gap: 2px;
+  padding: 12px 16px;
   transition: background var(--transition), transform var(--transition);
 }
 
@@ -153,7 +160,7 @@ button {
 }
 
 .admin-content {
-  padding: 30px 36px;
+  padding: 24px 28px;
 }
 
 .topbar {
