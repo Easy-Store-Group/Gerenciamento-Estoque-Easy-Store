@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import math
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.responses import HTMLResponse
@@ -16,6 +17,7 @@ from app.controllers import pdv_controller
 from app.controllers import produto_controller
 from app.controllers import cliente_controller
 from app.controllers import variacao_controller
+from app.controllers import cliente_admin_controller
 from app.database import get_db
 from app.models.categoria import Categoria
 from app.models.cliente import Cliente
@@ -58,6 +60,7 @@ app.include_router(movimentacao_controller.router)
 app.include_router(pdv_controller.router)
 app.include_router(cliente_controller.router)
 app.include_router(variacao_controller.router)
+app.include_router(cliente_admin_controller.router)
 
 
 @app.get("/")
@@ -133,15 +136,32 @@ def admin_dashboard(
 @app.get("/admin/pos")
 def admin_pos(
     request: Request,
+    busca: str = "",
+    pagina: int = 1,
+    por_pagina: int = 12,
     db: Session = Depends(get_db),
     admin=Depends(get_admin),
 ):
-    produtos = (
+    # Lista produtos com paginação e busca, parecido com /pdv
+    query = (
         db.query(Produto)
         .filter(Produto.ativo == True, Produto.estoque_atual > 0)
-        .order_by(Produto.nome)
-        .all()
     )
+
+    if busca and busca.strip():
+        query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
+
+    query = query.order_by(Produto.nome)
+    total_produtos = query.count()
+
+    por_pagina = min(max(por_pagina, 1), 50)
+    total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
+    pagina = min(max(pagina, 1), total_paginas)
+
+    produtos = (
+        query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+    )
+
     clientes = (
         db.query(Cliente)
         .filter(Cliente.ativo == True)
@@ -160,6 +180,11 @@ def admin_pos(
             "desconto_associado": 5.0,
             "css_path": "css/pos.css",
             "active": "pos",
+            "busca": busca,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_produtos": total_produtos,
         },
     )
 

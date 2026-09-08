@@ -98,6 +98,9 @@ def _extrair_produto_id(item: dict) -> int | None:
 @router.get("/")
 def tela_pdv(
     request: Request,
+    busca: str = "",
+    pagina: int = 1,
+    por_pagina: int = 12,
     db: Session = Depends(get_db),
     usuario=Depends(get_admin_ou_operador)
 ):
@@ -107,13 +110,28 @@ def tela_pdv(
     e a lista de clientes para o campo de busca.
     """
 
-    produtos = (
+    query = (
         db.query(Produto)
         .filter(
             Produto.ativo == True,
             Produto.estoque_atual > 0
         )
-        .order_by(Produto.nome)
+    )
+
+    if busca and busca.strip():
+        query = query.filter(Produto.nome.ilike(f"%{busca.strip()}%"))
+
+    query = query.order_by(Produto.nome)
+    total_produtos = query.count()
+
+    por_pagina = min(max(por_pagina, 1), 50)
+    total_paginas = math.ceil(total_produtos / por_pagina) if total_produtos else 1
+    pagina = min(max(pagina, 1), total_paginas)
+
+    produtos = (
+        query
+        .offset((pagina - 1) * por_pagina)
+        .limit(por_pagina)
         .all()
     )
 
@@ -134,6 +152,11 @@ def tela_pdv(
             "usuario": usuario,
             "produtos": produtos,
             "clientes": clientes,
+            "busca": busca,
+            "pagina": pagina,
+            "por_pagina": por_pagina,
+            "total_paginas": total_paginas,
+            "total_produtos": total_produtos,
             "css_path": "css/pos.css",
             "active": "pos",
             "page_title": "Ponto de Venda",
