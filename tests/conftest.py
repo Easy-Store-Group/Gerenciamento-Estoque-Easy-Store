@@ -1,7 +1,14 @@
+import os
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+# Ensure env vars needed by auth/database are set before importing app
+os.environ.setdefault("SECRET_KEY", "test-secret-key")
+os.environ.setdefault("ALGORITHM", "HS256")
+os.environ.setdefault("ACCESS_TOKEN_EXPIRACAO_MINUTOS", "60")
+os.environ.setdefault("DATABASE_URL", "sqlite:///./test_temp.db")
 
 from app.main import app
 from app.database import Base, get_db
