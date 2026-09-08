@@ -11,6 +11,10 @@
   {% endif %}
 </head>
 <body>
+  <button type="button" class="sidebar-toggle" aria-label="Abrir menu" aria-expanded="false">
+    ☰
+  </button>
+
   <div class="admin-layout">
     <aside class="sidebar">
       <div class="brand-block">
@@ -76,5 +80,49 @@
       </section>
     </main>
   </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.querySelector('.sidebar-toggle');
+      const sidebar = document.querySelector('.sidebar');
+      const navLinks = document.querySelectorAll('.sidebar-nav a');
+
+      if (!toggle || !sidebar) return;
+
+      const abrirSidebar = () => {
+        sidebar.classList.add('is-open');
+        toggle.setAttribute('aria-expanded', 'true');
+      };
+
+      const fecharSidebar = () => {
+        sidebar.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+      };
+
+      toggle.addEventListener('click', () => {
+        const estaAberta = sidebar.classList.contains('is-open');
+        if (estaAberta) {
+          fecharSidebar();
+        } else {
+          abrirSidebar();
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 820) fecharSidebar();
+        });
+      });
+
+      document.addEventListener('click', (event) => {
+        if (window.innerWidth > 820) return;
+        const clicouNoToggle = toggle.contains(event.target);
+        const clicouNaSidebar = sidebar.contains(event.target);
+        if (!clicouNoToggle && !clicouNaSidebar && sidebar.classList.contains('is-open')) {
+          fecharSidebar();
+        }
+      });
+    });
+  </script>
 </body>
 </html>
