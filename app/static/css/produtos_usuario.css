@@ -60,7 +60,7 @@ body {
 .cat-btn {
     padding: 10px 22px;
     border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 12px;
+    border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
     color: white;
     font-size: 0.85rem;
@@ -92,7 +92,7 @@ body {
 
 .product-card { 
     background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); 
-    border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; 
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; 
     padding: 25px; cursor: pointer; color: white; transition: 0.3s; 
     text-align: center;
 }
@@ -110,7 +110,7 @@ body {
 
 .cart-table-header {
     display: flex; justify-content: space-between;
-    padding: 12px; background: #eef2f7; border-radius: 12px 12px 0 0;
+    padding: 12px; background: #eef2f7; border-radius: 10px 10px 0 0;
     font-weight: 700; font-size: 0.85rem; color: #555;
 }
 
@@ -120,12 +120,12 @@ body {
 
 .cart-items {
     flex: 1; background: white; border: 1px solid #e0e0e0; border-top: none;
-    border-radius: 0 0 12px 12px; margin-bottom: 20px; overflow-y: auto; padding: 10px;
+    border-radius: 0 0 10px 10px; margin-bottom: 20px; overflow-y: auto; padding: 10px;
 }
 
 .total-display-box {
     background: #003d99; color: white; padding: 20px;
-    border-radius: 15px; margin-bottom: 20px;
+    border-radius: 10px; margin-bottom: 20px;
     display: flex; justify-content: space-between; align-items: center;
 }
 
@@ -133,7 +133,7 @@ body {
 
 .cart-footer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
-.btn-action { height: 60px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+.btn-action { height: 60px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
 .btn-cancel { background: #ff4b5c; color: white; }
 .btn-confirm { background-color: #2575fc; color: white; }
 
@@ -143,7 +143,7 @@ body {
     display: flex;
     padding: 12px 15px;
     background: #eef2f7;
-    border-radius: 12px 12px 0 0;
+    border-radius: 10px 10px 0 0;
     font-weight: 700;
     font-size: 0.85rem;
     color: #555;
@@ -170,7 +170,7 @@ body {
     background: white;
     border: 1px solid #e0e0e0;
     border-top: none;
-    border-radius: 0 0 12px 12px;
+    border-radius: 0 0 10px 10px;
     margin-bottom: 20px;
     overflow-y: auto;
     padding: 0;
@@ -178,7 +178,7 @@ body {
 
 .total-display-box {
     background: #003d99; color: white; padding: 20px;
-    border-radius: 15px; margin-bottom: 20px;
+    border-radius: 10px; margin-bottom: 20px;
     display: flex; justify-content: space-between; align-items: center;
 }
 
@@ -186,7 +186,7 @@ body {
 
 .cart-footer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
-.btn-action { height: 60px; border: none; border-radius: 14px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+.btn-action { height: 60px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.3s; }
 .btn-cancel { background: #ff4b5c; color: white; }
 .btn-confirm { background-color: #2575fc; color: white; }
 
@@ -197,7 +197,7 @@ body {
     display: flex;
     padding: 12px 15px;
     background: #eef2f7;
-    border-radius: 12px 12px 0 0;
+    border-radius: 10px 10px 0 0;
     font-weight: 700;
     font-size: 0.85rem;
     color: #555;

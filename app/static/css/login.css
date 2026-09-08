@@ -26,6 +26,7 @@ body {
   justify-content: center;
   margin: 0;
   min-height: 100dvh;
+  line-height: 1.6;
 }
 
 .page {
@@ -100,7 +101,7 @@ body {
 .logo-icon {
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 10px;
+  border-radius: 8px;
   filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
   height: 90px;
   object-fit: contain;
@@ -166,12 +167,13 @@ body {
   font-weight: 700;
   line-height: 1.2;
   margin: 0 0 32px;
+  letter-spacing: -0.03em;
 }
 
 .login-error {
   background: var(--login-danger-bg);
   border: 1px solid rgba(180, 35, 24, 0.2);
-  border-radius: 8px;
+  border-radius: 6px;
   color: var(--login-danger);
   font-size: 0.875rem;
   line-height: 1.5;
@@ -192,7 +194,7 @@ body {
 .input-group input {
   background: var(--login-surface);
   border: 1px solid var(--login-border);
-  border-radius: 8px;
+  border-radius: 6px;
   color: #222222;
   caret-color: var(--login-primary);
   font: inherit;
@@ -202,39 +204,6 @@ body {
   padding: 12px 14px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   width: 100%;
-}
-
-.input-group input::placeholder { color: #98a2b3; }
-
-.password-control {
-  position: relative;
-}
-
-.password-control input {
-  padding-right: 122px;
-}
-
-.password-toggle {
-  background: transparent;
-  border: 0;
-  border-radius: 4px;
-  color: var(--login-primary);
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 6px;
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.password-toggle:hover { text-decoration: underline; }
-
-.password-toggle:focus-visible {
-  outline: 2px solid rgba(37, 117, 252, 0.24);
-  outline-offset: 1px;
 }
 
 .input-group input:hover:not(:disabled) {
@@ -254,11 +223,43 @@ body {
   box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.14);
 }
 
+.password-control {
+  position: relative;
+}
+
+.password-control input {
+  padding-right: 122px;
+}
+
+.password-toggle {
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  color: var(--login-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  height: 32px;
+  padding: 0 10px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.password-toggle:hover { text-decoration: underline; }
+
+.password-toggle:focus-visible {
+  outline: 2px solid rgba(37, 117, 252, 0.24);
+  outline-offset: 1px;
+}
+
 .btn-confirm {
   background-color: var(--login-primary);
   border: 0;
   border-radius: 8px;
-  box-shadow: 0 10px 22px rgba(37, 117, 252, 0.26);
+  box-shadow: 0 10px 22px rgba(37, 117, 252, 0.2);
   color: var(--login-surface);
   cursor: pointer;
   font: inherit;
@@ -273,7 +274,7 @@ body {
 
 .btn-confirm:hover {
   background-color: #3385ff;
-  box-shadow: 0 10px 24px rgba(37, 117, 252, 0.32);
+  box-shadow: 0 10px 24px rgba(37, 117, 252, 0.26);
   transform: translateY(-1px);
 }
 
