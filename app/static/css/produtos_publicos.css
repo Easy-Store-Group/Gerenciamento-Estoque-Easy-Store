@@ -65,7 +65,7 @@ a {
 }
 
 .public-nav a {
-    border-radius: 10px;
+    border-radius: 8px;
     color: var(--muted);
     font-weight: 600;
     padding: 9px 12px;
@@ -78,9 +78,14 @@ a {
 }
 
 .btn {
-    border-radius: 10px;
+    border-radius: 8px;
     font-weight: 700;
     padding: 10px 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
 }
 
 .btn-outline {
@@ -109,7 +114,7 @@ a {
 .catalog-hero {
     align-items: center;
     background-color: #060055;
-    border-radius: 22px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
     color: white;
     display: flex;
@@ -144,7 +149,7 @@ a {
 
 .hero-link {
     background: white;
-    border-radius: 12px;
+    border-radius: 8px;
     color: var(--primary-dark);
     flex: 0 0 auto;
     font-weight: 800;
@@ -153,9 +158,10 @@ a {
 
 .catalog-section {
     background: var(--surface);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
     padding: 28px;
+    border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .section-header {
@@ -184,7 +190,7 @@ a {
 
 .catalog-search input {
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 8px;
     min-width: 240px;
     padding: 10px 14px;
 }
@@ -192,11 +198,17 @@ a {
 .catalog-search button {
     background: var(--primary);
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
     color: white;
     cursor: pointer;
     font-weight: 700;
     padding: 10px 16px;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.catalog-search button:hover {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
 }
 
 .category-chips {
@@ -232,14 +244,15 @@ a {
 .product-card {
     background: #f8fafc;
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     overflow: hidden;
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
 .product-card:hover {
-    box-shadow: 0 16px 30px rgba(21, 126, 211, 0.13);
-    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(21, 126, 211, 0.12);
+    transform: translateY(-3px);
+    border-color: #bfdbfe;
 }
 
 .product-card-link {
@@ -299,7 +312,7 @@ a {
 .reserve-button {
     align-items: center;
     background: #16a34a;
-    border-radius: 999px;
+    border-radius: 8px;
     color: white;
     display: inline-flex;
     font-size: 0.9rem;
@@ -313,8 +326,8 @@ a {
 
 .reserve-button:hover {
     background: #15803d;
-    box-shadow: 0 10px 18px rgba(22, 163, 74, 0.28);
-    transform: translateY(-2px);
+    box-shadow: 0 10px 18px rgba(22, 163, 74, 0.22);
+    transform: translateY(-1px);
 }
 
 .reserve-button.disabled {
@@ -378,10 +391,10 @@ a {
 .modal-card {
     background: #ffffff;
     border: 1px solid var(--border);
-    border-radius: 18px;
-    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.26);
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
     max-width: 460px;
-    padding: 36px 28px; /* Corrigido de 90px para 36px 28px */
+    padding: 36px 28px;
     position: relative;
     text-align: center;
     width: min(100%, 460px);

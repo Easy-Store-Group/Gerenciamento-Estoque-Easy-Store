@@ -49,12 +49,11 @@
   cursor: pointer;
   font-weight: 600;
   font-size: 13px;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.btn-small.btn-primary {
-  background-color: #157ED3;
-  color: #fff;
-  border: none;
+.btn-small:hover {
+  transform: translateY(-1px);
 }
 
 .vendas-body {

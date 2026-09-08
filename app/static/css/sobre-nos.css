@@ -109,7 +109,7 @@ a {
 .about-hero {
     align-items: center;
     background-color: #060055;
-    border-radius: 22px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
     color: white;
     display: flex;
@@ -145,7 +145,7 @@ a {
 .hero-link,
 .section-link {
     background: white;
-    border-radius: 12px;
+    border-radius: 8px;
     color: var(--primary-dark);
     flex: 0 0 auto;
     font-weight: 800;
@@ -162,7 +162,7 @@ a {
 .about-stats article {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
     padding: 22px;
 }
@@ -188,7 +188,7 @@ a {
 
 .about-section {
     background: var(--surface);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: var(--shadow);
     margin-bottom: 28px;
     padding: 28px;

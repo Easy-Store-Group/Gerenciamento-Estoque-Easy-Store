@@ -6,8 +6,8 @@
   --cliente-primary: #2563eb;
   --cliente-primary-dark: #1d4ed8;
   --cliente-border: #e2e8f0;
-  --cliente-radius: 16px;
-  --cliente-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+  --cliente-radius: 12px;
+  --cliente-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
 * {
@@ -19,6 +19,7 @@ body {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: var(--cliente-bg);
   color: var(--cliente-text);
+  line-height: 1.6;
 }
 
 a {
@@ -64,7 +65,7 @@ a {
 }
 
 .cliente-nav a {
-  border-radius: 999px;
+  border-radius: 8px;
   color: var(--cliente-muted);
   font-weight: 600;
   padding: 10px 16px;
@@ -91,11 +92,17 @@ a {
 
 .btn-logout {
   background: #fee2e2;
-  border-radius: 10px;
+  border-radius: 8px;
   color: #b91c1c;
   font-size: 0.9rem;
   font-weight: 600;
   padding: 8px 14px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.btn-logout:hover {
+  background: #fecaca;
+  transform: translateY(-1px);
 }
 
 .cliente-main {
@@ -106,7 +113,7 @@ a {
 
 .portal-hero {
   background-color: #2563eb;
-  border-radius: 24px;
+  border-radius: 12px;
   box-shadow: var(--cliente-shadow);
   color: white;
   margin-bottom: 28px;
@@ -138,6 +145,7 @@ a {
   border-radius: var(--cliente-radius);
   box-shadow: var(--cliente-shadow);
   padding: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.12);
 }
 
 .section-header {
@@ -166,7 +174,7 @@ a {
 
 .portal-search input {
   border: 1px solid var(--cliente-border);
-  border-radius: 12px;
+  border-radius: 8px;
   min-width: 220px;
   padding: 10px 14px;
 }
@@ -174,11 +182,17 @@ a {
 .portal-search button {
   background: var(--cliente-primary);
   border: none;
-  border-radius: 12px;
+  border-radius: 8px;
   color: white;
   cursor: pointer;
   font-weight: 600;
   padding: 10px 16px;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.portal-search button:hover {
+  background: var(--cliente-primary-dark);
+  transform: translateY(-1px);
 }
 
 .category-chips {
@@ -236,14 +250,15 @@ a {
 .product-card {
   background: #f8fafc;
   border: 1px solid var(--cliente-border);
-  border-radius: 18px;
+  border-radius: 12px;
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .product-card:hover {
-  box-shadow: 0 16px 30px rgba(37, 99, 235, 0.12);
-  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+  transform: translateY(-3px);
+  border-color: #bfdbfe;
 }
 
 .product-card-link {
@@ -303,7 +318,7 @@ a {
 .reserve-button {
   align-items: center;
   background: #16a34a;
-  border-radius: 999px;
+  border-radius: 8px;
   color: white;
   display: inline-flex;
   font-size: 0.9rem;
@@ -314,13 +329,12 @@ a {
   padding: 9px 14px;
   text-align: center;
   transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
-  width: fit-content;
 }
 
 .reserve-button:hover {
   background: #15803d;
-  box-shadow: 0 10px 18px rgba(22, 163, 74, 0.28);
-  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 18px rgba(22, 163, 74, 0.22);
+  transform: translateY(-1px);
 }
 
 .reserve-button.disabled {
@@ -357,7 +371,7 @@ a {
 .category-card {
   background-color: #ffffff;
   border: 1px solid var(--cliente-border);
-  border-radius: 18px;
+  border-radius: 12px;
   display: grid;
   gap: 10px;
   padding: 22px;
@@ -366,8 +380,8 @@ a {
 
 .category-card:hover {
   border-color: #bfdbfe;
-  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.1);
-  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(37, 99, 235, 0.08);
+  transform: translateY(-2px);
 }
 
 .category-card h3 {
@@ -393,7 +407,7 @@ a {
 .purchase-card {
   background: #f8fafc;
   border: 1px solid var(--cliente-border);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 18px;
 }
 
@@ -470,10 +484,10 @@ a {
 .modal-card {
   background-color: #ffffff;
   border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 18px;
-  box-shadow: 0 28px 80px rgba(15, 23, 42, 0.26);
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
   max-width: 500px;
-  padding: 90px;
+  padding: 36px 28px;
   position: relative;
   text-align: center;
   width: min(100%, 500px);

@@ -11,8 +11,8 @@
   --success: #16a34a;
   --warning: #f59e0b;
   --danger: #dc2626;
-  --radius: 24px;
-  --shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+  --radius: 12px;
+  --shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
   --transition: 0.25s ease;
   --color-dark: #0262bd;
   --color-primary: #3fa1fc;
@@ -73,7 +73,7 @@ button {
 
 .brand-logo {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 10px;
   height: 48px;
   object-fit: contain;
   padding: 8px;
@@ -100,12 +100,12 @@ button {
 
 .sidebar-nav a {
   align-items: center;
-  border-radius: 16px;
+  border-radius: 10px;
   color: #dbeafe;
   display: flex;
   gap: 12px;
   padding: 14px 16px;
-  transition: background var(--transition), transform var(--transition);
+  transition: background var(--transition), transform var(--transition), color var(--transition);
 }
 
 .sidebar-nav a:hover,
@@ -145,11 +145,17 @@ button {
 
 .logout-btn {
   background: rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  border-radius: 10px;
   color: #f8fafc;
   font-weight: 600;
   padding: 12px 14px;
   text-align: center;
+  transition: background var(--transition), transform var(--transition);
+}
+
+.logout-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
 }
 
 .admin-content {
@@ -182,15 +188,16 @@ button {
 .btn {
   align-items: center;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   display: inline-flex;
   justify-content: center;
   padding: 14px 22px;
-  transition: transform var(--transition), box-shadow var(--transition);
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
 }
 
 .btn:hover {
   transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
 .btn-primary {
@@ -224,6 +231,7 @@ button {
 .table-card,
 .form-card {
   background: var(--surface);
+  border: 1px solid rgba(148, 163, 184, 0.14);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
@@ -314,15 +322,18 @@ button {
 .input-group textarea {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  border-radius: 10px;
   padding: 16px 18px;
   width: 100%;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
 }
 
 .input-group input:focus,
 .input-group select:focus,
 .input-group textarea:focus {
-  outline: 2px solid rgba(37, 99, 235, 0.18);
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  outline: none;
 }
 
 .field-preview {
@@ -338,7 +349,7 @@ button {
 }
 
 .alert {
-  border-radius: 16px;
+  border-radius: 10px;
   margin-bottom: 18px;
   padding: 16px 18px;
 }
@@ -400,7 +411,7 @@ button {
   align-items: center;
   background: var(--surface);
   border: 1px solid #eef6ff;
-  border-radius: 14px;
+  border-radius: 10px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
   display: flex;
   flex-wrap: wrap;
@@ -412,7 +423,7 @@ button {
 .search-bar select {
   background: #ffffff;
   border: 1px solid #e6eefb;
-  border-radius: 12px;
+  border-radius: 8px;
   min-width: 200px;
   padding: 10px 14px;
   transition: box-shadow var(--transition), outline var(--transition), transform var(--transition);
@@ -420,8 +431,8 @@ button {
 
 .search-bar input[type="text"]:focus,
 .search-bar select:focus {
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.06);
-  outline: 2px solid rgba(37, 99, 235, 0.12);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
+  outline: none;
   transform: translateY(-1px);
 }
 
@@ -441,7 +452,7 @@ button {
 }
 
 .search-bar .btn-primary {
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 10px 14px;
 }
 
