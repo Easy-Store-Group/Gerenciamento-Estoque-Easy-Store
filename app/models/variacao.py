@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Boolean
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, Boolean, Float
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -22,6 +22,7 @@ class ProdutoVariacao(Base):
     
     # Estoque
     estoque_atual = Column(Integer, default=0)
+    preco = Column(Float, nullable=False, default=0.0)
     ativa = Column(Boolean, default=True)
     
     # Imagem da variação

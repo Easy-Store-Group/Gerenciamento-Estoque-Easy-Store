@@ -25,7 +25,7 @@
     <div>Plataforma</div>
     <div>Categoria</div>
     <div>Estoque</div>
-    <div>Ações</div>
+    <div>Preço</div>
   </div>
   {% for produto in produtos %}
   <div class="table-row">
@@ -96,15 +96,43 @@
 </div>
 
 <style>
-  .modal-variacoes-produto { align-items: center; background: rgba(15,23,42,.55); display: none; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 1000; }
+  .modal-variacoes-produto { align-items: center; background: rgba(15,23,42,.58); display: none; inset: 0; justify-content: center; padding: 20px; position: fixed; z-index: 1000; }
   .modal-variacoes-produto.is-open { display: flex; }
-  .modal-variacoes-produto__card { background: #fff; border-radius: 16px; box-shadow: 0 24px 60px rgba(15,23,42,.28); max-height: 85vh; max-width: 760px; overflow: auto; width: 100%; }
-  .modal-variacoes-produto__header { align-items: flex-start; border-bottom: 1px solid #e5e7eb; display: flex; justify-content: space-between; padding: 20px 24px; }
-  .modal-variacoes-produto__header span { color: #64748b; font-size: .85rem; }.modal-variacoes-produto__header h2 { font-size: 1.25rem; margin: 4px 0 0; }
-  .modal-variacoes-produto__close { background: transparent; border: 0; color: #475569; cursor: pointer; font-size: 2rem; line-height: 1; }.modal-variacoes-produto__body { padding: 20px 24px; }
-  .variacoes-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }.variacao-card { border: 1px solid #e2e8f0; border-radius: 12px; display: grid; gap: 12px; grid-template-columns: 88px 1fr; padding: 12px; }
-  .variacao-card img, .variacao-sem-imagem { background: #f1f5f9; border-radius: 8px; height: 88px; object-fit: cover; width: 88px; }.variacao-sem-imagem { align-items: center; color: #64748b; display: flex; font-size: .75rem; justify-content: center; padding: 8px; text-align: center; }
-  .variacao-card p { color: #475569; font-size: .9rem; margin: 0 0 5px; }.variacao-card strong { color: #0f172a; }.variacao-vazia { color: #64748b; margin: 0; text-align: center; }
+  .modal-variacoes-produto__card { background: #f8fafc; border: 1px solid #dfeaf5; border-radius: 22px; box-shadow: 0 28px 70px rgba(15,23,42,.18); max-height: 85vh; max-width: 840px; overflow: auto; width: 100%; }
+  .modal-variacoes-produto__header { align-items: center; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; padding: 22px 24px 18px; }
+  .modal-variacoes-produto__header span { color: #64748b; display: block; font-size: .76rem; letter-spacing: .08em; text-transform: uppercase; }
+  .modal-variacoes-produto__header h2 { font-size: 1.5rem; margin: 4px 0 0; }
+  .modal-variacoes-produto__close { background: transparent; border: 0; color: #475569; cursor: pointer; font-size: 2.2rem; line-height: 1; padding: 0 6px; }
+  .modal-variacoes-produto__body { padding: 20px 24px 24px; }
+  .variacoes-grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .variacao-card { background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%); border: 1px solid #dfeaf8; border-radius: 18px; box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06); display: grid; gap: 12px; grid-template-columns: 92px 1fr; padding: 14px; min-height: 210px; align-items: start; }
+  .variacao-card img, .variacao-sem-imagem { background: #edf4ff; border: 1px solid #dbeafe; border-radius: 12px; height: 92px; object-fit: cover; width: 92px; }
+  .variacao-sem-imagem { align-items: center; color: #64748b; display: flex; font-size: .72rem; justify-content: center; padding: 8px; text-align: center; }
+  .variacao-meta { display: flex; flex-direction: column; gap: 3px; justify-content: center; min-width: 0; }
+  .variacao-meta p { color: #475569; font-size: .95rem; margin: 0; line-height: 1.45; }
+  .variacao-meta strong { color: #0f172a; }
+  .variacao-preco { color: #0f172a; font-weight: 700; }
+  .variacao-actions { display: flex; justify-content: flex-end; margin-top: auto; padding-top: 4px; }
+  .btn-editar-variacao { background: #eef6ff; border: 1px solid #bfdafc; border-radius: 12px; color: #1d4ed8; cursor: pointer; font-size: .82rem; font-weight: 700; padding: 8px 14px; transition: all .2s ease; }
+  .btn-editar-variacao:hover { background: #dbeafe; transform: translateY(-1px); }
+  .variacao-edit { border-top: 1px solid #e2e8f0; display: none; gap: 10px; margin-top: 12px; padding-top: 12px; }
+  .variacao-edit.is-editing { display: block; }
+  .variacao-edit-row { align-items: end; display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+  .variacao-edit label { color: #334155; display: grid; gap: 6px; font-size: .8rem; }
+  .variacao-edit input[type="number"] { background: #f8fafc; border: 1px solid #dbeafe; border-radius: 10px; font-size: .95rem; padding: 9px 0px; width: 100%; }
+  .variacao-edit .variacao-status-toggle { align-items: center; display: inline-flex; gap: 8px; min-height: 42px; }
+  .variacao-edit input[type="checkbox"] { accent-color: #2563eb; height: 16px; width: 16px; }
+  .variacao-edit-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px; }
+  .variacao-edit button { border: 0; border-radius: 12px; cursor: pointer; font-weight: 700; padding: 10px 16px; }
+  .variacao-edit .btn-cancelar { background: #e2e8f0; color: #0f172a; }
+  .variacao-edit .btn-salvar { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+  .variacao-vazia { color: #64748b; margin: 0; text-align: center; }
+  @media (max-width: 640px) {
+    .modal-variacoes-produto__card { border-radius: 18px; }
+    .modal-variacoes-produto__header { padding: 18px 18px 16px; }
+    .modal-variacoes-produto__body { padding: 18px; }
+    .variacao-edit-row { grid-template-columns: 1fr; }
+  }
 </style>
 
 <script>
@@ -119,6 +147,8 @@
     const titulo = document.getElementById('tituloVariacoesProduto');
     const conteudo = document.getElementById('conteudoVariacoesProduto');
     titulo.textContent = nomeProduto;
+    modal.dataset.produtoId = String(produtoId);
+    modal.dataset.produtoNome = nomeProduto;
     conteudo.innerHTML = '<p class="variacao-vazia">Carregando variações...</p>';
     modal.classList.add('is-open'); modal.setAttribute('aria-hidden', 'false');
     try {
@@ -129,9 +159,89 @@
       conteudo.innerHTML = `<div class="variacoes-grid">${variacoes.map(variacao => {
         const cor = escaparHtml(variacao.cor?.nome || 'Sem cor');
         const tamanho = escaparHtml(variacao.tamanho?.nome || 'Sem tamanho');
-        const imagem = variacao.imagem ? `<img src="${escaparHtml(variacao.imagem)}" alt="Imagem da variação ${cor} ${tamanho}">` : '<div class="variacao-sem-imagem">Sem imagem da variação</div>';
-        return `<article class="variacao-card">${imagem}<div><p><strong>Cor:</strong> ${cor}</p><p><strong>Tamanho:</strong> ${tamanho}</p><p><strong>Estoque:</strong> ${variacao.estoque_atual}</p><p><strong>Status:</strong> ${variacao.ativa ? 'Ativa' : 'Inativa'}</p></div></article>`;
+        const imagem = variacao.imagem ? `<img src="${escaparHtml(variacao.imagem)}" alt="Imagem da variação ${cor} ${tamanho}">` : '<div class="variacao-sem-imagem">Sem imagem</div>';
+        const preco = Number(variacao.preco || 0);
+        return `
+          <article class="variacao-card" data-variacao-id="${variacao.id}">
+            ${imagem}
+            <div class="variacao-meta">
+              <p><strong>Cor:</strong> ${cor}</p>
+              <p><strong>Tamanho:</strong> ${tamanho}</p>
+              <p><strong>Preço:</strong> <span class="variacao-preco">R$ ${preco.toFixed(2)}</span></p>
+              <p><strong>Estoque:</strong> ${variacao.estoque_atual}</p>
+              <p><strong>Status:</strong> ${variacao.ativa ? 'Ativa' : 'Inativa'}</p>
+              <div class="variacao-actions">
+                <button type="button" class="btn-editar-variacao">Editar</button>
+              </div>
+              <form class="variacao-edit" data-variacao-form>
+                <div class="variacao-edit-row">
+                  <label>
+                    Preço
+                    <input type="number" name="preco" min="0" step="0.01" value="${preco.toFixed(2)}" required>
+                  </label>
+                  <label>
+                    Estoque
+                    <input type="number" name="estoque" min="0" value="${variacao.estoque_atual}" required>
+                  </label>
+                  <label class="variacao-status-toggle">
+                    <input type="checkbox" name="ativa" ${variacao.ativa ? 'checked' : ''}>
+                    Ativa
+                  </label>
+                </div>
+                <div class="variacao-edit-actions">
+                  <button type="button" class="btn-cancelar">Cancelar</button>
+                  <button type="submit" class="btn-salvar">Salvar</button>
+                </div>
+              </form>
+            </div>
+          </article>`;
       }).join('')}</div>`;
+
+      document.querySelectorAll('.btn-editar-variacao').forEach(botaoEditar => {
+        botaoEditar.addEventListener('click', () => {
+          const card = botaoEditar.closest('.variacao-card');
+          const form = card.querySelector('.variacao-edit');
+          form.classList.add('is-editing');
+        });
+      });
+
+      document.querySelectorAll('.btn-cancelar').forEach(botaoCancelar => {
+        botaoCancelar.addEventListener('click', () => {
+          const form = botaoCancelar.closest('.variacao-edit');
+          form.classList.remove('is-editing');
+        });
+      });
+
+      document.querySelectorAll('[data-variacao-form]').forEach(form => {
+        form.addEventListener('submit', async evento => {
+          evento.preventDefault();
+          const variacaoId = form.closest('.variacao-card').dataset.variacaoId;
+          const estoque = Math.max(0, Number(form.elements.estoque.value || 0));
+          const preco = Math.max(0, Number(form.elements.preco.value || 0));
+          const ativa = form.elements.ativa.checked;
+
+          try {
+            const params = new URLSearchParams({
+              estoque: String(estoque),
+              preco: String(preco),
+              ativa: String(ativa)
+            });
+
+            const respostaAtualizacao = await fetch(`/api/variacoes/${variacaoId}?${params.toString()}`, { method: 'PUT' });
+            if (!respostaAtualizacao.ok) {
+              const erro = await respostaAtualizacao.json().catch(() => ({}));
+              throw new Error(erro.detail || 'Erro ao atualizar a variação.');
+            }
+
+            form.classList.remove('is-editing');
+            const produtoId = Number(modal.dataset.produtoId);
+            const nomeProduto = modal.dataset.produtoNome;
+            await abrirVariacoesProduto({ dataset: { produtoId: String(produtoId), produtoNome: nomeProduto } });
+          } catch (erro) {
+            alert(erro.message);
+          }
+        });
+      });
     } catch (erro) { conteudo.innerHTML = `<p class="variacao-vazia">${escaparHtml(erro.message)}</p>`; }
   }
   function fecharVariacoesProduto() { const modal = document.getElementById('modalVariacoesProduto'); modal.classList.remove('is-open'); modal.setAttribute('aria-hidden', 'true'); }

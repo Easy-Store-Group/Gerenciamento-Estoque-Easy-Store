@@ -221,7 +221,7 @@ function adicionarAoCarrinho(produto, variacao = null) {
             produto_id: produto.produto_id,
             variacao_id: variacao?.id || null,
             nome: produto.nome + descricaoVariacao,
-            preco: produto.preco,
+            preco: variacao?.preco ?? produto.preco,
             estoque: produto.estoque,
             quantidade: 1
         });

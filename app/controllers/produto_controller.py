@@ -222,6 +222,7 @@ async def criar_produto(
                     cor_id=var_data.get('cor_id'),
                     tamanho_id=var_data.get('tamanho_id'),
                     estoque_atual=var_data.get('estoque_atual', 0),
+                    preco=float(var_data.get('preco', produto.preco or 0)),
                     ativa=True
                 )
                 db.add(variacao)
