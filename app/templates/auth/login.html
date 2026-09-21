@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=4">
-    <title>Entrar | EasyStore</title>
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=5">
+    <title>Entrar | Easy Store</title>
 </head>
 
 <body>
   <main class="page" id="page">
     <section class="auth-shell" aria-labelledby="login-title">
       <div class="auth-card">
-        <div class="auth-brand" aria-label="EasyStore">
-          <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo">
-          <span class="brand-name">EasyStore</span>
+        <div class="auth-brand" aria-label="Easy Store">
+          <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="Easy Store Logo">
+          <span class="brand-name">Easy Store</span>
         </div>
 
         <div class="auth-copy">
@@ -24,7 +24,7 @@
 
         {% if erro %}
           <div class="login-error" role="alert">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
@@ -33,16 +33,22 @@
           </div>
         {% endif %}
 
+        {% if mensagem %}
+          <div class="login-success" role="status">
+            <span>{{ mensagem }}</span>
+          </div>
+        {% endif %}
+
         <form id="login-form" action="/auth/login" method="post" novalidate>
           <div class="input-group">
             <label for="email">E-mail</label>
-            <input id="email" type="email" name="email" placeholder="nome@empresa.com" required>
+            <input id="email" type="email" name="email" placeholder="nome@admin.com" autocomplete="email" required>
           </div>
 
           <div class="input-group">
             <label for="senha">Senha</label>
             <div class="password-control">
-              <input id="senha" type="password" name="senha" placeholder="Sua senha" required>
+              <input id="senha" type="password" name="senha" placeholder="Sua senha" autocomplete="current-password" required>
               <button type="button" class="password-toggle" aria-controls="senha" aria-pressed="false" aria-label="Mostrar senha" title="Mostrar senha"></button>
             </div>
           </div>
@@ -51,13 +57,13 @@
 
           <div class="login-links">
             <p class="footer-text">Não tem conta? <a href="/auth/register">Cadastre-se</a></p>
-            <p class="footer-text"><a href="/">Voltar para o Início</a></p>
+            <p class="footer-text"><a href="/">Voltar para o início</a></p>
           </div>
         </form>
       </div>
     </section>
   </main>
 
-  <script src="{{ request.url_for('static', path='js/login.js') }}?v=4" defer></script>
+  <script src="{{ request.url_for('static', path='js/login.js') }}?v=5" defer></script>
 </body>
 </html>

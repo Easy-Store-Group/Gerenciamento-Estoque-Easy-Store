@@ -4,7 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
+<<<<<<< HEAD
     <meta name="description" content="Easy Store - Catálogo de produtos." />
+=======
+    <meta name="description" content="Catalogo publico de produtos da Easy Store." />
+>>>>>>> 4042dde (feat: atualiza layout das telas de login e cadastro)
     <title>Produtos | Easy Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -19,11 +23,24 @@
                 soft: '#F1F5F9',
                 white: '#FFFFFF'
               }
+<<<<<<< HEAD
+=======
+            },
+            animation: {
+              'infinite-scroll': 'infinite-scroll 25s linear infinite'
+            },
+            keyframes: {
+              'infinite-scroll': {
+                from: { transform: 'translateX(0)' },
+                to: { transform: 'translateX(-100%)' }
+              }
+>>>>>>> 4042dde (feat: atualiza layout das telas de login e cadastro)
             }
           }
         }
       };
     </script>
+<<<<<<< HEAD
     <style>
       html { scroll-behavior: smooth; }
       body {
@@ -361,11 +378,166 @@
             </a>
           </nav>
         </div>
+=======
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}?v=6">
+  </head>
+  <body class="text-slate-900 antialiased pt-16 bg-white">
+    {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
+
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white">
+      <div class="mx-auto max-w-7xl px-4 flex h-16 items-center justify-between gap-4">
+        <a href="/" class="flex items-center gap-3 shrink-0">
+          <div class="h-6 w-6 bg-brand-blue flex items-center justify-center text-white font-black text-xs">E</div>
+          <span class="text-xs font-black tracking-widest uppercase text-brand-navy">Easy Store</span>
+        </a>
+        <div class="flex items-center gap-4 sm:gap-8 text-xs font-bold uppercase tracking-widest text-slate-500">
+          <a href="/" class="hover:text-brand-navy transition">Inicio</a>
+          <a href="/auth/produtos" class="text-brand-navy">Produtos</a>
+          <a href="/sobre-nos" class="hover:text-brand-navy transition">Sobre</a>
+          {% if role == 'cliente' %}
+          <a href="/cliente" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Minha area</a>
+          {% else %}
+          <a href="/auth/login" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Entrar</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <div class="w-full inline-flex flex-nowrap overflow-hidden bg-brand-navy py-4">
+      {% for i in range(2) %}
+      <ul class="flex items-center justify-center md:justify-start [&_li]:mx-8 animate-infinite-scroll" {% if i == 1 %}aria-hidden="true"{% endif %}>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Catalogo Atualizado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Jogos e Acessorios</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Reserva por WhatsApp</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Estoque Visivel</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Produtos da Loja</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Catalogo Atualizado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Jogos e Acessorios</li>
+        <li class="text-brand-blue text-xs">+</li>
+      </ul>
+      {% endfor %}
+    </div>
+
+    <main>
+      <section class="relative bg-white py-20 sm:py-28 overflow-hidden">
+        <div class="mx-auto max-w-7xl px-4">
+          <div class="grid items-end gap-12 lg:grid-cols-[1.3fr_0.7fr]">
+            <div class="animate-trigger anim-up">
+              <span class="inline-flex bg-brand-navy px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">Vitrine Publica</span>
+              <h1 class="mt-8 text-5xl font-black tracking-tighter text-brand-navy sm:text-7xl leading-none">Produtos prontos para escolher.</h1>
+              <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-500 font-medium">Veja jogos, consoles e acessorios disponiveis antes de entrar no sistema. Filtre por categoria, confira estoque e abra a reserva direto pelo WhatsApp.</p>
+              <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
+                <a href="#catalogo" class="inline-flex items-center justify-center bg-brand-navy text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-brand-blue transition">Ver Catalogo</a>
+                {% if role == 'cliente' %}
+                <a href="/cliente" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">Minha Area</a>
+                {% else %}
+                <a href="/auth/register" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">Criar Conta</a>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="bg-slate-50 p-8 flex flex-col gap-6 animate-trigger anim-left d-200">
+              <div class="bg-white p-6 hover-scale">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Itens encontrados</p>
+                <p class="mt-2 text-4xl font-black tracking-tighter text-slate-900">{{ total_produtos }}</p>
+              </div>
+              <div class="bg-brand-blue p-6 text-white hover-scale">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-blue-200 font-bold">Compra assistida</p>
+                <p class="mt-2 text-lg font-black tracking-tight leading-snug">Escolha variacoes e finalize a reserva em poucos cliques.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="catalogo" class="py-20 bg-slate-50">
+        <div class="mx-auto max-w-7xl px-4">
+          <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8 mb-10 animate-trigger anim-up">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-blue block mb-4">Catalogo</span>
+              <h2 class="text-4xl md:text-5xl font-black tracking-tighter text-brand-navy">ESCOLHA SEU PRODUTO</h2>
+            </div>
+            <form class="catalog-search" method="get" action="/auth/produtos">
+              {% if categoria_id %}<input type="hidden" name="categoria_id" value="{{ categoria_id }}">{% endif %}
+              <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar produto..." aria-label="Buscar produto">
+              <button type="submit">Buscar</button>
+            </form>
+          </div>
+
+          {% if categorias %}
+          <div class="category-chips animate-trigger anim-up d-100">
+            <a href="/auth/produtos{% if busca %}?busca={{ busca }}{% endif %}#catalogo" class="chip {% if not categoria_id %}active{% endif %}">Todos</a>
+            {% for cat in categorias %}
+            <a href="/auth/produtos?categoria_id={{ cat.id }}{% if busca %}&busca={{ busca }}{% endif %}#catalogo" class="chip {% if categoria_id == cat.id %}active{% endif %}">{{ cat.nome }}</a>
+            {% endfor %}
+          </div>
+          {% endif %}
+
+          {% if produtos %}
+          <div class="products-grid">
+            {% for produto in produtos %}
+            <article class="product-card animate-trigger anim-scale">
+              <a class="product-card-link" href="#reservar-{{ produto.id }}">
+                <div class="product-image"><img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}"></div>
+                <div class="product-body">
+                  <div class="product-meta">
+                    <span>{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
+                    <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">{% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponivel{% endif %}</span>
+                  </div>
+                  <h3>{{ produto.nome }}</h3>
+                  <p>{{ produto.plataforma }}</p>
+                  <div class="product-footer">
+                    <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
+                    <span>Reservar</span>
+                  </div>
+                </div>
+              </a>
+            </article>
+
+            <div class="reserve-modal" id="reservar-{{ produto.id }}">
+              <a class="modal-backdrop" href="#catalogo" aria-label="Fechar"></a>
+              <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ produto.id }}">
+                <a class="modal-close" href="#catalogo" aria-label="Fechar">x</a>
+                <span class="modal-kicker">Reserva Easy Store</span>
+                <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
+                <div id="imagem-variacao-{{ produto.id }}" class="imagem-variacao-cliente" hidden></div>
+                {% if produto.estoque_atual > 0 %}
+                <p>Produto disponivel para reserva pelo WhatsApp. Selecione as opcoes disponiveis antes de chamar a loja.</p>
+                <div class="product-options" id="options-{{ produto.id }}"><p class="loading-variacoes">Carregando variacoes...</p></div>
+                <a class="reserve-button modal-whatsapp" data-base-href="{{ links_reserva.get(produto.id) }}" data-produto-id="{{ produto.id }}" href="{{ links_reserva.get(produto.id) }}" target="_blank" rel="noopener noreferrer">Abrir WhatsApp</a>
+                {% else %}
+                <p>Este produto esta sem estoque no momento.</p>
+                <span class="reserve-button disabled modal-whatsapp">Indisponivel</span>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="empty-state animate-trigger anim-up">Nenhum produto encontrado.</p>
+          {% endif %}
+
+          <nav class="pagination animate-trigger anim-up" aria-label="Paginacao de produtos">
+            <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}#catalogo">Anterior</a>
+            {% for numero in range(1, total_paginas + 1) %}
+            <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ numero }}#catalogo">{{ numero }}</a>
+            {% endfor %}
+            <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}#catalogo">Proxima</a>
+          </nav>
+        </div>
+>>>>>>> 4042dde (feat: atualiza layout das telas de login e cadastro)
       </section>
     </main>
 
     <footer class="bg-slate-900 py-16">
       <div class="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-8 animate-trigger anim-scale">
+<<<<<<< HEAD
         <div class="text-white font-black text-xl tracking-tighter uppercase">
           EASY STORE
         </div>
@@ -377,10 +549,20 @@
         <div class="text-[10px] font-bold uppercase tracking-widest text-slate-600">
           © 2026 Easy Store.
         </div>
+=======
+        <div class="text-white font-black text-xl tracking-tighter uppercase">EASY STORE</div>
+        <div class="flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <a href="/sobre-nos" class="hover:text-white transition">Sobre a Empresa</a>
+          <a href="/auth/produtos" class="text-white">Catalogo de Produtos</a>
+          <a href="/auth/login" class="hover:text-white transition">Acesso Restrito</a>
+        </div>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-600">© 2026 Easy Store.</div>
+>>>>>>> 4042dde (feat: atualiza layout das telas de login e cadastro)
       </div>
     </footer>
 
     <script>
+<<<<<<< HEAD
       // Animações ao scroll
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
@@ -510,8 +692,117 @@
             const produtoId = modal.id.replace('reservar-', '');
             carregarVariacoesProduto(produtoId);
           }
+=======
+      async function carregarVariacoesProduto(produtoId) {
+        try {
+          const response = await fetch(`/api/variacoes/produto/${produtoId}`);
+          if (!response.ok) return;
+          const variacoes = await response.json();
+          const container = document.getElementById(`options-${produtoId}`);
+          if (!container) return;
+          if (variacoes.length === 0) {
+            container.innerHTML = '<p class="loading-variacoes">Sem variacoes cadastradas</p>';
+            return;
+          }
+
+          const cores = new Set();
+          const tamanhos = new Set();
+          variacoes.forEach((variacao) => {
+            if (variacao.cor) cores.add(JSON.stringify(variacao.cor));
+            if (variacao.tamanho) tamanhos.add(JSON.stringify(variacao.tamanho));
+          });
+
+          let html = '';
+          if (tamanhos.size > 0) {
+            html += '<div class="form-group">';
+            html += `<label for="size-${produtoId}">Tamanho</label>`;
+            html += `<select id="size-${produtoId}" class="option-tamanho" data-produto-id="${produtoId}">`;
+            html += '<option value="">Selecione um tamanho</option>';
+            Array.from(tamanhos).forEach((item) => {
+              const tamanho = JSON.parse(item);
+              html += `<option value="${tamanho.id}" data-nome="${tamanho.nome}">${tamanho.nome}</option>`;
+            });
+            html += '</select></div>';
+          }
+
+          if (cores.size > 0) {
+            html += '<div class="form-group">';
+            html += '<label>Cor</label>';
+            html += `<div id="colors-${produtoId}" class="color-options" role="group" aria-label="Escolha uma cor">`;
+            Array.from(cores).forEach((item) => {
+              const cor = JSON.parse(item);
+              html += `<button type="button" class="color-option" data-cor-id="${cor.id}" data-cor-nome="${cor.nome}" title="${cor.nome}" aria-label="Cor ${cor.nome}" style="--color: ${cor.codigo_hex || '#ffffff'}"></button>`;
+            });
+            html += '</div></div>';
+          }
+
+          container.innerHTML = html;
+
+          const selectTamanho = document.getElementById(`size-${produtoId}`);
+          const colorOptions = document.getElementById(`colors-${produtoId}`);
+          const whatsappLink = document.querySelector(`.reserve-button[data-produto-id="${produtoId}"]`);
+          let corSelecionadaId = null;
+          let corSelecionadaNome = null;
+
+          const atualizarWhatsapp = () => {
+            if (!whatsappLink) return;
+            const nomeProduto = document.querySelector(`.reserve-modal[id="reservar-${produtoId}"] h3`).textContent;
+            let mensagem = `Gostaria de reservar o produto: ${nomeProduto}`;
+
+            if (selectTamanho && selectTamanho.value) {
+              mensagem += ` - Tamanho: ${selectTamanho.options[selectTamanho.selectedIndex].dataset.nome}`;
+            }
+            if (corSelecionadaNome) mensagem += ` - Cor: ${corSelecionadaNome}`;
+
+            const url = new URL(whatsappLink.dataset.baseHref);
+            url.searchParams.set('text', mensagem);
+            whatsappLink.href = url.toString();
+
+            const variacaoSelecionada = variacoes.find((variacao) =>
+              (!selectTamanho?.value || variacao.tamanho?.id === Number(selectTamanho.value)) &&
+              (!corSelecionadaId || variacao.cor?.id === corSelecionadaId)
+            );
+            const imagemContainer = document.getElementById(`imagem-variacao-${produtoId}`);
+            if (variacaoSelecionada?.imagem) {
+              imagemContainer.innerHTML = `<img src="${variacaoSelecionada.imagem}" alt="Imagem da variacao selecionada">`;
+              imagemContainer.hidden = false;
+            } else {
+              imagemContainer.hidden = true;
+              imagemContainer.innerHTML = '';
+            }
+          };
+
+          if (selectTamanho) selectTamanho.addEventListener('change', atualizarWhatsapp);
+          if (colorOptions) {
+            colorOptions.querySelectorAll('.color-option').forEach((botao) => {
+              botao.addEventListener('click', () => {
+                corSelecionadaId = Number(botao.dataset.corId);
+                corSelecionadaNome = botao.dataset.corNome;
+                colorOptions.querySelectorAll('.color-option').forEach((item) => item.classList.toggle('is-selected', item === botao));
+                atualizarWhatsapp();
+              });
+            });
+          }
+        } catch (error) {
+          console.error('Erro ao carregar variacoes:', error);
+        }
+      }
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) entry.target.classList.add('is-visible');
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.animate-trigger').forEach((el) => observer.observe(el));
+        document.querySelectorAll('.product-card-link').forEach((link) => {
+          const produtoId = link.getAttribute('href').replace('#reservar-', '');
+          carregarVariacoesProduto(produtoId);
+>>>>>>> 4042dde (feat: atualiza layout das telas de login e cadastro)
         });
       });
     </script>
   </body>
 </html>
+
