@@ -1,323 +1,517 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-    <title>Produtos - EasyStore</title>
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}?v=5">
-</head>
-<body>
-    <header class="public-header">
-        <div class="public-header-inner">
-            <a href="/" class="public-brand">
-                <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
-                <span>EasyStore</span>
+    <meta name="description" content="Easy Store - Catálogo de produtos." />
+    <title>Produtos | Easy Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                navy: '#0F172A',
+                blue: '#2563EB',
+                light: '#F8FAFC',
+                soft: '#F1F5F9',
+                white: '#FFFFFF'
+              }
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #ffffff;
+      }
+      
+      /* Animações distintas */
+      .anim-up {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .anim-left {
+        opacity: 0;
+        transform: translateX(-40px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .anim-right {
+        opacity: 0;
+        transform: translateX(40px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .anim-scale {
+        opacity: 0;
+        transform: scale(0.96);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      
+      .is-visible {
+        opacity: 1 !important;
+        transform: translate(0) scale(1) !important;
+      }
+
+      .d-100 { transition-delay: 100ms; }
+      .d-200 { transition-delay: 200ms; }
+      .d-300 { transition-delay: 300ms; }
+
+      .hover-scale { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+      .hover-scale:hover { transform: scale(1.02); }
+    </style>
+  </head>
+  <body class="text-slate-900 antialiased pt-16 bg-white">
+    
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white">
+      <div class="mx-auto max-w-7xl px-4 flex h-16 items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-6 w-6 bg-brand-blue flex items-center justify-center text-white font-black text-xs">E</div>
+          <span class="text-xs font-black tracking-widest uppercase text-brand-navy">Easy Store</span>
+        </div>
+        <div class="flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-slate-500">
+          <a href="/" class="hover:text-brand-navy transition">Início</a>
+          <a href="/auth/produtos" class="text-brand-navy">Produtos</a>
+          <a href="/sobre-nos" class="hover:text-brand-navy transition">Sobre</a>
+          {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
+          {% if role == 'cliente' %}
+          <a href="/cliente" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Minha Area</a>
+          {% else %}
+          <a href="/auth/login" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Entrar</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <!-- HERO -->
+      <section class="relative bg-white py-24 sm:py-32 overflow-hidden">
+        <div class="mx-auto max-w-7xl px-4">
+          <div class="grid items-center gap-16 lg:grid-cols-[1.5fr_1fr]">
+            <div class="animate-trigger anim-up">
+              <span class="inline-flex bg-brand-navy px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                Catálogo Público
+              </span>
+              <h1 class="mt-8 text-6xl font-black tracking-tighter text-brand-navy sm:text-7xl leading-none">
+                Conheça nossos produtos.
+              </h1>
+              <p class="mt-6 max-w-lg text-lg leading-relaxed text-slate-500 font-medium">
+                Confira jogos, consoles e acessórios disponíveis. Crie sua conta para fazer reservas pelo WhatsApp.
+              </p>
+
+              <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
+                <a href="/auth/register" class="inline-flex items-center justify-center bg-brand-navy text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-brand-blue transition">
+                  Criar Conta
+                </a>
+                <a href="#catalogo" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">
+                  Ver Catálogo
+                </a>
+              </div>
+            </div>
+            
+            <div class="bg-slate-50 p-8 flex flex-col gap-6 animate-trigger anim-left d-200">
+              <div class="bg-white p-6 hover-scale">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Variedade Completa</p>
+                <p class="mt-2 text-lg font-black tracking-tight text-slate-900 leading-snug">Jogos, consoles e acessórios de todas as plataformas.</p>
+              </div>
+              <div class="bg-brand-blue p-6 text-white hover-scale">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-blue-200 font-bold">Reservas Fáceis</p>
+                <p class="mt-2 text-lg font-black tracking-tight leading-snug">Escolha o produto e reserve direto pelo WhatsApp.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATÁLOGO -->
+      <section id="catalogo" class="bg-slate-50 py-24">
+        <div class="mx-auto max-w-7xl px-4">
+          <div class="mb-16 animate-trigger anim-up">
+            <span class="inline-flex bg-brand-navy px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white mb-4">
+              Explore
+            </span>
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-8">
+              <div>
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter text-brand-navy mb-6">
+                  Todos os Produtos
+                </h2>
+                <p class="text-lg text-slate-500 leading-relaxed font-medium max-w-lg">
+                  Use a busca ou filtre por categoria para encontrar o que procura.
+                </p>
+              </div>
+              
+              <form class="flex flex-col sm:flex-row gap-3 w-full md:w-auto" method="get" action="/auth/produtos">
+                {% if categoria_id %}
+                <input type="hidden" name="categoria_id" value="{{ categoria_id }}">
+                {% endif %}
+                <input 
+                  type="text" 
+                  name="busca" 
+                  value="{{ busca }}" 
+                  placeholder="Buscar produto..."
+                  class="px-6 py-3 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent transition"
+                >
+                <button 
+                  type="submit"
+                  class="px-8 py-3 rounded-lg bg-brand-blue text-white font-black text-xs uppercase tracking-[0.1em] hover:bg-blue-600 transition hover:scale-105"
+                >
+                  Buscar
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Filtros de Categoria -->
+          {% if categorias %}
+          <div class="animate-trigger anim-up d-100">
+            <div class="flex flex-wrap gap-3 mb-12">
+              <a href="/auth/produtos{% if busca %}?busca={{ busca }}{% endif %}"
+                 class="px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition {% if not categoria_id %}bg-brand-navy text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                Todos
+              </a>
+              {% for cat in categorias %}
+              <a href="/auth/produtos?categoria_id={{ cat.id }}{% if busca %}&busca={{ busca }}{% endif %}"
+                 class="px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition {% if categoria_id == cat.id %}bg-brand-navy text-white{% else %}bg-slate-100 text-slate-600 hover:bg-slate-200{% endif %}">
+                {{ cat.nome }}
+              </a>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <!-- Grid de Produtos -->
+          {% if produtos %}
+          <div class="animate-trigger anim-scale d-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {% for produto in produtos %}
+              <article class="group bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-blue transition hover:shadow-xl hover:-translate-y-1 duration-300">
+                <a href="#reservar-{{ produto.id }}" class="block">
+                  <!-- Imagem -->
+                  <div class="aspect-square bg-slate-50 flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="{{ produto.imagem_url }}" 
+                      alt="{{ produto.nome }}"
+                      class="w-full h-full object-contain p-4 group-hover:scale-110 transition duration-300"
+                    >
+                  </div>
+
+                  <!-- Conteúdo -->
+                  <div class="p-5">
+                    <span class="inline-flex text-[10px] font-black uppercase tracking-widest text-brand-blue">
+                      {{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}
+                    </span>
+                    
+                    <h3 class="mt-3 text-sm font-black tracking-tight text-slate-900 line-clamp-2">
+                      {{ produto.nome }}
+                    </h3>
+                    
+                    <p class="mt-2 text-[13px] text-slate-500 font-medium">
+                      {{ produto.plataforma }}
+                    </p>
+
+                    <div class="mt-4 flex items-baseline justify-between">
+                      <strong class="text-lg font-black text-brand-blue">
+                        R$ {{ "%.2f"|format(produto.preco) }}
+                      </strong>
+                      <span class="text-[11px] font-bold uppercase tracking-widest {% if produto.estoque_atual > 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        {% if produto.estoque_atual > 0 %}
+                          {{ produto.estoque_atual }} em estoque
+                        {% else %}
+                          Indisponível
+                        {% endif %}
+                      </span>
+                    </div>
+
+                    <!-- CTA -->
+                    <button 
+                      type="button"
+                      onclick="document.location.hash='reservar-{{ produto.id }}'"
+                      class="mt-4 w-full py-3 rounded-lg bg-green-600 text-white font-black text-xs uppercase tracking-widest hover:bg-green-700 transition hover:scale-105 duration-200 {% if produto.estoque_atual == 0 %}opacity-50 cursor-not-allowed{% endif %}"
+                      {% if produto.estoque_atual == 0 %}disabled{% endif %}
+                    >
+                      {% if produto.estoque_atual > 0 %}
+                        Reservar via WhatsApp
+                      {% else %}
+                        Indisponível
+                      {% endif %}
+                    </button>
+                  </div>
+                </a>
+
+                <!-- Modal de Reserva -->
+                <div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm hidden z-50 items-center justify-center p-4" id="reservar-{{ produto.id }}" onclick="if(event.target === this) this.classList.add('hidden')">
+                  <div class="bg-white rounded-xl max-w-md w-full p-8 relative animate-scale">
+                    <button 
+                      onclick="document.getElementById('reservar-{{ produto.id }}').classList.add('hidden')"
+                      class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-600 hover:bg-slate-200 transition font-bold"
+                    >
+                      ✕
+                    </button>
+
+                    <span class="inline-flex text-[10px] font-black uppercase tracking-widest text-green-600 mb-3">
+                      Reserva EasyStore
+                    </span>
+
+                    <h3 class="text-2xl font-black text-slate-900 mb-6">
+                      {{ produto.nome }}
+                    </h3>
+
+                    <p class="text-slate-500 text-sm mb-6">
+                      {% if produto.estoque_atual > 0 %}
+                        Produto disponível para reserva pelo WhatsApp. Escolha suas preferências abaixo.
+                      {% else %}
+                        Este produto está sem estoque no momento.
+                      {% endif %}
+                    </p>
+
+                    <!-- Variações -->
+                    {% if produto.estoque_atual > 0 %}
+                    <div id="options-{{ produto.id }}" class="mb-6 space-y-4">
+                      <p class="text-slate-400 text-sm text-center">Carregando variações...</p>
+                    </div>
+
+                    <div id="imagem-variacao-{{ produto.id }}" class="mb-6 text-center" hidden>
+                      <img class="mx-auto rounded-lg max-h-48 object-contain">
+                    </div>
+
+                    <a 
+                      class="block w-full text-center py-3 rounded-lg bg-brand-blue text-white font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition modal-whatsapp"
+                      data-base-href="{{ links_reserva.get(produto.id) }}"
+                      data-produto-id="{{ produto.id }}"
+                      href="{{ links_reserva.get(produto.id) }}"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Abrir WhatsApp
+                    </a>
+                    {% else %}
+                    <div class="text-center">
+                      <p class="text-slate-500 font-medium mb-6">Produto indisponível para reserva.</p>
+                      <button
+                        onclick="document.getElementById('reservar-{{ produto.id }}').classList.add('hidden')"
+                        class="w-full py-3 rounded-lg bg-slate-100 text-slate-600 font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition"
+                      >
+                        Fechar
+                      </button>
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+
+                <!-- Script para abrir/fechar modal -->
+                <script>
+                  (function() {
+                    const modal = document.getElementById('reservar-{{ produto.id }}');
+                    const hash = window.location.hash;
+                    
+                    if(hash === '#reservar-{{ produto.id }}') {
+                      modal.classList.remove('hidden');
+                      modal.classList.add('flex');
+                    }
+                    
+                    window.addEventListener('hashchange', function() {
+                      if(window.location.hash === '#reservar-{{ produto.id }}') {
+                        modal.classList.remove('hidden');
+                        modal.classList.add('flex');
+                      } else {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                      }
+                    });
+                  })();
+                </script>
+              </article>
+              {% endfor %}
+            </div>
+          </div>
+          {% else %}
+          <div class="text-center py-16 animate-trigger anim-up">
+            <p class="text-slate-500 font-medium text-lg">Nenhum produto encontrado.</p>
+          </div>
+          {% endif %}
+
+          <!-- Paginação -->
+          <nav class="flex flex-wrap justify-center gap-3 mt-16 animate-trigger anim-up d-300" aria-label="Paginação">
+            <a 
+              href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}"
+              class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold text-sm hover:bg-slate-50 transition {% if pagina == 1 %}opacity-50 cursor-not-allowed pointer-events-none{% endif %}"
+            >
+              ← Anterior
             </a>
 
-            <nav class="public-nav">
-                <a href="/">Inicio</a>
-                <a href="/auth/produtos" class="active">Produtos</a>
-                <a href="/sobre-nos">Sobre</a>
-            </nav>
+            {% for numero in range(1, total_paginas + 1) %}
+            <a 
+              href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ numero }}"
+              class="px-3 py-2 rounded-lg text-sm font-bold {% if numero == pagina %}bg-brand-navy text-white{% else %}border border-slate-300 text-slate-600 hover:bg-slate-50{% endif %} transition"
+            >
+              {{ numero }}
+            </a>
+            {% endfor %}
 
-            <div class="public-actions">
-                {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
-                {% if role == 'cliente' %}
-                <a href="/cliente" class="btn btn-outline">Minha area</a>
-                {% else %}
-                <a href="/auth/login" class="btn btn-outline">Login</a>
-
-                {% endif %}
-            </div>
+            <a 
+              href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}"
+              class="px-4 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold text-sm hover:bg-slate-50 transition {% if pagina == total_paginas %}opacity-50 cursor-not-allowed pointer-events-none{% endif %}"
+            >
+              Próxima →
+            </a>
+          </nav>
         </div>
-    </header>
-
-    <main class="public-main">
-        <section class="catalog-hero">
-            <div>
-                <span class="eyebrow">Catalogo publico</span>
-                <h1>Produtos EasyStore</h1>
-                <p>Confira nossos jogos, consoles e acessorios disponiveis antes de entrar no sistema.</p>
-            </div>
-            <a href="/auth/register" class="btn btn-primary cta-hero-btn" style="padding: 14px 28px; font-size: 1.1rem; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">Criar conta para reservar</a>
-        </section>
-
-        <section class="catalog-section">
-            <div class="section-header">
-                <div>
-                    <h2>Produtos</h2>
-                    <p>Use a busca ou filtre por categoria para encontrar o que voce procura.</p>
-                </div>
-
-                <form class="catalog-search" method="get" action="/auth/produtos">
-                    {% if categoria_id %}
-                    <input type="hidden" name="categoria_id" value="{{ categoria_id }}">
-                    {% endif %}
-                    <input type="text" name="busca" value="{{ busca }}" placeholder="Buscar produto...">
-                    <button type="submit">Buscar</button>
-                </form>
-            </div>
-
-            {% if categorias %}
-            <div class="category-chips">
-                <a href="/auth/produtos{% if busca %}?busca={{ busca }}{% endif %}"
-                   class="chip {% if not categoria_id %}active{% endif %}">Todos</a>
-                {% for cat in categorias %}
-                <a href="/auth/produtos?categoria_id={{ cat.id }}{% if busca %}&busca={{ busca }}{% endif %}"
-                   class="chip {% if categoria_id == cat.id %}active{% endif %}">{{ cat.nome }}</a>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            {% if produtos %}
-            <div class="products-grid">
-                {% for produto in produtos %}
-                <article class="product-card">
-                    <a class="product-card-link" href="#reservar-{{ produto.id }}">
-                        <div class="product-image">
-                            <img src="{{ produto.imagem_url }}" alt="{{ produto.nome }}">
-                        </div>
-                        <div class="product-body">
-                            <span class="product-category">{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</span>
-                            <h3>{{ produto.nome }}</h3>
-                            <p class="product-platform">{{ produto.plataforma }}</p>
-                            <div class="product-footer">
-                                <strong>R$ {{ "%.2f"|format(produto.preco) }}</strong>
-                                <span class="stock {% if produto.estoque_atual > 0 %}in-stock{% else %}out-stock{% endif %}">
-                                    {% if produto.estoque_atual > 0 %}{{ produto.estoque_atual }} em estoque{% else %}Indisponivel{% endif %}
-                                </span>
-                            </div>
-                        </div>
-                    </a>
-                </article>
-                <div class="reserve-modal" id="reservar-{{ produto.id }}">
-                    <a class="modal-backdrop" href="#produtos" aria-label="Fechar"></a>
-                    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ produto.id }}">
-                        <a class="modal-close" href="#produtos" aria-label="Fechar">x</a>
-                        <span class="modal-kicker">Reserva EasyStore</span>
-                        <h3 id="modal-title-{{ produto.id }}">{{ produto.nome }}</h3>
-                        <div id="imagem-variacao-{{ produto.id }}" class="imagem-variacao-cliente" hidden></div>
-                                                {% if produto.estoque_atual > 0 %}
-                                                <p>Produto disponivel para reserva pelo WhatsApp.</p>
-                                                <div class="product-options" id="options-{{ produto.id }}">
-                                                    <p class="loading-variacoes">Carregando variações...</p>
-                                                </div>
-                                                <a class="reserve-button modal-whatsapp"
-                                                     data-base-href="{{ links_reserva.get(produto.id) }}"
-                                                     data-produto-id="{{ produto.id }}"
-                                                     href="{{ links_reserva.get(produto.id) }}"
-                                                     target="_blank"
-                                                     rel="noopener noreferrer">
-                                                        Abrir WhatsApp
-                                                </a>
-                        {% else %}
-                        <p>Este produto esta sem estoque no momento.</p>
-                        <span class="reserve-button disabled modal-whatsapp">Indisponivel</span>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="empty-state">Nenhum produto encontrado.</p>
-            {% endif %}
-            <nav class="pagination" aria-label="Paginação de produtos">
-                <a class="pagination-link {% if pagina == 1 %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina - 1 }}">Anterior</a>
-                {% for numero in range(1, total_paginas + 1) %}
-                <a class="pagination-link {% if numero == pagina %}active{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ numero }}">{{ numero }}</a>
-                {% endfor %}
-                <a class="pagination-link {% if pagina == total_paginas %}disabled{% endif %}" href="/auth/produtos?categoria_id={{ categoria_id }}&busca={{ busca }}&por_pagina={{ por_pagina }}&pagina={{ pagina + 1 }}">Próxima</a>
-            </nav>
-        </section>
+      </section>
     </main>
 
+    <footer class="bg-slate-900 py-16">
+      <div class="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-8 animate-trigger anim-scale">
+        <div class="text-white font-black text-xl tracking-tighter uppercase">
+          EASY STORE
+        </div>
+        <div class="flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <a href="/sobre-nos" class="hover:text-white transition">Sobre a Empresa</a>
+          <a href="/auth/produtos" class="text-white">Catálogo de Produtos</a>
+          <a href="/auth/login" class="hover:text-white transition">Acesso Restrito</a>
+        </div>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+          © 2026 Easy Store.
+        </div>
+      </div>
+    </footer>
+
     <script>
-        // Carrega variações para cada produto
-        async function carregarVariacoesProduto(produtoId) {
-            try {
-                const response = await fetch(`/api/variacoes/produto/${produtoId}`);
-                if (!response.ok) return;
-                
-                const variacoes = await response.json();
-                const container = document.getElementById(`options-${produtoId}`);
-                
-                if (variacoes.length === 0) {
-                    container.innerHTML = '<p style="color: #999; font-size: 12px;">Sem variações</p>';
-                    return;
-                }
-
-                // Agrupa variações por cor e tamanho
-                const cores = new Set();
-                const tamanhos = new Set();
-                
-                variacoes.forEach(v => {
-                    if (v.cor) cores.add(JSON.stringify(v.cor));
-                    if (v.tamanho) tamanhos.add(JSON.stringify(v.tamanho));
-                });
-
-                let html = '';
-
-                // Seleto de tamanhos
-                if (tamanhos.size > 0) {
-                    html += '<div class="form-group">';
-                    html += `<label for="size-${produtoId}">Tamanho</label>`;
-                    html += `<select id="size-${produtoId}" class="option-tamanho" data-produto-id="${produtoId}">`;
-                    html += '<option value="">-- Selecione um tamanho --</option>';
-                    
-                    Array.from(tamanhos).forEach(t => {
-                        const tamanho = JSON.parse(t);
-                        html += `<option value="${tamanho.id}" data-nome="${tamanho.nome}">${tamanho.nome}</option>`;
-                    });
-                    
-                    html += '</select></div>';
-                }
-
-                // Cores como bolinhas clicáveis
-                if (cores.size > 0) {
-                    html += '<div class="form-group">';
-                    html += '<label>Cor</label>';
-                    html += `<div id="colors-${produtoId}" class="color-options" role="group" aria-label="Escolha uma cor">`;
-                    Array.from(cores).forEach(c => {
-                        const cor = JSON.parse(c);
-                        html += `<button type="button" class="color-option" data-cor-id="${cor.id}" data-cor-nome="${cor.nome}" title="${cor.nome}" aria-label="Cor ${cor.nome}" style="--color: ${cor.codigo_hex || '#ffffff'}"></button>`;
-                    });
-                    html += '</div></div>';
-                }
-
-                container.innerHTML = html;
-
-                // Atualiza links de WhatsApp ao selecionar
-                const selectTamanho = document.getElementById(`size-${produtoId}`);
-                const colorOptions = document.getElementById(`colors-${produtoId}`);
-                const whatsappLink = document.querySelector(`.reserve-button[data-produto-id="${produtoId}"]`);
-                let corSelecionadaId = null;
-                let corSelecionadaNome = null;
-
-                const atualizarWhatsapp = () => {
-                    let mensagem = `Gostaria de reservar o produto: `;
-                    const nomeProduto = document.querySelector(`.reserve-modal[id="reservar-${produtoId}"] h3`).textContent;
-                    mensagem += nomeProduto;
-
-                    if (selectTamanho && selectTamanho.value) {
-                        const tamanhonome = selectTamanho.options[selectTamanho.selectedIndex].dataset.nome;
-                        mensagem += ` - Tamanho: ${tamanhonome}`;
-                    }
-
-                    if (corSelecionadaNome) {
-                        mensagem += ` - Cor: ${corSelecionadaNome}`;
-                    }
-
-                    const baseHref = whatsappLink.dataset.baseHref;
-                    const url = new URL(baseHref);
-                    url.searchParams.set('text', mensagem);
-                    whatsappLink.href = url.toString();
-
-                    const variacaoSelecionada = variacoes.find(variacao =>
-                        (!selectTamanho?.value || variacao.tamanho?.id === Number(selectTamanho.value)) &&
-                        (!corSelecionadaId || variacao.cor?.id === corSelecionadaId)
-                    );
-                    const imagemContainer = document.getElementById(`imagem-variacao-${produtoId}`);
-                    if (variacaoSelecionada?.imagem) {
-                        imagemContainer.innerHTML = `<img src="${variacaoSelecionada.imagem}" alt="Imagem da variação selecionada">`;
-                        imagemContainer.hidden = false;
-                    } else {
-                        imagemContainer.hidden = true;
-                        imagemContainer.innerHTML = '';
-                    }
-                };
-
-                if (selectTamanho) selectTamanho.addEventListener('change', atualizarWhatsapp);
-                if (colorOptions) {
-                    colorOptions.querySelectorAll('.color-option').forEach(botao => {
-                        botao.addEventListener('click', () => {
-                            corSelecionadaId = Number(botao.dataset.corId);
-                            corSelecionadaNome = botao.dataset.corNome;
-                            colorOptions.querySelectorAll('.color-option').forEach(item => item.classList.toggle('is-selected', item === botao));
-                            atualizarWhatsapp();
-                        });
-                    });
-                }
-
-            } catch (error) {
-                console.error('Erro ao carregar variações:', error);
-            }
-        }
-
-        // Carrega variações de todos os produtos quando a página carrega
-        document.addEventListener('DOMContentLoaded', () => {
-            const produtoCards = document.querySelectorAll('.product-card');
-            produtoCards.forEach(card => {
-                const link = card.querySelector('.product-card-link');
-                const modal = link.getAttribute('href');
-                const produtoId = modal.replace('#reservar-', '');
-                carregarVariacoesProduto(produtoId);
-            });
+      // Animações ao scroll
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
         });
+      }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+      
+      document.querySelectorAll('.animate-trigger').forEach((el) => observer.observe(el));
+
+      // Carrega variações para cada produto
+      async function carregarVariacoesProduto(produtoId) {
+        try {
+          const response = await fetch(`/api/variacoes/produto/${produtoId}`);
+          if (!response.ok) return;
+          
+          const variacoes = await response.json();
+          const container = document.getElementById(`options-${produtoId}`);
+          
+          if (variacoes.length === 0) {
+            container.innerHTML = '<p class="text-slate-400 text-sm text-center">Sem variações disponíveis</p>';
+            return;
+          }
+
+          const cores = new Set();
+          const tamanhos = new Set();
+          
+          variacoes.forEach(v => {
+            if (v.cor) cores.add(JSON.stringify(v.cor));
+            if (v.tamanho) tamanhos.add(JSON.stringify(v.tamanho));
+          });
+
+          let html = '';
+
+          if (tamanhos.size > 0) {
+            html += '<div>';
+            html += `<label class="block text-xs font-bold uppercase tracking-widest text-slate-600 mb-2">Tamanho</label>`;
+            html += `<select id="size-${produtoId}" class="option-tamanho w-full px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-blue transition">`;
+            html += '<option value="">-- Selecione um tamanho --</option>';
+            
+            Array.from(tamanhos).forEach(t => {
+              const tamanho = JSON.parse(t);
+              html += `<option value="${tamanho.id}" data-nome="${tamanho.nome}">${tamanho.nome}</option>`;
+            });
+            
+            html += '</select></div>';
+          }
+
+          if (cores.size > 0) {
+            html += '<div>';
+            html += '<label class="block text-xs font-bold uppercase tracking-widest text-slate-600 mb-3">Cor</label>';
+            html += `<div id="colors-${produtoId}" class="flex flex-wrap gap-3" role="group" aria-label="Escolha uma cor">`;
+            Array.from(cores).forEach(c => {
+              const cor = JSON.parse(c);
+              html += `<button type="button" class="color-option w-10 h-10 rounded-full border-2 border-transparent transition hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue" data-cor-id="${cor.id}" data-cor-nome="${cor.nome}" title="${cor.nome}" aria-label="Cor ${cor.nome}" style="background-color: ${cor.codigo_hex || '#ffffff'}; --tw-ring-color: rgb(37, 99, 235);"></button>`;
+            });
+            html += '</div></div>';
+          }
+
+          container.innerHTML = html;
+
+          const selectTamanho = document.getElementById(`size-${produtoId}`);
+          const colorOptions = document.getElementById(`colors-${produtoId}`);
+          const whatsappLink = document.querySelector(`.modal-whatsapp[data-produto-id="${produtoId}"]`);
+          let corSelecionadaId = null;
+          let corSelecionadaNome = null;
+
+          const atualizarWhatsapp = () => {
+            let mensagem = `Gostaria de reservar o produto: `;
+            const nomeProduto = document.querySelector(`#reservar-${produtoId} h3`).textContent;
+            mensagem += nomeProduto;
+
+            if (selectTamanho && selectTamanho.value) {
+              const tamanhonome = selectTamanho.options[selectTamanho.selectedIndex].dataset.nome;
+              mensagem += ` - Tamanho: ${tamanhonome}`;
+            }
+
+            if (corSelecionadaNome) {
+              mensagem += ` - Cor: ${corSelecionadaNome}`;
+            }
+
+            const baseHref = whatsappLink.dataset.baseHref;
+            const url = new URL(baseHref);
+            url.searchParams.set('text', mensagem);
+            whatsappLink.href = url.toString();
+
+            const variacaoSelecionada = variacoes.find(variacao =>
+              (!selectTamanho?.value || variacao.tamanho?.id === Number(selectTamanho.value)) &&
+              (!corSelecionadaId || variacao.cor?.id === corSelecionadaId)
+            );
+            const imagemContainer = document.getElementById(`imagem-variacao-${produtoId}`);
+            if (variacaoSelecionada?.imagem) {
+              imagemContainer.querySelector('img').src = variacaoSelecionada.imagem;
+              imagemContainer.hidden = false;
+            } else {
+              imagemContainer.hidden = true;
+            }
+          };
+
+          if (selectTamanho) selectTamanho.addEventListener('change', atualizarWhatsapp);
+          if (colorOptions) {
+            colorOptions.querySelectorAll('.color-option').forEach(botao => {
+              botao.addEventListener('click', () => {
+                corSelecionadaId = Number(botao.dataset.corId);
+                corSelecionadaNome = botao.dataset.corNome;
+                colorOptions.querySelectorAll('.color-option').forEach(item => {
+                  item.style.boxShadow = item === botao ? '0 0 0 2px #fff, 0 0 0 4px #2563eb' : 'none';
+                  item.style.borderColor = item === botao ? '#2563eb' : 'transparent';
+                });
+                atualizarWhatsapp();
+              });
+            });
+          }
+
+        } catch (error) {
+          console.error('Erro ao carregar variações:', error);
+        }
+      }
+
+      // Carrega variações quando a página carrega
+      document.addEventListener('DOMContentLoaded', () => {
+        const produtoCards = document.querySelectorAll('article');
+        produtoCards.forEach(card => {
+          const modal = card.querySelector('[id^="reservar-"]');
+          if(modal) {
+            const produtoId = modal.id.replace('reservar-', '');
+            carregarVariacoesProduto(produtoId);
+          }
+        });
+      });
     </script>
-
-    <style>
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: #333;
-        }
-
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 13px;
-            background-color: #f9f9f9;
-        }
-
-        .loading-variacoes {
-            font-size: 12px;
-            color: #999;
-            text-align: center;
-            padding: 10px;
-        }
-
-        .color-options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .color-option {
-            background: var(--color);
-            border: 2px solid rgba(15, 23, 42, .2);
-            border-radius: 50%;
-            cursor: pointer;
-            height: 28px;
-            padding: 0;
-            transition: transform .15s, box-shadow .15s;
-            width: 28px;
-        }
-
-        .color-option:hover,
-        .color-option:focus-visible { transform: scale(1.12); outline: none; }
-
-        .color-option.is-selected { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #2563eb; }
-
-        .imagem-variacao-cliente {
-            margin: 12px 0;
-            text-align: center;
-        }
-
-        .imagem-variacao-cliente img {
-            border-radius: 8px;
-            max-height: 180px;
-            max-width: 100%;
-            object-fit: cover;
-        }
-    </style>
-</body>
+  </body>
 </html>
