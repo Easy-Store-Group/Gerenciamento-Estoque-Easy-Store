@@ -1,241 +1,310 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Easy Store - Controle de estoque e vendas." />
+    <title>Easy Store | Gestão de Estoque</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                navy: '#0F172A',
+                blue: '#2563EB',
+                light: '#F8FAFC',
+                soft: '#F1F5F9',
+                white: '#FFFFFF'
+              }
+            },
+            animation: {
+              'infinite-scroll': 'infinite-scroll 25s linear infinite',
+            },
+            keyframes: {
+              'infinite-scroll': {
+                from: { transform: 'translateX(0)' },
+                to: { transform: 'translateX(-100%)' },
+              }
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #ffffff;
+      }
+      
+      /* Animações distintas */
+      .anim-up {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .anim-left {
+        opacity: 0;
+        transform: translateX(-40px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .anim-right {
+        opacity: 0;
+        transform: translateX(40px);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .anim-scale {
+        opacity: 0;
+        transform: scale(0.96);
+        transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      
+      .is-visible {
+        opacity: 1 !important;
+        transform: translate(0) scale(1) !important;
+      }
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-    <title>EasyStore - Produtos com qualidade e garantia</title>
+      .d-100 { transition-delay: 100ms; }
+      .d-200 { transition-delay: 200ms; }
+      .d-300 { transition-delay: 300ms; }
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
-</head>
-
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar" aria-label="Navegação principal">
-        <div class="navbar-container">
-            <a class="navbar-logo" href="/" aria-label="EasyStore - página inicial">
-                <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo" class="logo-image">
-                <span class="logo-text">EasyStore</span>
-            </a>
-            <div class="navbar-buttons">
-                {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
-                {% if role == 'cliente' %}
-                <a href="/cliente" class="nav-btn nav-login">Minha área</a>
-                {% else %}
-                <a href="/auth/register" class="nav-btn nav-signup">Cadastre-se</a>
-                <a href="/auth/login" class="nav-btn nav-login">Login</a>
-                {% endif %}
-            </div>
+      .hover-scale { transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+      .hover-scale:hover { transform: scale(1.02); }
+    </style>
+  </head>
+  <body class="text-slate-900 antialiased pt-16 bg-white">
+    
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-white">
+      <div class="mx-auto max-w-7xl px-4 flex h-16 items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-6 w-6 bg-brand-blue flex items-center justify-center text-white font-black text-xs">E</div>
+          <span class="text-xs font-black tracking-widest uppercase text-brand-navy">Easy Store</span>
         </div>
+        <div class="flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-slate-500">
+          <a href="#inicio" class="hover:text-brand-navy transition">Início</a>
+          <a href="#sistema-games" class="hover:text-brand-navy transition">Funcionalidades</a>
+          <a href="#pdv-solucoes" class="hover:text-brand-navy transition">Soluções</a>
+          <a href="/sobre-nos" class="hover:text-brand-navy transition">Sobre</a>
+          <a href="/auth/login" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Entrar</a>
+        </div>
+      </div>
     </nav>
 
-    <!-- Hero Section -->
-    <main>
-        <section class="hero section-enter" aria-labelledby="hero-title">
-            <div class="hero-container">
-                <div class="hero-content">
-                    <p class="hero-eyebrow">Loja de confiança</p>
-                    <h1 class="hero-title" id="hero-title">
-                        Produtos com <span class="highlight">qualidade</span>, garantia e estilo
-                    </h1>
-                    <p class="hero-subtitle">
-                        Na EasyStore, você encontra itens escolhidos com cuidado para entregar conforto, durabilidade e
-                        uma experiência de compra segura. Tudo pensado para valorizar seu dia a dia com confiança.
-                    </p>
+    <!-- Barra rolante -->
+    <div class="w-full inline-flex flex-nowrap overflow-hidden bg-brand-navy py-4">
+      <ul class="flex items-center justify-center md:justify-start [&_li]:mx-8 animate-infinite-scroll">
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Estoque Centralizado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">PDV Integrado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Gestão Clara</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Menos Planilhas</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Foco no Essencial</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <!-- Duplicado para loop -->
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Estoque Centralizado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">PDV Integrado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Gestão Clara</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Menos Planilhas</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Foco no Essencial</li>
+        <li class="text-brand-blue text-xs">+</li>
+      </ul>
+      <ul class="flex items-center justify-center md:justify-start [&_li]:mx-8 animate-infinite-scroll" aria-hidden="true">
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Estoque Centralizado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">PDV Integrado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Gestão Clara</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Menos Planilhas</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Foco no Essencial</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <!-- Duplicado para loop -->
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Estoque Centralizado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">PDV Integrado</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Gestão Clara</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Menos Planilhas</li>
+        <li class="text-brand-blue text-xs">+</li>
+        <li class="text-white text-[10px] font-black uppercase tracking-[0.2em]">Foco no Essencial</li>
+        <li class="text-brand-blue text-xs">+</li>
+      </ul>
+    </div>
 
-                    <div class="hero-badges">
-                        <span>Produtos com garantia</span>
-                        <span>Retirada na loja</span>
-                        <span>Atendimento confiável</span>
-                    </div>
+    <main id="inicio">
+      <!-- HERO: Fade UP -->
+      <section class="relative bg-white py-24 sm:py-32 overflow-hidden">
+        <div class="mx-auto max-w-7xl px-4">
+          <div class="grid items-center gap-16 lg:grid-cols-[1.5fr_1fr]">
+            <div class="animate-trigger anim-up">
+              <span class="inline-flex bg-brand-navy px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white">
+                O Básico, Bem Feito
+              </span>
+              <h1 class="mt-8 text-6xl font-black tracking-tighter text-brand-navy sm:text-7xl leading-none">
+                Seu estoque, sem a bagunça.
+              </h1>
+              <p class="mt-6 max-w-lg text-lg leading-relaxed text-slate-500 font-medium">
+                Crie produtos, controle as saídas no balcão e saiba exatamente o que você tem na loja. Tudo em um só lugar.
+              </p>
 
-                    <div class="hero-buttons">
-                        <a href="/auth/produtos" class="btn btn-primary">
-                            <span>Reservar produto</span>
-                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                                <polyline points="12 5 19 12 12 19"></polyline>
-                            </svg>
-                        </a>
-                    </div>
-
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">+10k</span>
-                            <span class="stat-label">Produtos</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">100%</span>
-                            <span class="stat-label">Confiança</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">Na loja</span>
-                            <span class="stat-label">Retirada</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="hero-visual" aria-label="Gestão de estoque EasyStore">
-                    <div class="hero-orbit orbit-one" aria-hidden="true"></div>
-                    <div class="hero-orbit orbit-two" aria-hidden="true"></div>
-                    <div class="hero-emblem" aria-hidden="true">
-                        <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="">
-                        <span class="emblem-ring ring-a"></span>
-                        <span class="emblem-ring ring-b"></span>
-                    </div>
-                </div>
+              <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
+                <a href="/auth/login" class="inline-flex items-center justify-center bg-brand-navy text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-brand-blue transition">
+                  Acessar Sistema
+                </a>
+                <a href="/auth/produtos" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">
+                  Ver Produtos
+                </a>
+                <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-slate-900 text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-700 transition">
+                  <svg class="w-4 h-4 mr-3 fill-current" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.418 22 12c0-5.523-4.477-10-10-10z"></path>
+                  </svg>
+                  GitHub
+                </a>
+              </div>
             </div>
-        </section>
-
-        <section class="services section-enter" aria-labelledby="services-title">
-            <div class="services-container">
-                <div class="section-header">
-                    <h2 id="services-title">Por que escolher a EasyStore?</h2>
-                    <p>Qualidade, praticidade e confiança em cada visita.</p>
-                </div>
-
-                <div class="services-grid">
-                    <div class="service-card">
-                        <div class="service-icon" aria-hidden="true">
-                            <img src="{{ request.url_for('static', path='img/box.png') }}" alt="">
-                        </div>
-                        <h3>Produtos selecionados</h3>
-                        <p>Itens com acabamento premium, boa variedade e excelente custo-benefício.</p>
-                        <div class="service-badge">Qualidade</div>
-                    </div>
-
-                    <div class="service-card">
-                        <div class="service-icon" aria-hidden="true">
-                            <img src="{{ request.url_for('static', path='img/caminhao.png') }}" alt="">
-                        </div>
-                        <h3>Reserva rápida</h3>
-                        <p>Escolha o que deseja e reserve para buscar na loja quando for mais conveniente.</p>
-                        <div class="service-badge">Praticidade</div>
-                    </div>
-
-                    <div class="service-card">
-                        <div class="service-icon" aria-hidden="true">
-                            <img src="{{ request.url_for('static', path='img/dinheiro.png') }}" alt="">
-                        </div>
-                        <h3>Garantia e suporte</h3>
-                        <p>Prezamos pela satisfação do cliente com atendimento ágil e confiança total.</p>
-                        <div class="service-badge">Segurança</div>
-                    </div>
-
-                </div>
+            
+            <div class="bg-slate-50 p-8 flex flex-col gap-6 animate-trigger anim-left d-200">
+              <div class="bg-white p-6 hover-scale">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold">Arquitetura Integrada</p>
+                <p class="mt-2 text-lg font-black tracking-tight text-slate-900 leading-snug">Módulos conectados para PDV e Estoque.</p>
+              </div>
+              <div class="bg-brand-blue p-6 text-white hover-scale">
+                <p class="text-[10px] uppercase tracking-[0.2em] text-blue-200 font-bold">Direto ao Ponto</p>
+                <p class="mt-2 text-lg font-black tracking-tight leading-snug">Apenas as ferramentas exigidas pela sua operação diária.</p>
+              </div>
             </div>
-        </section>
+          </div>
+        </div>
+      </section>
 
-        <section class="cta-section section-enter">
-            <div class="cta-container">
-                <h2>Reserve o que você ama e retire na loja</h2>
-                <p>Variedade, qualidade e garantia em uma experiência prática para você conhecer e buscar na hora.</p>
-                <a href="/auth/register" class="btn btn-primary btn-large">Reservar agora</a>
+      <!-- GAMES: Slide Right -->
+      <section id="sistema-games" class="bg-brand-navy py-24 overflow-hidden">
+        <div class="mx-auto max-w-3xl px-4 text-center animate-trigger anim-right">
+          <h2 class="text-4xl font-black tracking-tighter text-white sm:text-5xl">
+            PARA LOJAS DE GAMES
+          </h2>
+          <p class="mt-6 text-lg text-slate-400 leading-relaxed font-medium">
+            Estoque separado por edição, plataforma e condição. Feito sob medida para lidar com jogos, consoles e acessórios.
+          </p>
+          
+          <div class="mt-16 grid gap-2 sm:grid-cols-2 text-left">
+            <div class="bg-slate-800 p-8 hover-scale">
+              <p class="text-sm font-black uppercase tracking-widest text-white">Catálogo Preciso</p>
+              <p class="mt-4 text-sm text-slate-400 leading-relaxed">Cadastre jogos indicando o console exato e se a mídia é física ou digital.</p>
             </div>
-        </section>
+            <div class="bg-slate-800 p-8 hover-scale">
+              <p class="text-sm font-black uppercase tracking-widest text-white">Caixa Rápido</p>
+              <p class="mt-4 text-sm text-slate-400 leading-relaxed">Venda no balcão de forma rápida, dando baixa imediata no estoque.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-        <section class="story-section section-enter" aria-labelledby="story-title">
-            <div class="story-container">
-                <div class="story-intro home-reveal">
-                    <p class="section-kicker">Sobre a EasyStore</p>
-                    <h2 id="story-title">Uma loja pensada para surpreender e fidelizar clientes.</h2>
-                    <p>A EasyStore nasceu para oferecer uma experiência de compra prática, moderna e confiável. Além de
-                        mostrar produtos de qualidade, permitimos que o cliente reserve o item e retire na loja com rapidez e segurança.</p>
-                    <a href="/sobre-nos" class="text-link">Conheça nossa história <span
-                            aria-hidden="true">→</span></a>
-                </div>
-                <div class="story-values" aria-label="Pilares da EasyStore">
-                    <article class="value-item home-reveal">
-                        <span class="value-number">01</span>
-                        <h3>Produtos com valor</h3>
-                        <p>Escolha itens que unem funcionalidade, design e durabilidade no dia a dia.</p>
-                    </article>
-                    <article class="value-item home-reveal">
-                        <span class="value-number">02</span>
-                        <h3>Reserva simples</h3>
-                        <p>Reserve o produto e venha buscar na loja quando for mais conveniente.</p>
-                    </article>
-                    <article class="value-item home-reveal">
-                        <span class="value-number">03</span>
-                        <h3>Confiança que faz diferença</h3>
-                        <p>Prezamos por atendimento humano, garantia e transparência em cada detalhe.</p>
-                    </article>
-                </div>
-            </div>
-        </section>
+      <!-- IDEAS: Scale Up -->
+      <section id="nossas-ideias" class="py-24 bg-slate-50">
+        <div class="mx-auto max-w-7xl px-4">
+          <h2 class="text-3xl font-black tracking-tighter text-brand-navy mb-16 animate-trigger anim-up">
+            MÚLTIPLOS FORMATOS
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-1">
+            <article class="bg-white p-12 md:col-span-2 animate-trigger anim-scale">
+              <h3 class="text-xl font-black tracking-tight text-brand-navy uppercase">Lojas Físicas</h3>
+              <p class="mt-4 text-sm leading-relaxed text-slate-500 font-medium">
+                Gestão de vitrine e vendas presenciais. Acompanhe a entrada de mercadorias e as vendas diárias direto pelo painel principal.
+              </p>
+            </article>
+            <article class="bg-brand-blue p-12 text-white animate-trigger anim-scale d-100">
+              <h3 class="text-xl font-black tracking-tight uppercase">Acessórios</h3>
+              <p class="mt-4 text-sm leading-relaxed text-blue-100 font-medium">
+                Controle itens menores, cabos e controles adicionais.
+              </p>
+            </article>
+            <article class="bg-white p-12 animate-trigger anim-scale d-200">
+              <h3 class="text-xl font-black tracking-tight text-brand-navy uppercase">Colecionáveis</h3>
+              <p class="mt-4 text-sm leading-relaxed text-slate-500 font-medium">
+                Diferencie edições limitadas e produtos raros.
+              </p>
+            </article>
+            <article class="bg-slate-200 p-12 md:col-span-2 animate-trigger anim-scale d-300">
+              <h3 class="text-xl font-black tracking-tight text-brand-navy uppercase">E-Commerce & Distribuição</h3>
+              <p class="mt-4 text-sm leading-relaxed text-slate-600 font-medium">
+                Acompanhe o fluxo de mercadorias que chegam dos fornecedores e as vendas despachadas.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
 
-        <section class="journey-section section-enter" aria-labelledby="journey-title">
-            <div class="journey-container">
-                <div class="section-header home-reveal">
-                    <p class="section-kicker">Como funciona</p>
-                    <h2 id="journey-title">Escolha, reserve e retire na loja.</h2>
-                    <p>Um processo simples para você encontrar o que deseja sem burocracia.</p>
-                </div>
-                <ol class="journey-steps">
-                    <li class="home-reveal"><span>1</span>
-                        <div>
-                            <h3>Escolha</h3>
-                            <p>Explore produtos de qualidade e encontre o ideal para você.</p>
-                        </div>
-                    </li>
-                    <li class="home-reveal"><span>2</span>
-                        <div>
-                            <h3>Reserve</h3>
-                            <p>Confirme seu item e deixe preparado para retirada na loja.</p>
-                        </div>
-                    </li>
-                    <li class="home-reveal"><span>3</span>
-                        <div>
-                            <h3>Retire</h3>
-                            <p>Venha buscar seu produto com rapidez, segurança e atendimento.</p>
-                        </div>
-                    </li>
-                </ol>
+      <!-- SOLUTIONS: Fade Up Staggered -->
+      <section id="pdv-solucoes" class="bg-white py-24">
+        <div class="mx-auto max-w-5xl px-4">
+          <span class="text-[10px] font-black uppercase tracking-[0.2em] text-brand-blue block mb-12 animate-trigger anim-up">
+            O Essencial
+          </span>
+          
+          <div class="space-y-12">
+            <div class="flex flex-col md:flex-row md:items-baseline gap-4 md:gap-12 animate-trigger anim-up">
+              <h3 class="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 w-full md:w-1/3">PDV</h3>
+              <p class="text-lg text-slate-500 leading-relaxed font-medium md:w-2/3">
+                Interface voltada para o caixa. Adicione o produto, confirme o pagamento e encerre a venda.
+              </p>
             </div>
-        </section>
+            <div class="flex flex-col md:flex-row md:items-baseline gap-4 md:gap-12 animate-trigger anim-up d-100">
+              <h3 class="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 w-full md:w-1/3">ESTOQUE</h3>
+              <p class="text-lg text-slate-500 leading-relaxed font-medium md:w-2/3">
+                Saiba quais produtos estão acabando e quais precisam de reposição, tudo listado de forma clara.
+              </p>
+            </div>
+            <div class="flex flex-col md:flex-row md:items-baseline gap-4 md:gap-12 animate-trigger anim-up d-200">
+              <h3 class="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 w-full md:w-1/3">USUÁRIOS</h3>
+              <p class="text-lg text-slate-500 leading-relaxed font-medium md:w-2/3">
+                Crie perfis com diferentes acessos. O dono da loja vê os relatórios, o atendente acessa apenas o caixa.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
 
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h4>EasyStore</h4>
-                    <p>Qualidade, confiança e produtos que fazem a diferença.</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Links</h4>
-                    <ul>
-                        <li><a href="/sobre-nos">Sobre</a></li>
-                        <li><a target="_blank"
-                                href="https://github.com/Easy-Store-Group/Gerenciamento-Estoque-Easy-Store">GitHub</a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Contatos</h4>
-                    <ul>
-                        <li>
-                            <p>11 94002-8922</p>
-                        </li>
-                        <li>
-                            <p>EasyStore@gmail.com</p>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2026 EasyStore. Todos os direitos reservados.</p>
-            </div>
+    <footer class="bg-slate-900 py-16">
+      <div class="mx-auto max-w-7xl px-4 flex flex-col md:flex-row items-center justify-between gap-8 animate-trigger anim-scale">
+        <div class="text-white font-black text-xl tracking-tighter uppercase">
+          EASY STORE
         </div>
+        <div class="flex flex-wrap justify-center gap-6 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <a href="/sobre-nos" class="hover:text-white transition">Sobre a Empresa</a>
+          <a href="/auth/produtos" class="hover:text-white transition">Catálogo de Produtos</a>
+          <a href="/auth/login" class="hover:text-white transition">Acesso Restrito</a>
+        </div>
+        <div class="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+          © 2026 Easy Store.
+        </div>
+      </div>
     </footer>
 
-</body>
-
+    <script>
+      // Observador para transições distintas
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+          }
+        });
+      }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });
+      
+      document.querySelectorAll('.animate-trigger').forEach((el) => observer.observe(el));
+    </script>
+  </body>
 </html>

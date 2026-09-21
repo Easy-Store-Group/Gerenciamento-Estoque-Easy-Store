@@ -4,29 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=3">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=4">
     <title>Entrar | EasyStore</title>
 </head>
 
 <body>
   <main class="page" id="page">
-    <!-- BRANDING SIDE -->
-    <aside class="branding" aria-label="EasyStore Branding">
-      <div class="brand-content">
-        <div class="logo-row">
+    <section class="auth-shell" aria-labelledby="login-title">
+      <div class="auth-card">
+        <div class="auth-brand" aria-label="EasyStore">
           <img class="logo-icon" src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo">
           <span class="brand-name">EasyStore</span>
         </div>
-        <p class="tagline">Gestão inteligente<br>para o seu negócio</p>
-        <p class="sub">Controle de estoque, vendas e catálogo de forma simples e eficiente.</p>
-      </div>
-    </aside>
 
-    <!-- FORM SIDE -->
-    <section class="form-side" aria-labelledby="login-title">
-      <div class="login-box">
-        <h1 id="login-title">Entrar</h1>
-        
+        <div class="auth-copy">
+          <h1 id="login-title">Entrar</h1>
+          <p>Acesse sua conta para continuar.</p>
+        </div>
+
         {% if erro %}
           <div class="login-error" role="alert">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -37,25 +32,23 @@
             <span>{{ erro }}</span>
           </div>
         {% endif %}
-        
+
         <form id="login-form" action="/auth/login" method="post" novalidate>
           <div class="input-group">
             <label for="email">E-mail</label>
             <input id="email" type="email" name="email" placeholder="nome@empresa.com" required>
           </div>
-          
+
           <div class="input-group">
             <label for="senha">Senha</label>
             <div class="password-control">
               <input id="senha" type="password" name="senha" placeholder="Sua senha" required>
-              <button type="button" class="password-toggle" aria-controls="senha" aria-pressed="false" aria-label="Mostrar senha" title="Mostrar senha">
-                <!-- Eye Icon (hidden by default handled in JS or we inject via JS) -->
-              </button>
+              <button type="button" class="password-toggle" aria-controls="senha" aria-pressed="false" aria-label="Mostrar senha" title="Mostrar senha"></button>
             </div>
           </div>
-          
+
           <button type="submit" class="btn-confirm">Entrar</button>
-          
+
           <div class="login-links">
             <p class="footer-text">Não tem conta? <a href="/auth/register">Cadastre-se</a></p>
             <p class="footer-text"><a href="/">Voltar para o Início</a></p>
@@ -64,7 +57,7 @@
       </div>
     </section>
   </main>
-  
-  <script src="{{ request.url_for('static', path='js/login.js') }}?v=3" defer></script>
+
+  <script src="{{ request.url_for('static', path='js/login.js') }}?v=4" defer></script>
 </body>
 </html>
