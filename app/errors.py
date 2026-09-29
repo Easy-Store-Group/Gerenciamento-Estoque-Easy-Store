@@ -78,6 +78,23 @@ def handler_http_exception(request: Request, exc: StarletteHTTPException):
         )
         return HTMLResponse(content=html, status_code=status.HTTP_403_FORBIDDEN)
 
+    if exc.status_code == status.HTTP_404_NOT_FOUND:
+        logger.info("Rota não encontrada: %s %s", request.method, request.url.path)
+        if _is_api_request(request):
+            return JSONResponse(
+                status_code=status.HTTP_404_NOT_FOUND,
+                content={"error": "nao_encontrado", "mensagem": "Rota não encontrada."},
+            )
+        html = templates.env.get_template("errors/erro.html").render(
+            {
+                "request": request,
+                "codigo": 404,
+                "titulo": "Página não encontrada",
+                "mensagem": "Não encontramos o endereço que você tentou abrir.",
+            }
+        )
+        return HTMLResponse(content=html, status_code=status.HTTP_404_NOT_FOUND)
+
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},

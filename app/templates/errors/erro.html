@@ -1,17 +1,34 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-    <title>{{ titulo or 'Erro' }} — EasyStore</title>
-    <link rel="stylesheet" href="/static/css/style.css" />
-  </head>
-  <body>
-    <div class="container">
-      <h1>{{ codigo }} — {{ titulo }}</h1>
-      <p>{{ mensagem }}</p>
-      <p><a href="/">Voltar para a página inicial</a></p>
-    </div>
-  </body>
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/errors.css') }}">
+  <title>{{ codigo }} — {{ titulo }} | EasyStore</title>
+</head>
+<body class="error-page">
+  <main class="error-container" aria-labelledby="error-title">
+    <section class="error-card error-{{ codigo }}">
+      <a class="error-brand" href="/" aria-label="EasyStore — página inicial">
+        <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
+        <span>EasyStore</span>
+      </a>
+      <div class="error-illustration" aria-hidden="true">
+        <span class="error-orbit orbit-one"></span><span class="error-orbit orbit-two"></span>
+        <span class="error-emoji">{% if codigo == 403 %}🔒{% else %}🧭{% endif %}</span>
+        <span class="error-badge">{{ codigo }}</span>
+      </div>
+      <p class="error-eyebrow">{% if codigo == 403 %}ACESSO RESTRITO{% else %}PÁGINA NÃO ENCONTRADA{% endif %}</p>
+      <h1 id="error-title">{% if codigo == 403 %}Ops! Essa área é exclusiva{% else %}Ops! Essa página se perdeu{% endif %}</h1>
+      <p class="error-message">{% if codigo == 403 %}Você não tem permissão para acessar este conteúdo. Se acredita que deveria ter acesso, fale com um administrador.{% else %}Não encontramos o endereço que você tentou abrir. Confira o link ou volte para um lugar conhecido.{% endif %}</p>
+      <div class="error-actions">
+        <a class="error-btn error-btn-primary" href="/">Ir para a página inicial <span aria-hidden="true">→</span></a>
+        <button class="error-btn error-btn-secondary" type="button" onclick="if (history.length > 1) history.back(); else location.href='/'">Voltar à página anterior</button>
+      </div>
+      <p class="error-code">Erro {{ codigo }}</p>
+    </section>
+  </main>
+</body>
 </html>
