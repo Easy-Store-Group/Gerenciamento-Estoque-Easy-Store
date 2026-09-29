@@ -42,6 +42,7 @@ def listar_produtos(
     pagina: int = 1,
     por_pagina: int = 10,
     mostrar_inativos: bool = False,  # toggle para exibir também produtos inativos
+    estoque_baixo: bool = False,
     db: Session = Depends(get_db),
     usuario = Depends(get_admin)
 ):
@@ -56,6 +57,9 @@ def listar_produtos(
 
     if categoria_id:
         query = query.filter(Produto.categoria_id == categoria_id)
+
+    if estoque_baixo:
+        query = query.filter(Produto.estoque_atual < 20)
 
     query = query.order_by(Produto.nome)
     total_produtos = query.count()
@@ -94,6 +98,7 @@ def listar_produtos(
             "busca":        busca,
             "categoria_id": categoria_id,
             "mostrar_inativos": mostrar_inativos,
+            "estoque_baixo": estoque_baixo,
             "pagina":         pagina,
             "por_pagina":     por_pagina,
             "total_paginas":  total_paginas,

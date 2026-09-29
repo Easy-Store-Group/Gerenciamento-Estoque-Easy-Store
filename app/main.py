@@ -82,6 +82,11 @@ def admin_dashboard(
     total_categorias = db.query(Categoria).count()
     total_usuarios = db.query(Usuario).count()
     ativos_produtos = db.query(Produto).filter(Produto.ativo == True).count()
+    produtos_baixo_estoque_count = (
+        db.query(Produto)
+        .filter(Produto.ativo == True, Produto.estoque_atual < 20)
+        .count()
+    )
     ultimas_vendas = (
         db.query(Venda)
         .order_by(Venda.criado_em.desc())
@@ -112,6 +117,14 @@ def admin_dashboard(
     ]
     total_vendas_7_dias = sum(totais_por_dia.values())
 
+    produtos_baixo_estoque = (
+        db.query(Produto)
+        .filter(Produto.ativo == True, Produto.estoque_atual <= 30)
+        .order_by(Produto.estoque_atual.asc(), Produto.nome.asc())
+        .limit(6)
+        .all()
+    )
+
     return templates.TemplateResponse(
         request,
         "admin/index.html",
@@ -129,6 +142,7 @@ def admin_dashboard(
             "vendas_grafico": vendas_grafico,
             "ultimas_vendas": ultimas_vendas,
             "total_vendas_7_dias": total_vendas_7_dias,
+            "produtos_baixo_estoque_count": produtos_baixo_estoque_count,
         },
     )
 

@@ -17,10 +17,11 @@
     <strong class="metric-value">{{ total_usuarios }}</strong>
     <p class="metric-note">Operadores e administradores do painel.</p>
   </div>
-  <div class="metric-card accent-card">
-    <span class="metric-label">Total vendas (7 dias)</span>
-    <strong class="metric-value">R$ {{ "%.2f"|format(total_vendas_7_dias) }}</strong>
-    <p class="metric-note">Valor total vendido no PDV nos últimos 7 dias.</p>
+  <div class="metric-card accent-card stock-summary-card">
+    <span class="metric-label">Produtos em baixo estoque</span>
+    <strong class="metric-value">{{ produtos_baixo_estoque_count }}</strong>
+    <p class="metric-note">Produtos com estoque inferior a 20 unidades.</p>
+    <a href="/produtos?estoque_baixo=true" class="btn btn-secondary stock-button">Ver produtos em baixo estoque</a>
   </div>
 </div>
 

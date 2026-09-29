@@ -12,6 +12,9 @@
       {% endfor %}
     </select>
     <label style="margin-left:8px; display:inline-flex; align-items:center;">
+      <input type="checkbox" name="estoque_baixo" value="true" {% if estoque_baixo %}checked{% endif %} style="margin-right:6px;"> Baixo estoque
+    </label>
+    <label style="margin-left:8px; display:inline-flex; align-items:center;">
       <input type="checkbox" name="mostrar_inativos" value="true" {% if mostrar_inativos %}checked{% endif %} style="margin-right:6px;"> Mostrar inativos
     </label>
     <button type="submit" class="btn btn-primary">Buscar</button>
@@ -39,7 +42,15 @@
     </div>
     <div>{{ produto.plataforma }}</div>
     <div>{{ produto.categoria.nome if produto.categoria else 'Sem categoria' }}</div>
-    <div>{{ produto.estoque_atual }}</div>
+    <div>
+      {% if produto.estoque_atual < 10 %}
+      <span class="stock-level stock-danger">{{ produto.estoque_atual }}</span>
+      {% elif produto.estoque_atual < 30 %}
+      <span class="stock-level stock-warning">{{ produto.estoque_atual }}</span>
+      {% else %}
+      <span class="stock-level stock-ok">{{ produto.estoque_atual }}</span>
+      {% endif %}
+    </div>
     <div>{{ produto.preco }}</div>
     <div class="actions">
       {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
@@ -64,19 +75,19 @@
 {% if total_paginas > 1 %}
 <nav class="pagination" aria-label="Paginação de produtos">
   {% if pagina > 1 %}
-  <a class="pagination-button" href="/produtos/?pagina={{ pagina - 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}{% if mostrar_inativos %}&mostrar_inativos=true{% endif %}" aria-label="Página anterior">← Anterior</a>
+  <a class="pagination-button" href="/produtos/?pagina={{ pagina - 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}{% if mostrar_inativos %}&mostrar_inativos=true{% endif %}{% if estoque_baixo %}&estoque_baixo=true{% endif %}" aria-label="Página anterior">← Anterior</a>
   {% else %}
   <span class="pagination-button is-disabled" aria-disabled="true">← Anterior</span>
   {% endif %}
 
   <div class="pagination-pages">
     {% for numero in range(1, total_paginas + 1) %}
-    <a class="pagination-page {% if numero == pagina %}is-current{% endif %}" href="/produtos/?pagina={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}{% if mostrar_inativos %}&mostrar_inativos=true{% endif %}" {% if numero == pagina %}aria-current="page"{% endif %}>{{ numero }}</a>
+    <a class="pagination-page {% if numero == pagina %}is-current{% endif %}" href="/produtos/?pagina={{ numero }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}{% if mostrar_inativos %}&mostrar_inativos=true{% endif %}{% if estoque_baixo %}&estoque_baixo=true{% endif %}" {% if numero == pagina %}aria-current="page"{% endif %}>{{ numero }}</a>
     {% endfor %}
   </div>
 
   {% if pagina < total_paginas %}
-  <a class="pagination-button" href="/produtos/?pagina={{ pagina + 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}{% if mostrar_inativos %}&mostrar_inativos=true{% endif %}" aria-label="Próxima página">Próxima →</a>
+  <a class="pagination-button" href="/produtos/?pagina={{ pagina + 1 }}&por_pagina={{ por_pagina }}&busca={{ busca|urlencode }}&categoria_id={{ categoria_id }}{% if mostrar_inativos %}&mostrar_inativos=true{% endif %}{% if estoque_baixo %}&estoque_baixo=true{% endif %}" aria-label="Próxima página">Próxima →</a>
   {% else %}
   <span class="pagination-button is-disabled" aria-disabled="true">Próxima →</span>
   {% endif %}
@@ -85,24 +96,32 @@
 {% block scripts %}
 <script>
   document.addEventListener('DOMContentLoaded', function () {
-    const checkbox = document.querySelector('input[name="mostrar_inativos"]');
     const form = document.querySelector('.search-bar');
-    if (!checkbox || !form) return;
+    const checkboxBaixoEstoque = document.querySelector('input[name="estoque_baixo"]');
+    const checkboxMostrarInativos = document.querySelector('input[name="mostrar_inativos"]');
+    if (!form || !checkboxBaixoEstoque || !checkboxMostrarInativos) return;
 
-    const syncCheckboxFromQuery = () => {
+    const syncCheckboxesFromQuery = () => {
       const params = new URLSearchParams(window.location.search);
-      const checked = params.get('mostrar_inativos') === 'true' || params.get('mostrar_inativos') === '1' || params.get('mostrar_inativos') === 'on';
-      checkbox.checked = checked;
+      const mostrarInativosChecked = params.get('mostrar_inativos') === 'true' || params.get('mostrar_inativos') === '1' || params.get('mostrar_inativos') === 'on';
+      const estoqueBaixoChecked = params.get('estoque_baixo') === 'true' || params.get('estoque_baixo') === '1' || params.get('estoque_baixo') === 'on';
+      checkboxBaixoEstoque.checked = estoqueBaixoChecked;
+      checkboxMostrarInativos.checked = mostrarInativosChecked;
     };
 
     const syncPaginationLinks = () => {
       document.querySelectorAll('.pagination a[href]').forEach(a => {
         try {
           const url = new URL(a.getAttribute('href'), window.location.origin);
-          if (checkbox.checked) {
+          if (checkboxMostrarInativos.checked) {
             url.searchParams.set('mostrar_inativos', 'true');
           } else {
             url.searchParams.delete('mostrar_inativos');
+          }
+          if (checkboxBaixoEstoque.checked) {
+            url.searchParams.set('estoque_baixo', 'true');
+          } else {
+            url.searchParams.delete('estoque_baixo');
           }
           a.setAttribute('href', url.pathname + url.search);
         } catch (e) {
@@ -116,10 +135,16 @@
       if (hiddenPage) hiddenPage.value = '1';
     };
 
-    syncCheckboxFromQuery();
+    syncCheckboxesFromQuery();
     syncPaginationLinks();
 
-    checkbox.addEventListener('change', function () {
+    checkboxBaixoEstoque.addEventListener('change', function () {
+      resetPageOnSearch();
+      syncPaginationLinks();
+      form.requestSubmit();
+    });
+
+    checkboxMostrarInativos.addEventListener('change', function () {
       resetPageOnSearch();
       syncPaginationLinks();
       form.requestSubmit();
