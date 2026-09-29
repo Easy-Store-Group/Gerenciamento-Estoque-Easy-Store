@@ -2,39 +2,39 @@
 
 {% block content %}
 {% if request.query_params.get('sucesso') %}
-<div class="alert alert-success">✅ Venda finalizada com sucesso!</div>
+<div class="alert alert-success">Venda finalizada com sucesso!</div>
 {% endif %}
 
 <div class="comprovante-wrapper">
   <div class="comprovante-card" id="comprovante-print">
 
     <div class="comprovante-header">
-      <h2>🧾 Comprovante de Venda</h2>
+      <h2>Comprovante de Venda</h2>
       <span class="comprovante-id">#{{ venda.id }}</span>
     </div>
 
     <div class="comprovante-meta">
       <div class="meta-row">
-        <span>📅 Data</span>
+        <span>Data</span>
         <strong>{{ venda.criado_em.strftime('%d/%m/%Y %H:%M') if venda.criado_em else '—' }}</strong>
       </div>
       <div class="meta-row">
-        <span>👤 Cliente</span>
+        <span>Cliente</span>
         <strong>{{ venda.cliente.nome if venda.cliente else 'Consumidor não identificado' }}</strong>
       </div>
       {% if venda.cliente and venda.cliente.is_associado %}
       <div class="meta-row">
-        <span>⭐ Associado</span>
+        <span>Associado</span>
         <strong style="color:#059669">Sim — desconto aplicado</strong>
       </div>
       {% endif %}
       <div class="meta-row">
-        <span>🔑 Operador</span>
+        <span>Operador</span>
         <strong>{{ venda.usuario.nome if venda.usuario else '—' }}</strong>
       </div>
       {% if venda.observacao %}
       <div class="meta-row">
-        <span>📝 Obs.</span>
+        <span>Obs.</span>
         <strong>{{ venda.observacao }}</strong>
       </div>
       {% endif %}
@@ -81,9 +81,9 @@
   </div>
 
   <div class="comprovante-actions no-print">
-    <button onclick="window.print()" class="btn btn-primary">🖨️ Imprimir</button>
-    <a href="/pdv" class="btn btn-secondary">🛒 Nova venda</a>
-    <a href="/pdv/historico" class="btn btn-outline">📋 Histórico</a>
+    <button onclick="window.print()" class="btn btn-primary">Imprimir</button>
+    <a href="/pdv" class="btn btn-secondary">Nova venda</a>
+    <a href="/pdv/historico" class="btn btn-outline">Histórico</a>
   </div>
 </div>
 

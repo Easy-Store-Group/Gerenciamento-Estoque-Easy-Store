@@ -75,19 +75,26 @@
     </style>
   </head>
   <body class="text-slate-900 antialiased pt-16 bg-white">
+    {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}
     
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white">
       <div class="mx-auto max-w-7xl px-4 flex h-16 items-center justify-between">
-        <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-3">
           <div class="h-6 w-6 bg-brand-blue flex items-center justify-center text-white font-black text-xs">E</div>
           <span class="text-xs font-black tracking-widest uppercase text-brand-navy">Easy Store</span>
-        </div>
+        </a>
         <div class="flex items-center gap-8 text-xs font-bold uppercase tracking-widest text-slate-500">
           <a href="#inicio" class="hover:text-brand-navy transition">Início</a>
           <a href="#sistema-games" class="hover:text-brand-navy transition">Funcionalidades</a>
           <a href="#pdv-solucoes" class="hover:text-brand-navy transition">Soluções</a>
           <a href="/sobre-nos" class="hover:text-brand-navy transition">Sobre</a>
+          {% if role == 'admin' %}
+          <a href="/admin" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Minha Área</a>
+          {% elif role == 'cliente' %}
+          <a href="/cliente/?secao=compras" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Minha Área</a>
+          {% else %}
           <a href="/auth/login" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Entrar</a>
+          {% endif %}
         </div>
       </div>
     </nav>
@@ -159,9 +166,15 @@
               </p>
 
               <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
+                {% if role == 'admin' %}
+                <a href="/admin" class="inline-flex items-center justify-center bg-brand-navy text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-brand-blue transition">
+                  Acessar Sistema
+                </a>
+                {% else %}
                 <a href="/auth/login" class="inline-flex items-center justify-center bg-brand-navy text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-brand-blue transition">
                   Acessar Sistema
                 </a>
+                {% endif %}
                 <a href="/auth/produtos" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">
                   Ver Produtos
                 </a>

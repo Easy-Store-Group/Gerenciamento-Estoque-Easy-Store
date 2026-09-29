@@ -48,7 +48,9 @@
           <a href="/" class="hover:text-brand-navy transition">Início</a>
           <a href="/auth/produtos" class="text-brand-navy">Produtos</a>
           <a href="/sobre-nos" class="hover:text-brand-navy transition">Sobre</a>
-          {% if role == 'cliente' %}
+          {% if role == 'admin' %}
+          <a href="/admin" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Minha Área</a>
+          {% elif role == 'cliente' %}
           <a href="/cliente/?secao=compras" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Minha Área</a>
           {% else %}
           <a href="/auth/login" class="bg-brand-navy text-white px-4 py-2 hover:bg-brand-blue transition">Entrar</a>
@@ -88,7 +90,9 @@
               <p class="mt-6 max-w-2xl text-lg leading-relaxed text-slate-500 font-medium">Veja jogos, consoles e acessórios disponíveis antes de entrar no sistema. Filtre por categoria, confira estoque e abra a reserva direto pelo WhatsApp.</p>
               <div class="mt-10 flex flex-col sm:flex-row flex-wrap gap-4">
                 <a href="#catalogo" class="inline-flex items-center justify-center bg-brand-navy text-white px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-brand-blue transition">Ver Catálogo</a>
-                {% if role == 'cliente' %}
+                {% if role == 'admin' %}
+                <a href="/admin" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">Acessar Sistema</a>
+                {% elif role == 'cliente' %}
                 <a href="/cliente/?secao=compras" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">Minha Área</a>
                 {% else %}
                 <a href="/auth/register" class="inline-flex items-center justify-center bg-slate-100 text-brand-navy px-8 py-4 text-xs font-black uppercase tracking-[0.2em] hover:bg-slate-200 transition">Criar Conta</a>
