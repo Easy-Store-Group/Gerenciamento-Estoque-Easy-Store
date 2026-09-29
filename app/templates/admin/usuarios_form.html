@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="form-card">
+<div class="form-card user-edit-card">
   <h2>{% if editando %}Editar usuario{% else %}Novo usuario{% endif %}</h2>
   <form action="{% if editando %}/usuarios/{{ editando.id }}/editar{% else %}/usuarios/novo{% endif %}" method="post">
     <div class="form-grid">

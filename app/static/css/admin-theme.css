@@ -636,3 +636,220 @@ a.latest-sales-row:hover {
     padding: 18px !important;
   }
 }
+
+/* Category form: compact, focused and visually separate from the larger forms. */
+.category-edit-card {
+  background: var(--surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--border) !important;
+  border-top: 4px solid #2563eb !important;
+  box-shadow: none !important;
+  max-width: 680px;
+  padding: 30px !important;
+}
+
+.category-edit-card h2 {
+  color: var(--text) !important;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 24px !important;
+}
+
+.category-edit-card .category-name-field {
+  background: #eff6ff;
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-left: 3px solid #2563eb;
+  gap: 10px;
+  padding: 18px;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.3s ease;
+}
+
+.category-edit-card .category-name-field:focus-within {
+  background: #ffffff;
+  border-color: rgba(37, 99, 235, 0.42);
+  transform: translateY(-1px);
+}
+
+.category-edit-card .category-name-field label {
+  color: var(--muted-strong) !important;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.category-edit-card .category-name-field input {
+  background: #ffffff !important;
+  border-color: rgba(37, 99, 235, 0.2) !important;
+  font-size: 1rem;
+  font-weight: 700;
+  min-height: 48px;
+}
+
+.category-edit-card form > .btn {
+  margin-top: 22px;
+  min-width: 150px;
+}
+
+@media (max-width: 640px) {
+  .category-edit-card {
+    padding: 20px !important;
+  }
+}
+
+/* Focused form treatments: product catalog and user access have distinct accents. */
+.product-edit-card,
+.user-edit-card {
+  background: var(--surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+  max-width: 1080px;
+  padding: 30px !important;
+}
+
+.product-edit-card {
+  border-left: 4px solid #2563eb !important;
+}
+
+.product-edit-card h2,
+.user-edit-card h2 {
+  color: var(--text) !important;
+  font-size: 1.45rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  margin-bottom: 24px !important;
+}
+
+.product-edit-card .form-grid,
+.user-edit-card .form-grid {
+  gap: 1px !important;
+}
+
+.product-edit-card .input-group,
+.user-edit-card .input-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  gap: 8px;
+  padding: 16px;
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.3s ease;
+}
+
+.product-edit-card .input-group:focus-within,
+.user-edit-card .input-group:focus-within {
+  background: var(--surface-soft);
+  border-color: rgba(59, 130, 246, 0.35);
+  transform: translateY(-1px);
+}
+
+.product-edit-card .input-group > label,
+.user-edit-card .input-group > label,
+.product-edit-card .field-preview > span {
+  color: var(--muted-strong) !important;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.product-edit-card .category-field {
+  background: #eff6ff;
+  border-left: 3px solid #2563eb;
+}
+
+.product-edit-card .category-field select {
+  background: #ffffff !important;
+  border-color: rgba(37, 99, 235, 0.25) !important;
+  font-weight: 700;
+}
+
+.product-edit-card .field-preview {
+  align-items: center;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 18px;
+  margin: 18px 0 22px;
+  padding: 14px 16px;
+}
+
+.product-edit-card .field-preview img {
+  border: 1px solid var(--border);
+  height: 92px;
+  object-fit: cover;
+  width: 92px;
+}
+
+.product-edit-card form > .btn,
+.user-edit-card form > .btn {
+  margin-top: 22px;
+}
+
+.user-edit-card {
+  border-top: 4px solid #0f172a !important;
+  max-width: 900px;
+}
+
+.user-edit-card .form-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.user-edit-card .checkbox-card {
+  align-items: start;
+  background: #eff6ff;
+  border-left: 3px solid #2563eb;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  grid-column: 1 / -1;
+}
+
+.user-edit-card .checkbox-card > input {
+  accent-color: #2563eb;
+  flex: 0 0 auto;
+  height: 18px;
+  margin-top: 2px;
+  width: 18px;
+}
+
+.user-edit-card .checkbox-card span {
+  display: grid;
+  gap: 5px;
+}
+
+.user-edit-card .checkbox-card strong {
+  color: var(--text);
+  font-size: 0.88rem;
+}
+
+.user-edit-card .checkbox-card small {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.user-edit-card .btn-primary,
+.product-edit-card .btn-primary {
+  min-width: 150px;
+}
+
+@media (max-width: 640px) {
+  .product-edit-card,
+  .user-edit-card {
+    padding: 20px !important;
+  }
+
+  .user-edit-card .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-edit-card .checkbox-card {
+    grid-column: auto;
+  }
+
+  .product-edit-card .field-preview {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

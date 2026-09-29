@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 
 {% block content %}
-<div class="form-card">
+<div class="form-card product-edit-card">
   <h2>Editar produto</h2>
   {% if erro %}
   <div class="alert alert-error">{{ erro }}</div>
@@ -24,7 +24,7 @@
         <label>Estoque atual</label>
         <input type="number" name="estoque_atual" value="{{ editando.estoque_atual }}" required>
       </div>
-      <div class="input-group">
+      <div class="input-group category-field">
         <label>Categoria</label>
         <select name="categoria_id">
           <option value="0" {% if not editando.categoria_id %}selected{% endif %}>Sem categoria</option>
