@@ -1,7 +1,7 @@
 def test_homepage(client):
     res = client.get("/")
     assert res.status_code == 200
-    assert "Uma loja" in res.text or "Ponto de Venda" in res.text
+    assert "Easy Store" in res.text or "PDV" in res.text
 
 
 def test_sobre(client):

@@ -10,14 +10,22 @@ os.environ.setdefault("ALGORITHM", "HS256")
 os.environ.setdefault("ACCESS_TOKEN_EXPIRACAO_MINUTOS", "60")
 os.environ.setdefault("DATABASE_URL", "sqlite:///./test_temp.db")
 
-from app.main import app
+import app.models
 from app.database import Base, get_db
+from app.main import app
 
+
+
+from sqlalchemy.pool import StaticPool
 
 TEST_DATABASE_URL = "sqlite:///:memory:"
 
 
-engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
