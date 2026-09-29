@@ -1,33 +1,45 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f7fb">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
-  <link rel="stylesheet" href="{{ request.url_for('static', path='css/errors.css') }}">
   <title>{{ codigo }} — {{ titulo }} | EasyStore</title>
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/errors.css') }}">
 </head>
-<body class="error-page">
-  <main class="error-container" aria-labelledby="error-title">
-    <section class="error-card error-{{ codigo }}">
-      <a class="error-brand" href="/" aria-label="EasyStore — página inicial">
-        <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore">
+<body class="auth-required-page error-page">
+  <main class="auth-required error-layout">
+    <section class="auth-required-card error-card error-{{ codigo }}">
+      <a href="/" class="auth-required-brand">
+        <img src="{{ request.url_for('static', path='img/logo.png') }}" alt="EasyStore Logo">
         <span>EasyStore</span>
       </a>
-      <div class="error-illustration" aria-hidden="true">
-        <span class="error-orbit orbit-one"></span><span class="error-orbit orbit-two"></span>
-        <span class="error-emoji">{% if codigo == 403 %}🔒{% else %}🧭{% endif %}</span>
-        <span class="error-badge">{{ codigo }}</span>
+
+      <div class="auth-required-content">
+        <span class="auth-required-kicker">{% if codigo == 403 %}Acesso restrito{% else %}Página não encontrada{% endif %}</span>
+        <h1>{% if codigo == 403 %}Você não tem acesso a esta área{% else %}Ops! Essa página não existe{% endif %}</h1>
+        <p>{% if codigo == 403 %}Sua conta não tem permissão para acessar este conteúdo. Se acredita que deveria ter acesso, entre em contato com um administrador.{% else %}Não encontramos o endereço que você tentou abrir. Confira o link ou volte para a página inicial da EasyStore.{% endif %}</p>
       </div>
-      <p class="error-eyebrow">{% if codigo == 403 %}ACESSO RESTRITO{% else %}PÁGINA NÃO ENCONTRADA{% endif %}</p>
-      <h1 id="error-title">{% if codigo == 403 %}Ops! Essa área é exclusiva{% else %}Ops! Essa página se perdeu{% endif %}</h1>
-      <p class="error-message">{% if codigo == 403 %}Você não tem permissão para acessar este conteúdo. Se acredita que deveria ter acesso, fale com um administrador.{% else %}Não encontramos o endereço que você tentou abrir. Confira o link ou volte para um lugar conhecido.{% endif %}</p>
-      <div class="error-actions">
-        <a class="error-btn error-btn-primary" href="/">Ir para a página inicial <span aria-hidden="true">→</span></a>
-        <button class="error-btn error-btn-secondary" type="button" onclick="if (history.length > 1) history.back(); else location.href='/'">Voltar à página anterior</button>
+
+      <div class="auth-required-actions">
+        <a href="/" class="btn btn-primary">Ir para a página inicial</a>
+        <button type="button" class="error-back-link" onclick="if (history.length > 1) history.back(); else location.href='/'">Voltar à página anterior</button>
       </div>
-      <p class="error-code">Erro {{ codigo }}</p>
+
+      <div class="auth-required-features" aria-label="Sugestões">
+        {% if codigo == 403 %}
+        <div><strong>Faça login</strong><span>Entre com uma conta que tenha acesso a esta área.</span></div>
+        <div><strong>Confira sua conta</strong><span>Verifique se está usando o perfil correto.</span></div>
+        <div><strong>Precisa de ajuda?</strong><span>Peça ao administrador para revisar suas permissões.</span></div>
+        {% else %}
+        <div><strong>Confira o endereço</strong><span>Veja se o link foi digitado corretamente.</span></div>
+        <div><strong>Explore a loja</strong><span>Acesse produtos, estoque e vendas pela navegação.</span></div>
+        <div><strong>Comece pela Home</strong><span>Volte ao início e encontre o que precisa.</span></div>
+        {% endif %}
+      </div>
+
+      <p class="error-status">Erro {{ codigo }} · {{ titulo }}</p>
     </section>
   </main>
 </body>
