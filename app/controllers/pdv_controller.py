@@ -91,6 +91,135 @@ def _extrair_produto_id(item: dict) -> int | None:
     return None
 
 
+FORMAS_PAGAMENTO_VALIDAS = {
+    "dinheiro",
+    "pix",
+    "cartao_credito",
+    "cartao_debito",
+}
+
+
+def _coerce_float(value):
+    if value is None or value == "":
+        return None
+
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _pagamentos_do_admin(
+    forma_pagamento: str | None,
+    valor_recebido: float | None,
+    total_liquido: float,
+    forma_pagamento_1: str | None = None,
+    valor_pagamento_1: float | None = None,
+    forma_pagamento_2: str | None = None,
+    valor_pagamento_2: float | None = None,
+):
+    """Normaliza os pagamentos válidos para o admin.
+
+    Suporta pagamento único e combinação de dois métodos.
+    """
+
+    total_liquido = round(float(total_liquido), 2)
+
+    if forma_pagamento_1 or forma_pagamento_2 or valor_pagamento_1 or valor_pagamento_2:
+        pagamentos = []
+        formas_usadas = set()
+
+        for forma, valor in (
+            (forma_pagamento_1, valor_pagamento_1),
+            (forma_pagamento_2, valor_pagamento_2),
+        ):
+            if forma in (None, ""):
+                continue
+
+            if forma not in FORMAS_PAGAMENTO_VALIDAS:
+                raise ValueError("forma_pagamento_invalida")
+
+            if forma in formas_usadas:
+                raise ValueError("pagamento_duplicado")
+
+            formas_usadas.add(forma)
+
+            valor_float = _coerce_float(valor)
+            if valor_float is None or valor_float <= 0:
+                raise ValueError("valor_pagamento_invalido")
+
+            pagamentos.append({
+                "forma": forma,
+                "valor": round(valor_float, 2),
+            })
+
+        if not pagamentos:
+            raise ValueError("forma_pagamento")
+
+        if len(pagamentos) != 2:
+            raise ValueError("forma_pagamento")
+
+        total_pago = round(sum(item["valor"] for item in pagamentos), 2)
+        if total_pago < total_liquido:
+            raise ValueError("valor_insuficiente")
+
+        if total_pago > total_liquido and not any(item["forma"] == "dinheiro" for item in pagamentos):
+            raise ValueError("valor_insuficiente")
+
+        troco = round(total_pago - total_liquido, 2) if any(item["forma"] == "dinheiro" for item in pagamentos) else 0.0
+
+        pagamentos_validos = []
+        for item in pagamentos:
+            forma = item["forma"]
+            if forma == "dinheiro":
+                pagamentos_validos.append({
+                    "forma": forma,
+                    "valor": round(item["valor"], 2),
+                    "valor_recebido": round(item["valor"], 2),
+                    "troco": troco,
+                })
+            else:
+                pagamentos_validos.append({
+                    "forma": forma,
+                    "valor": round(item["valor"], 2),
+                    "valor_recebido": None,
+                    "troco": None,
+                })
+
+        return pagamentos_validos
+
+    if forma_pagamento is None:
+        raise ValueError("forma_pagamento")
+
+    if forma_pagamento not in FORMAS_PAGAMENTO_VALIDAS:
+        raise ValueError("forma_pagamento_invalida")
+
+    valor_float = _coerce_float(valor_recebido)
+
+    if forma_pagamento == "dinheiro":
+        if valor_float is None:
+            raise ValueError("valor_recebido")
+
+        if valor_float < total_liquido:
+            raise ValueError("valor_insuficiente")
+
+        troco = round(valor_float - total_liquido, 2)
+
+        return [{
+            "forma": forma_pagamento,
+            "valor": round(total_liquido, 2),
+            "valor_recebido": round(valor_float, 2),
+            "troco": troco,
+        }]
+
+    return [{
+        "forma": forma_pagamento,
+        "valor": round(total_liquido, 2),
+        "valor_recebido": None,
+        "troco": None,
+    }]
+
+
 # ============================================================
 # TELA DO PDV
 # ============================================================
@@ -191,6 +320,14 @@ def finalizar_venda(
 
     valor_recebido: float | None = Form(None),
 
+    forma_pagamento_1: str | None = Form(None),
+
+    valor_pagamento_1: float | None = Form(None),
+
+    forma_pagamento_2: str | None = Form(None),
+
+    valor_pagamento_2: float | None = Form(None),
+
     db: Session = Depends(get_db),
 
     usuario=Depends(get_admin_ou_operador)
@@ -211,34 +348,24 @@ def finalizar_venda(
     # ========================================================
 
     if eh_admin:
-
-        formas_validas = {
-            "dinheiro",
-            "pix",
-            "cartao_credito",
-            "cartao_debito",
-        }
-
-        if not forma_pagamento:
-
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=forma_pagamento"
+        pagamentos_admin = []
+        try:
+            pagamentos_admin = _pagamentos_do_admin(
+                forma_pagamento=forma_pagamento,
+                valor_recebido=valor_recebido,
+                total_liquido=0.0,
+                forma_pagamento_1=request.form.get("forma_pagamento_1"),
+                valor_pagamento_1=request.form.get("valor_pagamento_1"),
+                forma_pagamento_2=request.form.get("forma_pagamento_2"),
+                valor_pagamento_2=request.form.get("valor_pagamento_2"),
             )
-
-        if forma_pagamento not in formas_validas:
-
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=forma_pagamento_invalida"
-            )
-
+        except ValueError as exc:
+            return _redirect_pdv(db, f"/pdv?erro={exc}")
     else:
-
         # Operador não possui forma de pagamento.
         forma_pagamento = None
         valor_recebido = None
-
+        pagamentos_admin = []
 
     # ========================================================
     # LÊ O CARRINHO
@@ -426,36 +553,31 @@ def finalizar_venda(
 
 
     # ========================================================
-    # VALIDA VALOR RECEBIDO
-    # SOMENTE DINHEIRO
+    # VALIDA VALOR RECEBIDO / PAGAMENTOS COMBINADOS
     # ========================================================
 
     troco = 0.0
 
-
-    if eh_admin and forma_pagamento == "dinheiro":
-
-        if valor_recebido is None:
-
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=valor_recebido"
+    if eh_admin:
+        try:
+            pagamentos_admin = _pagamentos_do_admin(
+                forma_pagamento=forma_pagamento,
+                valor_recebido=valor_recebido,
+                total_liquido=total_liquido,
+                forma_pagamento_1=request.form.get("forma_pagamento_1"),
+                valor_pagamento_1=request.form.get("valor_pagamento_1"),
+                forma_pagamento_2=request.form.get("forma_pagamento_2"),
+                valor_pagamento_2=request.form.get("valor_pagamento_2"),
             )
+        except ValueError as exc:
+            return _redirect_pdv(db, f"/pdv?erro={exc}")
 
-
-        if valor_recebido < total_liquido:
-
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=valor_insuficiente"
-            )
-
-
-        troco = round(
-            valor_recebido - total_liquido,
-            2
-        )
-
+        if pagamentos_admin and len(pagamentos_admin) == 1:
+            metodo = pagamentos_admin[0]
+            if metodo["forma"] == "dinheiro":
+                troco = round(float(metodo["troco"] or 0.0), 2)
+            else:
+                troco = 0.0
 
     # ========================================================
     # PERSISTE TUDO EM UMA ÚNICA TRANSAÇÃO
@@ -547,32 +669,15 @@ def finalizar_venda(
 
         if eh_admin:
 
-            pagamento = Pagamento(
-
-                venda_id=venda.id,
-
-                forma=forma_pagamento,
-
-                valor=total_liquido,
-
-                valor_recebido=(
-                    round(
-                        valor_recebido,
-                        2
-                    )
-                    if forma_pagamento == "dinheiro"
-                    else None
-                ),
-
-                troco=(
-                    troco
-                    if forma_pagamento == "dinheiro"
-                    else None
-                ),
-            )
-
-
-            db.add(pagamento)
+            for pagamento_data in pagamentos_admin:
+                pagamento = Pagamento(
+                    venda_id=venda.id,
+                    forma=pagamento_data["forma"],
+                    valor=pagamento_data["valor"],
+                    valor_recebido=pagamento_data["valor_recebido"],
+                    troco=pagamento_data["troco"],
+                )
+                db.add(pagamento)
 
 
         # ----------------------------------------------------

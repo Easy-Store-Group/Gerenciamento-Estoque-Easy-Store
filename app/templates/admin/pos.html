@@ -344,6 +344,83 @@
 
                     </div>
 
+                    <div class="campo-pagamento">
+
+                        <label for="combo_pagamento">
+                            <input
+                                type="checkbox"
+                                id="combo_pagamento"
+                                name="combo_pagamento"
+                                value="1"
+                            >
+                            Combinar dois métodos
+                        </label>
+
+                    </div>
+
+                    <div id="pagamento-combinado" style="display:none;">
+                        <div class="campo-pagamento">
+                            <label for="forma_pagamento_1">
+                                Método 1
+                            </label>
+
+                            <select
+                                name="forma_pagamento_1"
+                                id="forma_pagamento_1"
+                                class="form-control"
+                            >
+                                <option value="">Selecione</option>
+                                <option value="dinheiro">Dinheiro</option>
+                                <option value="pix">Pix</option>
+                                <option value="cartao_credito">Cartão de Crédito</option>
+                                <option value="cartao_debito">Cartão de Débito</option>
+                            </select>
+                        </div>
+
+                        <div class="campo-pagamento" id="campo-valor-pagamento-1" style="display:none;">
+                            <label for="valor_pagamento_1">Valor do método 1</label>
+                            <input
+                                type="number"
+                                name="valor_pagamento_1"
+                                id="valor_pagamento_1"
+                                class="form-control"
+                                min="0"
+                                step="0.01"
+                                placeholder="R$ 0,00"
+                            >
+                        </div>
+
+                        <div class="campo-pagamento">
+                            <label for="forma_pagamento_2">
+                                Método 2
+                            </label>
+
+                            <select
+                                name="forma_pagamento_2"
+                                id="forma_pagamento_2"
+                                class="form-control"
+                            >
+                                <option value="">Selecione</option>
+                                <option value="dinheiro">Dinheiro</option>
+                                <option value="pix">Pix</option>
+                                <option value="cartao_credito">Cartão de Crédito</option>
+                                <option value="cartao_debito">Cartão de Débito</option>
+                            </select>
+                        </div>
+
+                        <div class="campo-pagamento" id="campo-valor-pagamento-2" style="display:none;">
+                            <label for="valor_pagamento_2">Valor do método 2</label>
+                            <input
+                                type="number"
+                                name="valor_pagamento_2"
+                                id="valor_pagamento_2"
+                                class="form-control"
+                                min="0"
+                                step="0.01"
+                                placeholder="R$ 0,00"
+                            >
+                        </div>
+                    </div>
                 </div>
 
                 {% endif %}
@@ -387,6 +464,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const valorTroco =
         document.getElementById("valor-troco");
+
+
+    const comboPagamento = document.getElementById("combo_pagamento");
+    const pagamentoCombinado = document.getElementById("pagamento-combinado");
+    const formaPagamento1 = document.getElementById("forma_pagamento_1");
+    const valorPagamento1 = document.getElementById("valor_pagamento_1");
+    const formaPagamento2 = document.getElementById("forma_pagamento_2");
+    const valorPagamento2 = document.getElementById("valor_pagamento_2");
 
 
     function obterTotal() {
@@ -480,6 +565,70 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
 
+    function atualizarModoPagamento() {
+        const combinar = comboPagamento && comboPagamento.checked;
+
+        if (pagamentoCombinado) {
+            pagamentoCombinado.style.display = combinar ? "" : "none";
+        }
+
+        if (formaPagamento) {
+            formaPagamento.disabled = combinar;
+            if (combinar) {
+                formaPagamento.value = "dinheiro";
+            }
+        }
+
+        if (campoValorRecebido) {
+            campoValorRecebido.style.display = combinar ? "none" : "";
+        }
+
+        if (valorRecebido) {
+            valorRecebido.value = "";
+        }
+
+        const mostrarCampo = (campo, select) => {
+            const mostra = Boolean(select && select.value);
+            if (campo) {
+                campo.style.display = mostra ? "" : "none";
+            }
+        };
+
+        mostrarCampo(document.getElementById("campo-valor-pagamento-1"), formaPagamento1);
+        mostrarCampo(document.getElementById("campo-valor-pagamento-2"), formaPagamento2);
+
+        if (combinar) {
+            const total = obterTotal();
+            const valor1 = parseFloat(valorPagamento1?.value || 0);
+            const valor2 = parseFloat(valorPagamento2?.value || 0);
+            const valorTotal = (valor1 || 0) + (valor2 || 0);
+            const troco = Math.max(valorTotal - total, 0);
+            if (valorTroco) {
+                valorTroco.textContent = "R$ " + troco.toFixed(2).replace(".", ",");
+            }
+        } else {
+            calcularTroco();
+        }
+    }
+
+
+    function atualizarCamposCombinaçao() {
+        if (!comboPagamento || !comboPagamento.checked) {
+            return;
+        }
+
+        const total = obterTotal();
+        const valor1 = parseFloat(valorPagamento1?.value || 0);
+        const valor2 = parseFloat(valorPagamento2?.value || 0);
+        const totalPago = (valor1 || 0) + (valor2 || 0);
+        const troco = Math.max(totalPago - total, 0);
+
+        if (valorTroco) {
+            valorTroco.textContent = "R$ " + troco.toFixed(2).replace(".", ",");
+        }
+    }
+
+
     if (formaPagamento) {
 
         formaPagamento.addEventListener(
@@ -498,6 +647,27 @@ document.addEventListener("DOMContentLoaded", function () {
         );
 
     }
+
+
+    if (comboPagamento) {
+        comboPagamento.addEventListener("change", atualizarModoPagamento);
+    }
+
+    [formaPagamento1, formaPagamento2].forEach(select => {
+        if (select) {
+            select.addEventListener("change", () => {
+                document.getElementById("campo-valor-pagamento-1").style.display = formaPagamento1 && formaPagamento1.value ? "" : "none";
+                document.getElementById("campo-valor-pagamento-2").style.display = formaPagamento2 && formaPagamento2.value ? "" : "none";
+                atualizarCamposCombinaçao();
+            });
+        }
+    });
+
+    [valorPagamento1, valorPagamento2].forEach(input => {
+        if (input) {
+            input.addEventListener("input", atualizarCamposCombinaçao);
+        }
+    });
 
 
     /*
@@ -528,6 +698,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     atualizarPagamento();
+    if (comboPagamento) {
+        atualizarModoPagamento();
+    }
 
 });
 </script>
