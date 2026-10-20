@@ -321,6 +321,12 @@ function exibirErroDaUrl() {
         produto_inexistente: `Produto #${params.get('id') || '?'} não encontrado ou inativo.`,
         estoque: `Estoque insuficiente para "${params.get('produto') || 'produto'}".`,
         salvar: 'Não foi possível salvar a venda. Tente novamente.',
+        forma_pagamento: 'Selecione uma forma de pagamento.',
+        forma_pagamento_invalida: 'Forma de pagamento inválida.',
+        valor_recebido: 'Informe o valor recebido para o pagamento em dinheiro.',
+        valor_insuficiente: 'O valor informado é menor que o total da venda.',
+        valor_pagamento_invalido: 'Informe valores válidos para cada método de pagamento.',
+        pagamento_duplicado: 'Não é permitido repetir a mesma forma de pagamento na mesma venda.',
     };
 
     mostrarAlerta(mensagens[erro] || 'Ocorreu um erro ao finalizar a venda.', 'warning');
