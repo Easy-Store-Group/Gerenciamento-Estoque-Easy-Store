@@ -299,6 +299,15 @@ def tela_pdv(
 # FINALIZAR VENDA
 # ============================================================
 
+@router.get("/finalizar")
+def finalizar_venda_get(request: Request):
+    """Evita 405 em acessos manuais ao endpoint de finalização."""
+    return RedirectResponse(
+        url="/pdv?erro=metodo_invalido",
+        status_code=302,
+    )
+
+
 @router.post("/finalizar")
 def finalizar_venda(
     request: Request,
@@ -354,10 +363,10 @@ def finalizar_venda(
                 forma_pagamento=forma_pagamento,
                 valor_recebido=valor_recebido,
                 total_liquido=0.0,
-                forma_pagamento_1=request.form.get("forma_pagamento_1"),
-                valor_pagamento_1=request.form.get("valor_pagamento_1"),
-                forma_pagamento_2=request.form.get("forma_pagamento_2"),
-                valor_pagamento_2=request.form.get("valor_pagamento_2"),
+                forma_pagamento_1=forma_pagamento_1,
+                valor_pagamento_1=valor_pagamento_1,
+                forma_pagamento_2=forma_pagamento_2,
+                valor_pagamento_2=valor_pagamento_2,
             )
         except ValueError as exc:
             return _redirect_pdv(db, f"/pdv?erro={exc}")
@@ -564,10 +573,10 @@ def finalizar_venda(
                 forma_pagamento=forma_pagamento,
                 valor_recebido=valor_recebido,
                 total_liquido=total_liquido,
-                forma_pagamento_1=request.form.get("forma_pagamento_1"),
-                valor_pagamento_1=request.form.get("valor_pagamento_1"),
-                forma_pagamento_2=request.form.get("forma_pagamento_2"),
-                valor_pagamento_2=request.form.get("valor_pagamento_2"),
+                forma_pagamento_1=forma_pagamento_1,
+                valor_pagamento_1=valor_pagamento_1,
+                forma_pagamento_2=forma_pagamento_2,
+                valor_pagamento_2=valor_pagamento_2,
             )
         except ValueError as exc:
             return _redirect_pdv(db, f"/pdv?erro={exc}")
