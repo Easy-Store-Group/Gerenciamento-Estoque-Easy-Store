@@ -307,3 +307,13 @@ a.latest-sales-row:hover {
     display: none;
   }
 }
+
+@media (max-width: 640px) {
+  .dashboard-grid {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .latest-sales-card { order: 1; }
+  .sales-chart-card { order: 2; }
+}
