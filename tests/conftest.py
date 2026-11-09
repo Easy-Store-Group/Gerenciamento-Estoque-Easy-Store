@@ -1,10 +1,12 @@
 import os
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
-# Ensure env vars needed by auth/database are set before importing app
+# Configura??o isolada antes dos imports da aplica??o.
 os.environ.setdefault("SECRET_KEY", "test-secret-key")
 os.environ.setdefault("ALGORITHM", "HS256")
 os.environ.setdefault("ACCESS_TOKEN_EXPIRACAO_MINUTOS", "60")
@@ -13,25 +15,20 @@ os.environ.setdefault("DATABASE_URL", "sqlite:///./test_temp.db")
 import app.models
 from app.database import Base, get_db
 from app.main import app
-
-
-
-from sqlalchemy.pool import StaticPool
-
-TEST_DATABASE_URL = "sqlite:///:memory:"
-
+from app.controllers import variacao_controller
 
 engine = create_engine(
-    TEST_DATABASE_URL,
+    "sqlite:///:memory:",
     connect_args={"check_same_thread": False},
     poolclass=StaticPool,
 )
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-@pytest.fixture(scope="session", autouse=True)
-def create_test_db():
-    # Create all tables
+@pytest.fixture(autouse=True)
+def isolated_test_database():
+    """Recria o schema em mem?ria para cada teste; nunca usa o banco da loja."""
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
@@ -46,11 +43,15 @@ def get_test_db():
 
 
 @pytest.fixture()
-def client(monkeypatch):
-    # Override the dependency
+def client():
     app.dependency_overrides[get_db] = get_test_db
-    with TestClient(app) as c:
-        yield c
+    # O controller de varia??es define sua pr?pria depend?ncia de banco.
+    app.dependency_overrides[variacao_controller.get_db] = get_test_db
+    try:
+        with TestClient(app) as test_client:
+            yield test_client
+    finally:
+        app.dependency_overrides.clear()
 
 
 @pytest.fixture()

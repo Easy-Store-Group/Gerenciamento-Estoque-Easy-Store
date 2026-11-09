@@ -80,6 +80,23 @@ function inicializarPDV() {
         finalizarVenda();
     });
 
+    const formaPagamentoPix = document.getElementById('forma_pagamento');
+    formaPagamentoPix?.addEventListener('change', () => {
+        document.getElementById('pix_aprovado').value = '0';
+        if (formaPagamentoPix.value === 'pix' && !document.getElementById('combo_pagamento')?.checked && carrinho.length) {
+            abrirModalPix();
+        }
+    });
+
+    const fecharPix = () => document.getElementById('pix-modal')?.classList.remove('is-open');
+    document.getElementById('pix-modal-close')?.addEventListener('click', fecharPix);
+    document.getElementById('pix-modal-cancel')?.addEventListener('click', fecharPix);
+    document.getElementById('pix-modal-approve')?.addEventListener('click', () => {
+        document.getElementById('pix_aprovado').value = '1';
+        fecharPix();
+        finalizarVenda();
+    });
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'F2') {
             e.preventDefault();
@@ -274,6 +291,8 @@ function atualizarCarrinho() {
 }
 
 function atualizarTotais() {
+    const aprovacaoPix = document.getElementById('pix_aprovado');
+    if (aprovacaoPix) aprovacaoPix.value = '0';
     const isAssociado = clienteSelect.options[clienteSelect.selectedIndex]?.dataset.associado === 'true';
 
     let subtotalBruto = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
@@ -325,6 +344,7 @@ function exibirErroDaUrl() {
         forma_pagamento_invalida: 'Forma de pagamento inválida.',
         valor_recebido: 'Informe o valor recebido para o pagamento em dinheiro.',
         valor_insuficiente: 'O valor informado é menor que o total da venda.',
+        valor_excedente: 'A soma dos pagamentos não pode ultrapassar o total da venda.',
         valor_pagamento_invalido: 'Informe valores válidos para cada método de pagamento.',
         pagamento_duplicado: 'Não é permitido repetir a mesma forma de pagamento na mesma venda.',
     };
@@ -352,6 +372,31 @@ function mostrarAlerta(mensagem, tipo = 'success') {
     }, 3000);
 }
 
+async function abrirModalPix() {
+    if (!carrinho.length) return;
+    const formData = new FormData(formFinalizar);
+    formData.set('carrinho_json', serializarCarrinho());
+    try {
+        const resposta = await fetch('/pdv/pix/preview', {
+            method: 'POST', body: formData, credentials: 'same-origin'
+        });
+        const dados = await resposta.json();
+        if (!resposta.ok) {
+            mostrarAlerta(dados.detail || 'N?o foi poss?vel gerar o QR Code Pix.', 'warning');
+            return;
+        }
+        document.getElementById('pix-modal-qr').src = `data:image/png;base64,${dados.qr_code_base64}`;
+        const moeda = valor => `R$ ${Number(valor).toFixed(2).replace('.', ',')}`;
+        document.getElementById('pix-modal-total').textContent = moeda(dados.total_venda);
+        const extra = document.getElementById('pix-modal-valor-extra');
+        extra.hidden = Number(dados.valor_pix) === Number(dados.total_venda);
+        document.getElementById('pix-modal-valor').textContent = moeda(dados.valor_pix);
+        document.getElementById('pix-modal').classList.add('is-open');
+    } catch (error) {
+        mostrarAlerta('Erro ao preparar o QR Code Pix. Tente novamente.', 'warning');
+    }
+}
+
 async function finalizarVenda() {
     if (carrinho.length === 0) {
         mostrarAlerta('Carrinho vazio! Adicione produtos.', 'warning');
@@ -359,8 +404,16 @@ async function finalizarVenda() {
     }
 
     const payload = serializarCarrinho();
-    if (carrinhoJsonInput) {
-        carrinhoJsonInput.value = payload;
+    if (carrinhoJsonInput) carrinhoJsonInput.value = payload;
+
+    const forma = document.getElementById('forma_pagamento')?.value;
+    const forma1 = document.getElementById('forma_pagamento_1')?.value;
+    const forma2 = document.getElementById('forma_pagamento_2')?.value;
+    const pixSelecionado = forma === 'pix' || forma1 === 'pix' || forma2 === 'pix';
+    const aprovacaoPix = document.getElementById('pix_aprovado');
+    if (pixSelecionado && aprovacaoPix?.value !== '1') {
+        await abrirModalPix();
+        return;
     }
 
     const formData = new FormData(formFinalizar);
@@ -376,7 +429,6 @@ async function finalizarVenda() {
             credentials: 'same-origin',
             redirect: 'follow',
         });
-
         window.location.href = response.url;
     } catch (error) {
         mostrarAlerta('Erro ao finalizar venda. Tente novamente.', 'warning');

@@ -1,0 +1,68 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+<div class="pix-modal-backdrop">
+  <section class="pix-modal" role="dialog" aria-modal="true" aria-labelledby="pix-titulo">
+    <header class="pix-modal-header">
+      <div>
+        <small>Pagamento via Pix</small>
+        <h2 id="pix-titulo">Venda #{{ venda.id }}</h2>
+      </div>
+      <span class="pix-status">{{ pagamento_pix.status if pagamento_pix else 'PENDENTE' }}</span>
+    </header>
+
+    {% if pagamento_pix and pagamento_pix.pix_qr_code %}
+    <img class="pix-qr" src="data:image/png;base64,{{ pagamento_pix.pix_qr_code }}" alt="QR Code Pix da venda {{ venda.id }}">
+    {% else %}
+    <div class="alert alert-secondary">QR Code indisponível.</div>
+    {% endif %}
+
+    <p class="pix-amount">Valor da venda <strong>R$ {{ "%.2f"|format(pagamento_pix.valor if pagamento_pix else venda.total_liquido) }}</strong></p>
+
+    <label for="pix-copia-cola">Pix Copia e Cola</label>
+    <textarea id="pix-copia-cola" rows="4" readonly>{{ pagamento_pix.pix_copy_paste if pagamento_pix else '' }}</textarea>
+    <button class="btn btn-outline-primary pix-copy-button" type="button" onclick="copiarPix()">Copiar código Pix</button>
+
+    <p class="pix-help">Confira o recebimento no aplicativo ou extrato antes de confirmar.</p>
+    <footer class="pix-modal-actions">
+      {% if pagamento_pix and pagamento_pix.status == 'PENDENTE' %}
+      <form method="post" action="/pdv/pix/{{ venda.id }}/confirmar">
+        <button class="btn btn-success" type="submit">Confirmar recebimento</button>
+      </form>
+      <form method="post" action="/pdv/pix/{{ venda.id }}/cancelar">
+        <button class="btn btn-outline-danger" type="submit">Cancelar</button>
+      </form>
+      {% else %}
+      <a href="/pdv/venda/{{ venda.id }}" class="btn btn-secondary">Ver venda</a>
+      {% endif %}
+    </footer>
+  </section>
+</div>
+
+<style>
+.pix-modal-backdrop{position:fixed;inset:0;z-index:1100;display:grid;place-items:center;padding:1rem;background:#111827a8;overflow:auto}
+.pix-modal{width:min(100%,460px);max-height:calc(100vh - 2rem);overflow:auto;background:#fff;border-radius:18px;padding:1.5rem;box-shadow:0 24px 70px #0004;text-align:center}
+.pix-modal-header{display:flex;justify-content:space-between;align-items:center;text-align:left;margin-bottom:1rem}
+.pix-modal-header small{color:#64748b;text-transform:uppercase;letter-spacing:.06em}
+.pix-modal-header h2{margin:.2rem 0;font-size:1.35rem}
+.pix-status{border-radius:999px;padding:.35rem .7rem;background:#fef3c7;color:#92400e;font-size:.8rem}
+.pix-qr{display:block;width:min(260px,75vw);height:auto;margin:0 auto 1rem;padding:.5rem;border:1px solid #e2e8f0;border-radius:12px}
+.pix-amount{display:flex;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid #e2e8f0}
+.pix-amount strong{font-size:1.1rem}
+.pix-modal label{display:block;text-align:left;font-weight:600;margin:.75rem 0 .35rem}
+.pix-modal textarea{display:block;width:100%;resize:vertical;border:1px solid #cbd5e1;border-radius:8px;padding:.7rem;font: .85rem/1.4 monospace}
+.pix-copy-button{width:100%;margin-top:.55rem}
+.pix-help{color:#64748b;font-size:.88rem;margin:1rem 0}
+.pix-modal-actions{display:flex;justify-content:center;gap:.6rem;flex-wrap:wrap}
+@media(max-width:480px){.pix-modal{padding:1.1rem}.pix-modal-actions form,.pix-modal-actions .btn{width:100%}}
+</style>
+<script>
+async function copiarPix(){
+  const campo=document.getElementById('pix-copia-cola');
+  const botao=document.querySelector('.pix-copy-button');
+  try{await navigator.clipboard.writeText(campo.value)}
+  catch(_){campo.select();document.execCommand('copy')}
+  const texto=botao.textContent;botao.textContent='Código copiado!';setTimeout(()=>botao.textContent=texto,1400);
+}
+</script>
+{% endblock %}

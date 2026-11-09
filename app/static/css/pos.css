@@ -669,3 +669,9 @@
     grid-column: 2;
   }
 }
+
+
+.pix-modal-content { max-width: 440px; }
+.pix-modal-body { text-align: center; padding: 1rem; }
+.pix-modal-body img { width: min(260px, 75vw); height: auto; padding: .5rem; background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; }
+.pix-modal-note { color: #64748b; font-size: .9rem; margin-top: 1rem; }

@@ -58,6 +58,7 @@ def listar_clientes(
     clientes = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
 
     return templates.TemplateResponse(
+        request,
         "admin/clientes.html",
         {
             "request": request,

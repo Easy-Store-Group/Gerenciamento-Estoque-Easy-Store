@@ -5,7 +5,7 @@ alembic
 jinja2
 python-multipart
 python-dotenv
-bcrypt==4.3.0
+bcrypt==4.0.1
 passlib[bcrypt]
 python-jose[cryptography]
 psycopg2-binary

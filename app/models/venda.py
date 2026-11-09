@@ -58,6 +58,13 @@ class Venda(Base):
         default=0.0
     )
 
+    # Status da venda (ex: PENDENTE, CONCLUÍDA, CANCELADA)
+    status = Column(
+        String(30),
+        nullable=False,
+        default="PENDENTE"
+    )
+
     # Observação opcional
     observacao = Column(
         String(255),

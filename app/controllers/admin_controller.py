@@ -1,4 +1,4 @@
-﻿# rotas acessiveis apenas por admin
+# rotas acessiveis apenas por admin
 
 import math
 
@@ -118,6 +118,8 @@ def editar_usuario(
     admin = Depends(get_admin)
 ):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usu?rio n?o encontrado")
     usuario.nome = nome
     usuario.email = email
     usuario.role = role
@@ -149,6 +151,8 @@ def editar_usuario(
 @router.post("/{usuario_id}/toggle-ativo")
 def toggle_ativo(usuario_id: int, db: Session = Depends(get_db), admin = Depends(get_admin)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usu?rio n?o encontrado")
     usuario.ativo = not usuario.ativo
     if usuario.cliente_perfil:
         usuario.cliente_perfil.ativo = usuario.ativo

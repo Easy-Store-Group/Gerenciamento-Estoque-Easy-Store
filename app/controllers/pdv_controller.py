@@ -12,12 +12,15 @@
 
 import json
 import math
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from datetime import datetime
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends, Request, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy import inspect, text
+from sqlalchemy.orm import Session, load_only
 
 from app.database import get_db
 
@@ -26,6 +29,7 @@ from app.models.produto import Produto
 from app.models.cliente import Cliente
 from app.models.movimentacao import Movimentacao, Tipo_de_movimentacao
 from app.models.pagamento import Pagamento
+from app.services.pix_service import PixService
 
 from app.auth import (
     get_admin,
@@ -99,14 +103,35 @@ FORMAS_PAGAMENTO_VALIDAS = {
 }
 
 
-def _coerce_float(value):
+def _centavos(value):
     if value is None or value == "":
         return None
-
     try:
-        return float(value)
-    except (TypeError, ValueError):
+        number = Decimal(str(value))
+        if not number.is_finite():
+            return None
+        quantized = number.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if number != quantized:
+            raise ValueError("valor_pagamento_invalido")
+        return int(quantized * 100)
+    except (InvalidOperation, TypeError, ValueError) as exc:
+        if isinstance(exc, ValueError) and str(exc) == "valor_pagamento_invalido":
+            raise
         return None
+
+
+def calcular_parcelas_cartao(valor_credito, quantidade):
+    centavos = _centavos(valor_credito)
+    if centavos is None or centavos <= 0:
+        raise ValueError("valor_pagamento_invalido")
+    try:
+        quantidade = int(quantidade)
+    except (TypeError, ValueError) as exc:
+        raise ValueError("parcelas_invalidas") from exc
+    if quantidade < 1 or quantidade > 12:
+        raise ValueError("parcelas_invalidas")
+    base, resto = divmod(centavos, quantidade)
+    return [(base + (1 if indice < resto else 0)) / 100 for indice in range(quantidade)]
 
 
 def _pagamentos_do_admin(
@@ -118,105 +143,60 @@ def _pagamentos_do_admin(
     forma_pagamento_2: str | None = None,
     valor_pagamento_2: float | None = None,
 ):
-    """Normaliza os pagamentos válidos para o admin.
+    """Valida pagamento único ou dois meios, sempre com valores em centavos."""
+    total_centavos = _centavos(total_liquido)
+    if total_centavos is None or total_centavos <= 0:
+        raise ValueError("valor_pagamento_invalido")
 
-    Suporta pagamento único e combinação de dois métodos.
-    """
-
-    total_liquido = round(float(total_liquido), 2)
-
-    if forma_pagamento_1 or forma_pagamento_2 or valor_pagamento_1 or valor_pagamento_2:
+    combinado = any(value not in (None, "") for value in (
+        forma_pagamento_1, valor_pagamento_1, forma_pagamento_2, valor_pagamento_2
+    ))
+    if combinado:
         pagamentos = []
         formas_usadas = set()
-
-        for forma, valor in (
-            (forma_pagamento_1, valor_pagamento_1),
-            (forma_pagamento_2, valor_pagamento_2),
-        ):
-            if forma in (None, ""):
-                continue
-
-            if forma not in FORMAS_PAGAMENTO_VALIDAS:
-                raise ValueError("forma_pagamento_invalida")
-
+        for forma, valor in ((forma_pagamento_1, valor_pagamento_1), (forma_pagamento_2, valor_pagamento_2)):
+            if not forma or forma not in FORMAS_PAGAMENTO_VALIDAS:
+                raise ValueError("forma_pagamento_invalida" if forma else "forma_pagamento")
             if forma in formas_usadas:
                 raise ValueError("pagamento_duplicado")
-
             formas_usadas.add(forma)
-
-            valor_float = _coerce_float(valor)
-            if valor_float is None or valor_float <= 0:
+            centavos = _centavos(valor)
+            if centavos is None or centavos <= 0:
                 raise ValueError("valor_pagamento_invalido")
-
-            pagamentos.append({
-                "forma": forma,
-                "valor": round(valor_float, 2),
-            })
-
-        if not pagamentos:
-            raise ValueError("forma_pagamento")
+            pagamentos.append((forma, centavos))
 
         if len(pagamentos) != 2:
             raise ValueError("forma_pagamento")
-
-        total_pago = round(sum(item["valor"] for item in pagamentos), 2)
-        if total_pago < total_liquido:
+        pago = sum(valor for _, valor in pagamentos)
+        if pago < total_centavos:
             raise ValueError("valor_insuficiente")
-
-        if total_pago > total_liquido and not any(item["forma"] == "dinheiro" for item in pagamentos):
-            raise ValueError("valor_insuficiente")
-
-        troco = round(total_pago - total_liquido, 2) if any(item["forma"] == "dinheiro" for item in pagamentos) else 0.0
-
-        pagamentos_validos = []
-        for item in pagamentos:
-            forma = item["forma"]
-            if forma == "dinheiro":
-                pagamentos_validos.append({
-                    "forma": forma,
-                    "valor": round(item["valor"], 2),
-                    "valor_recebido": round(item["valor"], 2),
-                    "troco": troco,
-                })
-            else:
-                pagamentos_validos.append({
-                    "forma": forma,
-                    "valor": round(item["valor"], 2),
-                    "valor_recebido": None,
-                    "troco": None,
-                })
-
-        return pagamentos_validos
+        if pago > total_centavos:
+            raise ValueError("valor_excedente")
+        return [{
+            "forma": forma, "valor": valor / 100,
+            "valor_recebido": valor / 100 if forma == "dinheiro" else None,
+            "troco": 0.0 if forma == "dinheiro" else None,
+        } for forma, valor in pagamentos]
 
     if forma_pagamento is None:
         raise ValueError("forma_pagamento")
-
     if forma_pagamento not in FORMAS_PAGAMENTO_VALIDAS:
         raise ValueError("forma_pagamento_invalida")
 
-    valor_float = _coerce_float(valor_recebido)
-
+    recebido = _centavos(valor_recebido)
     if forma_pagamento == "dinheiro":
-        if valor_float is None:
+        if recebido is None:
             raise ValueError("valor_recebido")
-
-        if valor_float < total_liquido:
+        if recebido < total_centavos:
             raise ValueError("valor_insuficiente")
-
-        troco = round(valor_float - total_liquido, 2)
-
         return [{
-            "forma": forma_pagamento,
-            "valor": round(total_liquido, 2),
-            "valor_recebido": round(valor_float, 2),
-            "troco": troco,
+            "forma": forma_pagamento, "valor": total_centavos / 100,
+            "valor_recebido": recebido / 100,
+            "troco": (recebido - total_centavos) / 100,
         }]
-
     return [{
-        "forma": forma_pagamento,
-        "valor": round(total_liquido, 2),
-        "valor_recebido": None,
-        "troco": None,
+        "forma": forma_pagamento, "valor": total_centavos / 100,
+        "valor_recebido": None, "troco": None,
     }]
 
 
@@ -299,6 +279,77 @@ def tela_pdv(
 # FINALIZAR VENDA
 # ============================================================
 
+@router.post("/pix/preview")
+def preview_pix(
+    carrinho_json: str = Form(...),
+    cliente_id: int = Form(0),
+    forma_pagamento: str | None = Form(None),
+    valor_recebido: float | None = Form(None),
+    forma_pagamento_1: str | None = Form(None),
+    valor_pagamento_1: float | None = Form(None),
+    forma_pagamento_2: str | None = Form(None),
+    valor_pagamento_2: float | None = Form(None),
+    db: Session = Depends(get_db),
+    usuario=Depends(get_admin_ou_operador),
+):
+    """Calcula e exibe uma cobran?a Pix visual, sem gravar venda ou estoque."""
+    try:
+        itens = _parse_carrinho_json(carrinho_json.strip())
+    except (json.JSONDecodeError, ValueError, AttributeError):
+        raise HTTPException(status_code=400, detail="Carrinho inv?lido")
+    if not itens:
+        raise HTTPException(status_code=400, detail="Carrinho vazio")
+
+    desconto = 0.0
+    if cliente_id:
+        cliente = db.query(Cliente).filter(Cliente.id == cliente_id, Cliente.ativo == True).first()
+        if cliente and cliente.is_associado:
+            desconto = DESCONTO_ASSOCIADO
+
+    total_bruto = 0.0
+    for item in itens:
+        if not isinstance(item, dict):
+            raise HTTPException(status_code=400, detail="Item inv?lido")
+        produto_id = _extrair_produto_id(item)
+        try:
+            quantidade = int(item.get("quantidade", 0))
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Quantidade inv?lida")
+        if not produto_id or quantidade <= 0:
+            raise HTTPException(status_code=400, detail="Item ou quantidade inv?lidos")
+        produto = db.query(Produto).filter(Produto.id == produto_id, Produto.ativo == True).first()
+        if not produto:
+            raise HTTPException(status_code=404, detail="Produto n?o encontrado ou inativo")
+        if produto.estoque_atual < quantidade:
+            raise HTTPException(status_code=400, detail=f"Estoque insuficiente para {produto.nome}")
+        total_bruto += produto.preco * quantidade
+
+    total_venda = round(total_bruto * (1 - desconto / 100), 2)
+    try:
+        pagamentos = _pagamentos_do_admin(
+            forma_pagamento=forma_pagamento,
+            valor_recebido=valor_recebido,
+            total_liquido=total_venda,
+            forma_pagamento_1=forma_pagamento_1,
+            valor_pagamento_1=valor_pagamento_1,
+            forma_pagamento_2=forma_pagamento_2,
+            valor_pagamento_2=valor_pagamento_2,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    valor_pix = round(sum(item["valor"] for item in pagamentos if item["forma"] == "pix"), 2)
+    if valor_pix <= 0:
+        raise HTTPException(status_code=400, detail="Selecione Pix para gerar o QR Code")
+
+    cobranca = PixService().gerar_cobranca(0, valor_pix)
+    return {
+        "total_venda": total_venda,
+        "valor_pix": valor_pix,
+        "qr_code_base64": cobranca.qr_code_base64,
+    }
+
+
 @router.get("/finalizar")
 def finalizar_venda_get(request: Request):
     """Evita 405 em acessos manuais ao endpoint de finalização."""
@@ -337,6 +388,8 @@ def finalizar_venda(
 
     valor_pagamento_2: float | None = Form(None),
 
+    pix_aprovado: bool = Form(False),
+
     db: Session = Depends(get_db),
 
     usuario=Depends(get_admin_ou_operador)
@@ -349,6 +402,8 @@ def finalizar_venda(
     role_usuario = usuario.get("role")
 
     eh_admin = role_usuario == "admin"
+    eh_operador = role_usuario == "operador"
+    pix_operador = eh_operador and forma_pagamento == "pix"
 
 
     # ========================================================
@@ -356,25 +411,7 @@ def finalizar_venda(
     # SOMENTE ADMIN PODE INFORMAR PAGAMENTO
     # ========================================================
 
-    if eh_admin:
-        pagamentos_admin = []
-        try:
-            pagamentos_admin = _pagamentos_do_admin(
-                forma_pagamento=forma_pagamento,
-                valor_recebido=valor_recebido,
-                total_liquido=0.0,
-                forma_pagamento_1=forma_pagamento_1,
-                valor_pagamento_1=valor_pagamento_1,
-                forma_pagamento_2=forma_pagamento_2,
-                valor_pagamento_2=valor_pagamento_2,
-            )
-        except ValueError as exc:
-            return _redirect_pdv(db, f"/pdv?erro={exc}")
-    else:
-        # Operador não possui forma de pagamento.
-        forma_pagamento = None
-        valor_recebido = None
-        pagamentos_admin = []
+    pagamentos_admin = []
 
     # ========================================================
     # LÊ O CARRINHO
@@ -567,7 +604,7 @@ def finalizar_venda(
 
     troco = 0.0
 
-    if eh_admin:
+    if eh_admin or pix_operador:
         try:
             pagamentos_admin = _pagamentos_do_admin(
                 forma_pagamento=forma_pagamento,
@@ -592,34 +629,45 @@ def finalizar_venda(
     # PERSISTE TUDO EM UMA ÚNICA TRANSAÇÃO
     # ========================================================
 
+    tem_pix = (eh_admin or pix_operador) and any(item["forma"] == "pix" for item in pagamentos_admin)
+    if tem_pix and not pix_aprovado:
+        return _redirect_pdv(db, "/pdv?erro=pix_aprovacao")
+
     try:
 
         # ----------------------------------------------------
         # CRIA A VENDA
         # ----------------------------------------------------
 
-        venda = Venda(
-            cliente_id=cliente_id_valido,
-
-            usuario_id=usuario.get("id"),
-
-            desconto_percentual=desconto_percentual,
-
-            total_bruto=round(
-                total_bruto,
-                2
-            ),
-
-            total_liquido=total_liquido,
-
-            observacao=observacao or None,
-        )
-
-
-        db.add(venda)
-
-        # Gera o ID da venda
-        db.flush()
+        colunas_venda = {coluna["name"] for coluna in inspect(db.get_bind()).get_columns("vendas")}
+        if "status" in colunas_venda:
+            venda = Venda(
+                cliente_id=cliente_id_valido,
+                usuario_id=usuario.get("id"),
+                desconto_percentual=desconto_percentual,
+                total_bruto=round(total_bruto, 2),
+                total_liquido=total_liquido,
+                observacao=observacao or None,
+                status="PAGO" if tem_pix and pix_aprovado else "PENDENTE",
+            )
+            db.add(venda)
+            db.flush()
+            venda_id = venda.id
+        else:
+            venda_id = db.execute(
+                text("""INSERT INTO vendas
+                    (cliente_id, usuario_id, desconto_percentual, total_bruto, total_liquido, observacao)
+                    VALUES (:cliente_id, :usuario_id, :desconto_percentual, :total_bruto, :total_liquido, :observacao)
+                    RETURNING id"""),
+                {
+                    "cliente_id": cliente_id_valido,
+                    "usuario_id": usuario.get("id"),
+                    "desconto_percentual": desconto_percentual,
+                    "total_bruto": round(total_bruto, 2),
+                    "total_liquido": total_liquido,
+                    "observacao": observacao or None,
+                },
+            ).scalar_one()
 
 
         # ----------------------------------------------------
@@ -630,7 +678,7 @@ def finalizar_venda(
 
             db.add(
                 ItemVenda(
-                    venda_id=venda.id,
+                    venda_id=venda_id,
 
                     produto_id=item["produto"].id,
 
@@ -662,7 +710,7 @@ def finalizar_venda(
 
                     preco_unitario=item["preco"],
 
-                    observacao=f"Venda PDV #{venda.id}",
+                    observacao=f"Venda PDV #{venda_id}",
 
                     produto_id=item["produto"].id,
 
@@ -676,17 +724,62 @@ def finalizar_venda(
         # SOMENTE ADMIN
         # ====================================================
 
-        if eh_admin:
+        if eh_admin or pix_operador:
+
+            pix_service = PixService()
 
             for pagamento_data in pagamentos_admin:
-                pagamento = Pagamento(
-                    venda_id=venda.id,
-                    forma=pagamento_data["forma"],
-                    valor=pagamento_data["valor"],
-                    valor_recebido=pagamento_data["valor_recebido"],
-                    troco=pagamento_data["troco"],
-                )
-                db.add(pagamento)
+                pagamento_kwargs = {
+                    "venda_id": venda_id,
+                    "forma": pagamento_data["forma"],
+                    "valor": pagamento_data["valor"],
+                    "valor_recebido": pagamento_data["valor_recebido"],
+                    "troco": pagamento_data["troco"],
+                    "status": "PAGO" if pagamento_data["forma"] != "pix" or pix_aprovado else "PENDENTE",
+                    "provider": "local" if pagamento_data["forma"] == "pix" else None,
+                    "provider_charge_id": None,
+                    "pix_qr_code": None,
+                    "pix_copy_paste": None,
+                    "pix_qr_code_url": None,
+                    "pix_status": ("PAGO" if pix_aprovado else "PENDENTE") if pagamento_data["forma"] == "pix" else None,
+                    "pix_data_pagamento": datetime.utcnow() if pagamento_data["forma"] == "pix" and pix_aprovado else None,
+                    "pix_observacao": "Aprovado manualmente pelo operador" if pagamento_data["forma"] == "pix" and pix_aprovado else None,
+                }
+
+                if pagamento_data["forma"] == "pix":
+                    cobranca = pix_service.gerar_cobranca(venda_id, float(pagamento_data["valor"]))
+                    pagamento_kwargs.update({
+                        "provider": "local",
+                        "provider_charge_id": cobranca.provider_charge_id,
+                        "status": "PAGO" if pix_aprovado else "PENDENTE",
+                        "pix_qr_code": cobranca.qr_code_base64,
+                        "pix_copy_paste": cobranca.copia_cola,
+                        "pix_qr_code_url": None,
+                        "pix_status": "PAGO" if pix_aprovado else "PENDENTE",
+                        "pix_data_pagamento": datetime.utcnow() if pix_aprovado else None,
+                        "pix_observacao": "Aprovado manualmente pelo operador" if pix_aprovado else None,
+                    })
+
+                colunas_pagamento = {
+                    coluna["name"]
+                    for coluna in inspect(db.get_bind()).get_columns("pagamentos")
+                }
+                colunas_modelo_pagamento = set(Pagamento.__table__.columns.keys())
+                if colunas_modelo_pagamento.issubset(colunas_pagamento):
+                    db.add(Pagamento(**pagamento_kwargs))
+                else:
+                    db.execute(
+                        text("""INSERT INTO pagamentos
+                            (venda_id, forma, valor, valor_recebido, troco)
+                            VALUES (:venda_id, :forma, :valor, :valor_recebido, :troco)"""),
+                        {
+                            "venda_id": venda_id,
+                            "forma": pagamento_data["forma"],
+                            "valor": pagamento_data["valor"],
+                            "valor_recebido": pagamento_data["valor_recebido"],
+                            "troco": pagamento_data["troco"],
+                        },
+                    )
 
 
         # ----------------------------------------------------
@@ -711,7 +804,7 @@ def finalizar_venda(
     # ========================================================
 
     return RedirectResponse(
-        url=f"/pdv/venda/{venda.id}?sucesso=ok",
+        url=f"/pdv/venda/{venda_id}?sucesso=ok",
         status_code=302
     )
 
@@ -737,9 +830,11 @@ def detalhe_venda(
 
     venda = (
         db.query(Venda)
-        .filter(
-            Venda.id == venda_id
-        )
+        .options(load_only(
+            Venda.id, Venda.cliente_id, Venda.usuario_id, Venda.desconto_percentual,
+            Venda.total_bruto, Venda.total_liquido, Venda.observacao, Venda.criado_em,
+        ))
+        .filter(Venda.id == venda_id)
         .first()
     )
 
@@ -800,9 +895,11 @@ def historico_vendas(
 
     query = (
         db.query(Venda)
-        .order_by(
-            Venda.criado_em.desc()
-        )
+        .options(load_only(
+            Venda.id, Venda.cliente_id, Venda.desconto_percentual,
+            Venda.total_liquido, Venda.criado_em,
+        ))
+        .order_by(Venda.criado_em.desc())
     )
 
 
@@ -882,3 +979,101 @@ def historico_vendas(
             "active": "pos",
         }
     )
+
+
+# ============================================================
+# PAGAMENTO PIX
+# ============================================================
+
+@router.get("/pix/{venda_id}")
+def tela_pix_venda(
+    venda_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    usuario=Depends(get_admin_ou_operador),
+):
+    venda = db.query(Venda).filter(Venda.id == venda_id).first()
+    if not venda:
+        return RedirectResponse(url="/pdv", status_code=302)
+
+    pagamento_pix = (
+        db.query(Pagamento)
+        .filter(Pagamento.venda_id == venda.id, Pagamento.forma == "pix")
+        .order_by(Pagamento.id.desc())
+        .first()
+    )
+
+    return templates.TemplateResponse(
+        request,
+        "admin/pix_pagamento.html",
+        {
+            "request": request,
+            "usuario": usuario,
+            "venda": venda,
+            "pagamento_pix": pagamento_pix,
+            "page_title": f"Pagamento Pix - Venda #{venda.id}",
+            "page_subtitle": "Cobrança Pix ativa",
+            "css_path": "css/pos.css",
+            "active": "pos",
+        },
+    )
+
+
+@router.post("/pix/{venda_id}/confirmar")
+def confirmar_pix_venda(
+    venda_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    usuario=Depends(get_admin_ou_operador),
+):
+    venda = db.query(Venda).filter(Venda.id == venda_id).first()
+    if not venda:
+        return RedirectResponse(url="/pdv", status_code=302)
+
+    pagamento = (
+        db.query(Pagamento)
+        .filter(Pagamento.venda_id == venda_id, Pagamento.forma == "pix")
+        .order_by(Pagamento.id.desc())
+        .first()
+    )
+
+    if not pagamento:
+        return RedirectResponse(url=f"/pdv?erro=forma_pagamento", status_code=302)
+
+    if pagamento.status == "PAGO":
+        return RedirectResponse(url=f"/pdv/venda/{venda.id}?sucesso=ok", status_code=302)
+    if pagamento.status != "PENDENTE":
+        return RedirectResponse(url=f"/pdv/pix/{venda.id}?erro=pagamento_cancelado", status_code=302)
+
+    pagamento.status = "PAGO"
+    pagamento.pix_status = "PAGO"
+    pagamento.pix_data_pagamento = datetime.utcnow()
+    venda.status = "PAGO"
+    db.add(pagamento)
+    db.add(venda)
+    db.commit()
+
+    return RedirectResponse(url=f"/pdv/venda/{venda.id}?sucesso=ok", status_code=302)
+
+
+@router.post("/pix/{venda_id}/cancelar")
+def cancelar_pix_venda(
+    venda_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    usuario=Depends(get_admin_ou_operador),
+):
+    pagamento = (
+        db.query(Pagamento)
+        .filter(Pagamento.venda_id == venda_id, Pagamento.forma == "pix")
+        .order_by(Pagamento.id.desc())
+        .first()
+    )
+
+    if pagamento and pagamento.status == "PENDENTE":
+        pagamento.status = "CANCELADO"
+        pagamento.pix_status = "CANCELADO"
+        db.add(pagamento)
+        db.commit()
+
+    return RedirectResponse(url=f"/pdv?erro=cancelado", status_code=302)

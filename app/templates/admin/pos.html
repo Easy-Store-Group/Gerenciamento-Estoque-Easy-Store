@@ -1,4 +1,4 @@
-﻿{% extends "admin/base.html" %}
+{% extends "admin/base.html" %}
 
 {% set title = "PDV - Ponto de Venda" %}
 {% set page_title = "Ponto de Venda" %}
@@ -33,6 +33,25 @@
                 <button type="button" class="btn btn-primary" onclick="confirmarVariacoes()">
                     Adicionar
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pix-modal" class="modal-variacoes pix-modal" aria-hidden="true">
+        <div class="modal-variacoes-content pix-modal-content" role="dialog" aria-modal="true" aria-labelledby="pix-modal-title">
+            <div class="modal-variacoes-header">
+                <h3 id="pix-modal-title">Pagamento via Pix</h3>
+                <button type="button" class="close-btn" id="pix-modal-close" aria-label="Fechar">&times;</button>
+            </div>
+            <div class="pix-modal-body">
+                <img id="pix-modal-qr" alt="QR Code visual do Pix">
+                <p>Total da venda: <strong id="pix-modal-total"></strong></p>
+                <p id="pix-modal-valor-extra" hidden>Valor Pix: <strong id="pix-modal-valor"></strong></p>
+                <p class="pix-modal-note">QR Code apenas visual. A aprovação é manual e não confirma recebimento real.</p>
+            </div>
+            <div class="modal-variacoes-footer">
+                <button type="button" class="btn btn-secondary" id="pix-modal-cancel">Voltar</button>
+                <button type="button" class="btn btn-primary" id="pix-modal-approve">Aprovar pagamento</button>
             </div>
         </div>
     </div>
@@ -144,6 +163,7 @@
                     name="carrinho_json"
                     id="carrinho_json"
                 >
+                <input type="hidden" name="pix_aprovado" id="pix_aprovado" value="0">
 
 
                 <!-- CLIENTE -->
@@ -420,7 +440,30 @@
                                 placeholder="R$ 0,00"
                             >
                         </div>
+                        <div class="campo-pagamento" id="saldo-pagamento" aria-live="polite" style="display:none;">
+                            <strong id="texto-saldo-pagamento"></strong>
+                        </div>
                     </div>
+
+                    <div class="campo-pagamento" id="campo-parcelas-credito" style="display:none;">
+                        <label for="parcelas-credito">Parcelamento no cartão de crédito</label>
+                        <select id="parcelas-credito" class="form-control">
+                            {% for numero in range(1, 13) %}
+                            <option value="{{ numero }}">{{ numero }}x</option>
+                            {% endfor %}
+                        </select>
+                        <small id="resumo-parcelas-credito" aria-live="polite"></small>
+                    </div>
+                </div>
+
+                {% elif role == 'operador' %}
+
+                <div class="area-pagamento-admin campo-pagamento">
+                    <label for="forma_pagamento">Forma de pagamento</label>
+                    <select name="forma_pagamento" id="forma_pagamento" class="form-control">
+                        <option value="">Selecione</option>
+                        <option value="pix">Pix</option>
+                    </select>
                 </div>
 
                 {% endif %}
@@ -443,7 +486,7 @@
 </div>
 
 
-<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=6"></script>
+<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=7"></script>
 
 <script src="{{ request.url_for('static', path='js/checkout.js') }}?v=6"></script>
 
@@ -452,256 +495,130 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
-    const formaPagamento =
-        document.getElementById("forma_pagamento");
-
-    const campoValorRecebido =
-        document.getElementById("campo-valor-recebido");
-
-    const valorRecebido =
-        document.getElementById("valor_recebido");
-
-    const valorTroco =
-        document.getElementById("valor-troco");
-
-
-    const comboPagamento = document.getElementById("combo_pagamento");
-    const pagamentoCombinado = document.getElementById("pagamento-combinado");
-    const formaPagamento1 = document.getElementById("forma_pagamento_1");
-    const valorPagamento1 = document.getElementById("valor_pagamento_1");
-    const formaPagamento2 = document.getElementById("forma_pagamento_2");
-    const valorPagamento2 = document.getElementById("valor_pagamento_2");
-
-
-    function obterTotal() {
-
-        const elemento =
-            document.getElementById("resumo-total");
-
-        if (!elemento) {
-            return 0;
+    const form = document.getElementById("form-finalizar");
+    const forma = document.getElementById("forma_pagamento");
+    const recebido = document.getElementById("valor_recebido");
+    const campoRecebido = document.getElementById("campo-valor-recebido");
+    const troco = document.getElementById("valor-troco");
+    const combo = document.getElementById("combo_pagamento");
+    const blocoCombo = document.getElementById("pagamento-combinado");
+    const forma1 = document.getElementById("forma_pagamento_1");
+    const forma2 = document.getElementById("forma_pagamento_2");
+    const valor1 = document.getElementById("valor_pagamento_1");
+    const valor2 = document.getElementById("valor_pagamento_2");
+    const saldo = document.getElementById("saldo-pagamento");
+    const textoSaldo = document.getElementById("texto-saldo-pagamento");
+    const parcelasBox = document.getElementById("campo-parcelas-credito");
+    const parcelasSelect = document.getElementById("parcelas-credito");
+    const resumoParcelas = document.getElementById("resumo-parcelas-credito");
+    const formatar = centavos => new Intl.NumberFormat("pt-BR", {style:"currency", currency:"BRL"}).format(centavos / 100);
+    const parseCents = value => {
+        const n = Number(String(value || "0").replace(",", "."));
+        return Number.isFinite(n) ? Math.round(n * 100) : 0;
+    };
+    const totalCents = () => {
+        const text = document.getElementById("resumo-total")?.textContent || "";
+        const normalized = text.replace("R$", "").replace(/\./g, "").replace(",", ".").trim();
+        const value = Number(normalized);
+        return Number.isFinite(value) ? Math.round(value * 100) : 0;
+    };
+    const atualizarTroco = () => {
+        if (!troco) return;
+        troco.textContent = formatar(Math.max(parseCents(recebido?.value) - totalCents(), 0));
+    };
+    const atualizarParcelas = () => {
+        const isCombo = Boolean(combo?.checked);
+        const creditValues = [];
+        if (isCombo) {
+            if (forma1?.value === "cartao_credito") creditValues.push(parseCents(valor1?.value));
+            if (forma2?.value === "cartao_credito") creditValues.push(parseCents(valor2?.value));
+        } else if (forma?.value === "cartao_credito") {
+            creditValues.push(totalCents());
         }
-
-        const texto =
-            elemento.textContent
-                .replace("R$", "")
-                .replace(/\./g, "")
-                .replace(",", ".")
-                .trim();
-
-        const total = parseFloat(texto);
-
-        return isNaN(total) ? 0 : total;
-    }
-
-
-    function atualizarPagamento() {
-
-        if (!formaPagamento) {
-            return;
-        }
-
-        const forma =
-            formaPagamento.value;
-
-
-        /*
-         * Somente dinheiro precisa
-         * de valor recebido e troco.
-         */
-
-        if (forma === "dinheiro") {
-
-            if (campoValorRecebido) {
-                campoValorRecebido.style.display = "";
-            }
-
-            calcularTroco();
-
-        } else {
-
-            if (campoValorRecebido) {
-                campoValorRecebido.style.display = "none";
-            }
-
-            if (valorRecebido) {
-                valorRecebido.value = "";
-            }
-
-            if (valorTroco) {
-                valorTroco.textContent = "R$ 0,00";
-            }
-
-        }
-
-    }
-
-
-    function calcularTroco() {
-
-        const total =
-            obterTotal();
-
-        const recebido =
-            parseFloat(valorRecebido?.value || 0);
-
-        let troco =
-            recebido - total;
-
-        if (troco < 0 || isNaN(troco)) {
-            troco = 0;
-        }
-
-        if (valorTroco) {
-
-            valorTroco.textContent =
-                "R$ " +
-                troco.toFixed(2)
-                    .replace(".", ",");
-
-        }
-
-    }
-
-
-    function atualizarModoPagamento() {
-        const combinar = comboPagamento && comboPagamento.checked;
-
-        if (pagamentoCombinado) {
-            pagamentoCombinado.style.display = combinar ? "" : "none";
-        }
-
-        if (formaPagamento) {
-            formaPagamento.disabled = combinar;
-            if (combinar) {
-                formaPagamento.value = "dinheiro";
+        const creditCents = creditValues.reduce((sum, value) => sum + value, 0);
+        const hasCredit = isCombo
+            ? forma1?.value === "cartao_credito" || forma2?.value === "cartao_credito"
+            : forma?.value === "cartao_credito";
+        const count = Number(parcelasSelect?.value || 1);
+        if (parcelasBox) parcelasBox.style.display = hasCredit ? "" : "none";
+        if (resumoParcelas) {
+            if (creditCents <= 0) {
+                resumoParcelas.textContent = hasCredit ? "Informe o valor destinado ao crédito." : "";
+            } else {
+                const base = Math.floor(creditCents / count);
+                const remainder = creditCents % count;
+                const last = base + (remainder > 0 ? 1 : 0);
+                resumoParcelas.textContent = count === 1
+                    ? `Total no crédito: ${formatar(creditCents)}`
+                    : `${count} parcelas de ${formatar(base)}${remainder ? `; última de ${formatar(last)}` : ""} (total ${formatar(creditCents)})`;
             }
         }
-
-        if (campoValorRecebido) {
-            campoValorRecebido.style.display = combinar ? "none" : "";
+    };
+    const atualizarSaldo = () => {
+        if (!combo?.checked) return;
+        const pending = totalCents() - parseCents(valor1?.value) - parseCents(valor2?.value);
+        if (saldo) saldo.style.display = "";
+        if (textoSaldo) {
+            textoSaldo.textContent = pending > 0
+                ? `Falta pagar: ${formatar(pending)}`
+                : pending < 0 ? `Excedente: ${formatar(-pending)}` : "Pagamento totalizado";
+            textoSaldo.dataset.saldoCentavos = String(pending);
         }
-
-        if (valorRecebido) {
-            valorRecebido.value = "";
+        if (troco) troco.textContent = formatar(0);
+        atualizarParcelas();
+    };
+    const atualizarCampos = () => {
+        const isCombo = Boolean(combo?.checked);
+        if (blocoCombo) blocoCombo.style.display = isCombo ? "" : "none";
+        if (forma) forma.disabled = isCombo;
+        if (campoRecebido) campoRecebido.style.display = !isCombo && forma?.value === "dinheiro" ? "" : "none";
+        const campo1 = document.getElementById("campo-valor-pagamento-1");
+        const campo2 = document.getElementById("campo-valor-pagamento-2");
+        if (campo1) campo1.style.display = isCombo && forma1?.value ? "" : "none";
+        if (campo2) campo2.style.display = isCombo && forma2?.value ? "" : "none";
+        if (saldo) saldo.style.display = isCombo ? "" : "none";
+        if (!isCombo && recebido) recebido.value = forma?.value === "dinheiro" ? recebido.value : "";
+        if (!isCombo) atualizarTroco();
+        else atualizarSaldo();
+        atualizarParcelas();
+    };
+    const preencherRestante = () => {
+        if (combo?.checked && valor2) {
+            const restante = Math.max(totalCents() - parseCents(valor1?.value), 0);
+            valor2.value = (restante / 100).toFixed(2);
         }
-
-        const mostrarCampo = (campo, select) => {
-            const mostra = Boolean(select && select.value);
-            if (campo) {
-                campo.style.display = mostra ? "" : "none";
+        atualizarSaldo();
+    };
+    forma?.addEventListener("change", atualizarCampos);
+    recebido?.addEventListener("input", atualizarTroco);
+    combo?.addEventListener("change", atualizarCampos);
+    forma1?.addEventListener("change", () => { atualizarCampos(); preencherRestante(); });
+    forma2?.addEventListener("change", () => { atualizarCampos(); atualizarSaldo(); });
+    valor1?.addEventListener("input", preencherRestante);
+    valor2?.addEventListener("input", atualizarSaldo);
+    parcelasSelect?.addEventListener("change", atualizarParcelas);
+    form?.addEventListener("submit", event => {
+        if (!combo?.checked) return;
+        const pending = totalCents() - parseCents(valor1?.value) - parseCents(valor2?.value);
+        if (!forma1?.value || !forma2?.value || pending !== 0) {
+            event.preventDefault();
+            if (window.mostrarAlerta) {
+                window.mostrarAlerta(pending > 0 ? `Ainda falta pagar ${formatar(pending)}.` :
+                    pending < 0 ? `O pagamento excede o total em ${formatar(-pending)}.` :
+                    "Selecione dois métodos de pagamento válidos.", "warning");
+            } else {
+                alert(pending > 0 ? `Ainda falta pagar ${formatar(pending)}.` : "Confira os valores do pagamento.");
             }
-        };
-
-        mostrarCampo(document.getElementById("campo-valor-pagamento-1"), formaPagamento1);
-        mostrarCampo(document.getElementById("campo-valor-pagamento-2"), formaPagamento2);
-
-        if (combinar) {
-            const total = obterTotal();
-            const valor1 = parseFloat(valorPagamento1?.value || 0);
-            const valor2 = parseFloat(valorPagamento2?.value || 0);
-            const valorTotal = (valor1 || 0) + (valor2 || 0);
-            const troco = Math.max(valorTotal - total, 0);
-            if (valorTroco) {
-                valorTroco.textContent = "R$ " + troco.toFixed(2).replace(".", ",");
-            }
-        } else {
-            calcularTroco();
-        }
-    }
-
-
-    function atualizarCamposCombinaçao() {
-        if (!comboPagamento || !comboPagamento.checked) {
-            return;
-        }
-
-        const total = obterTotal();
-        const valor1 = parseFloat(valorPagamento1?.value || 0);
-        const valor2 = parseFloat(valorPagamento2?.value || 0);
-        const totalPago = (valor1 || 0) + (valor2 || 0);
-        const troco = Math.max(totalPago - total, 0);
-
-        if (valorTroco) {
-            valorTroco.textContent = "R$ " + troco.toFixed(2).replace(".", ",");
-        }
-    }
-
-
-    if (formaPagamento) {
-
-        formaPagamento.addEventListener(
-            "change",
-            atualizarPagamento
-        );
-
-    }
-
-
-    if (valorRecebido) {
-
-        valorRecebido.addEventListener(
-            "input",
-            calcularTroco
-        );
-
-    }
-
-
-    if (comboPagamento) {
-        comboPagamento.addEventListener("change", atualizarModoPagamento);
-    }
-
-    [formaPagamento1, formaPagamento2].forEach(select => {
-        if (select) {
-            select.addEventListener("change", () => {
-                document.getElementById("campo-valor-pagamento-1").style.display = formaPagamento1 && formaPagamento1.value ? "" : "none";
-                document.getElementById("campo-valor-pagamento-2").style.display = formaPagamento2 && formaPagamento2.value ? "" : "none";
-                atualizarCamposCombinaçao();
-            });
         }
     });
-
-    [valorPagamento1, valorPagamento2].forEach(input => {
-        if (input) {
-            input.addEventListener("input", atualizarCamposCombinaçao);
-        }
-    });
-
-
-    /*
-     * Atualiza o troco quando o total da venda
-     * mudar.
-     */
-
-    const resumoTotal =
-        document.getElementById("resumo-total");
-
-    if (resumoTotal) {
-
-        const observer =
-            new MutationObserver(function () {
-                calcularTroco();
-            });
-
-        observer.observe(
-            resumoTotal,
-            {
-                childList: true,
-                subtree: true,
-                characterData: true
-            }
-        );
-
-    }
-
-
-    atualizarPagamento();
-    if (comboPagamento) {
-        atualizarModoPagamento();
-    }
-
+    const totalNode = document.getElementById("resumo-total");
+    if (totalNode) new MutationObserver(() => {
+        atualizarTroco();
+        if (combo?.checked && valor1?.value) preencherRestante();
+        else atualizarSaldo();
+        atualizarParcelas();
+    }).observe(totalNode, {childList:true, subtree:true, characterData:true});
+    atualizarCampos();
 });
 </script>
 

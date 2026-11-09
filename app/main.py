@@ -6,7 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 
 from app.auth import get_admin, get_usuario_opcional
 from app.controllers import auth_controller
@@ -87,8 +87,15 @@ def admin_dashboard(
         .filter(Produto.ativo == True, Produto.estoque_atual < 20)
         .count()
     )
+    campos_dashboard_venda = load_only(
+        Venda.id,
+        Venda.cliente_id,
+        Venda.total_liquido,
+        Venda.criado_em,
+    )
     ultimas_vendas = (
         db.query(Venda)
+        .options(campos_dashboard_venda)
         .order_by(Venda.criado_em.desc())
         .limit(8)
         .all()
@@ -97,7 +104,12 @@ def admin_dashboard(
     hoje = datetime.now().date()
     dias_grafico = [hoje - timedelta(days=dia) for dia in range(6, -1, -1)]
     inicio_periodo = datetime.combine(dias_grafico[0], datetime.min.time())
-    vendas_periodo = db.query(Venda).filter(Venda.criado_em >= inicio_periodo).all()
+    vendas_periodo = (
+        db.query(Venda)
+        .options(load_only(Venda.criado_em, Venda.total_liquido))
+        .filter(Venda.criado_em >= inicio_periodo)
+        .all()
+    )
     totais_por_dia = {dia: 0.0 for dia in dias_grafico}
 
     for venda in vendas_periodo:

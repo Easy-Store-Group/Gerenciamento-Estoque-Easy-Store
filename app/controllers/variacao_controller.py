@@ -335,6 +335,11 @@ def atualizar_variacao(
     if not variacao:
         raise HTTPException(status_code=404, detail="Variação não encontrada")
     
+    if estoque is not None and estoque < 0:
+        raise HTTPException(status_code=400, detail="O estoque n?o pode ser negativo")
+    if preco is not None and preco < 0:
+        raise HTTPException(status_code=400, detail="O pre?o n?o pode ser negativo")
+
     if estoque is not None:
         variacao.estoque_atual = estoque
     
@@ -363,6 +368,9 @@ def entrada_estoque_variacao(
     if not variacao:
         raise HTTPException(status_code=404, detail="Variação não encontrada")
     
+    if quantidade <= 0:
+        raise HTTPException(status_code=400, detail="A quantidade deve ser maior que zero")
+
     variacao.estoque_atual += quantidade
     recalcular_estoque_produto(db, variacao.produto_id)
     db.commit()
@@ -382,6 +390,8 @@ def saida_estoque_variacao(
     if not variacao:
         raise HTTPException(status_code=404, detail="Variação não encontrada")
     
+    if quantidade <= 0:
+        raise HTTPException(status_code=400, detail="A quantidade deve ser maior que zero")
     if variacao.estoque_atual < quantidade:
         raise HTTPException(status_code=400, detail="Estoque insuficiente")
     

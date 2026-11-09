@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -22,6 +22,24 @@ class Pagamento(Base):
     valor_recebido = Column(Float, nullable=True)
 
     troco = Column(Float, nullable=True)
+
+    status = Column(String(30), nullable=False, default="PENDENTE")
+
+    provider = Column(String(50), nullable=True, default="pix")
+
+    provider_charge_id = Column(String(255), nullable=True)
+
+    pix_qr_code = Column(Text, nullable=True)
+
+    pix_copy_paste = Column(Text, nullable=True)
+
+    pix_qr_code_url = Column(String(255), nullable=True)
+
+    pix_status = Column(String(30), nullable=True, default="PENDENTE")
+
+    pix_data_pagamento = Column(DateTime, nullable=True)
+
+    pix_observacao = Column(Text, nullable=True)
 
     venda = relationship(
         "Venda",
