@@ -42,15 +42,15 @@
 
       <nav class="sidebar-nav">
         {% if role == 'admin' %}
-        <a href="/admin" class="{% if active == 'home' %}active{% endif %}"><span></span>Dashboard</a>
-        <a href="/produtos" class="{% if active == 'produtos' %}active{% endif %}"><span></span>Produtos</a>
-        <a href="/produtos/variacoes" class="{% if active == 'variacoes' %}active{% endif %}"><span></span>Variações</a>
-        <a href="/categorias" class="{% if active == 'categorias' %}active{% endif %}"><span></span>Categorias</a>
-        <a href="/admin/pos" class="{% if active == 'pos' %}active{% endif %}"><span></span>Ponto de Venda</a>
-        <a href="/usuarios" class="{% if active == 'usuarios' %}active{% endif %}"><span></span>Usuários</a>
-        <a href="/movimentacoes" class="{% if active == 'movimentacoes' %}active{% endif %}"><span></span>Movimentações</a>
+        <a href="/admin" class="{% if active == 'home' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Dashboard</span></a>
+        <a href="/produtos" class="{% if active == 'produtos' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Produtos</span></a>
+        <a href="/produtos/variacoes" class="{% if active == 'variacoes' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Variações</span></a>
+        <a href="/categorias" class="{% if active == 'categorias' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Categorias</span></a>
+        <a href="/admin/pos" class="{% if active == 'pos' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Ponto de Venda</span></a>
+        <a href="/usuarios" class="{% if active == 'usuarios' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Usuários</span></a>
+        <a href="/movimentacoes" class="{% if active == 'movimentacoes' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Movimentações</span></a>
         {% elif role == 'operador' %}
-        <a href="/pdv" class="{% if active == 'pos' %}active{% endif %}"><span></span>Ponto de Venda</a>
+        <a href="/pdv" class="{% if active == 'pos' %}active{% endif %}"><span class="nav-icon"></span><span class="nav-label">Ponto de Venda</span></a>
         {% endif %}
       </nav>
 
@@ -87,43 +87,102 @@
     document.addEventListener('DOMContentLoaded', () => {
       const toggle = document.querySelector('.sidebar-toggle');
       const sidebar = document.querySelector('.sidebar');
+      const layout = document.querySelector('.admin-layout');
       const navLinks = document.querySelectorAll('.sidebar-nav a');
 
-      if (!toggle || !sidebar) return;
+      if (!toggle || !sidebar || !layout) return;
 
-      const abrirSidebar = () => {
+      const isMobile = () => window.innerWidth <= 820;
+
+      const updateToggleUi = () => {
+        const open = sidebar.classList.contains('is-open');
+        toggle.setAttribute('aria-expanded', String(open));
+        toggle.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+      };
+
+      const openSidebar = () => {
         sidebar.classList.add('is-open');
-        toggle.setAttribute('aria-expanded', 'true');
+        sidebar.classList.remove('is-collapsed');
+        layout.classList.remove('sidebar-collapsed');
+        updateToggleUi();
       };
 
-      const fecharSidebar = () => {
+      const closeSidebar = () => {
         sidebar.classList.remove('is-open');
-        toggle.setAttribute('aria-expanded', 'false');
+        if (!isMobile()) {
+          sidebar.classList.add('is-collapsed');
+          layout.classList.add('sidebar-collapsed');
+        }
+        updateToggleUi();
       };
 
-      toggle.addEventListener('click', () => {
-        const estaAberta = sidebar.classList.contains('is-open');
-        if (estaAberta) {
-          fecharSidebar();
-        } else {
-          abrirSidebar();
+      const toggleSidebar = () => {
+        if (isMobile()) {
+          if (sidebar.classList.contains('is-open')) {
+            closeSidebar();
+          } else {
+            openSidebar();
+          }
+          return;
         }
-      });
 
-      navLinks.forEach(link => {
+        if (sidebar.classList.contains('is-collapsed')) {
+          sidebar.classList.remove('is-collapsed');
+          layout.classList.remove('sidebar-collapsed');
+          toggle.setAttribute('aria-expanded', 'true');
+          toggle.setAttribute('aria-label', 'Fechar menu');
+        } else {
+          sidebar.classList.add('is-collapsed');
+          layout.classList.add('sidebar-collapsed');
+          toggle.setAttribute('aria-expanded', 'false');
+          toggle.setAttribute('aria-label', 'Abrir menu');
+        }
+      };
+
+      toggle.addEventListener('click', toggleSidebar);
+
+      navLinks.forEach((link) => {
         link.addEventListener('click', () => {
-          if (window.innerWidth <= 820) fecharSidebar();
+          if (isMobile()) {
+            sidebar.classList.remove('is-open');
+            updateToggleUi();
+          }
         });
       });
 
       document.addEventListener('click', (event) => {
-        if (window.innerWidth > 820) return;
-        const clicouNoToggle = toggle.contains(event.target);
-        const clicouNaSidebar = sidebar.contains(event.target);
-        if (!clicouNoToggle && !clicouNaSidebar && sidebar.classList.contains('is-open')) {
-          fecharSidebar();
+        if (!isMobile()) return;
+        if (!toggle.contains(event.target) && !sidebar.contains(event.target) && sidebar.classList.contains('is-open')) {
+          sidebar.classList.remove('is-open');
+          updateToggleUi();
         }
       });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && isMobile() && sidebar.classList.contains('is-open')) {
+          sidebar.classList.remove('is-open');
+          updateToggleUi();
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        if (!isMobile()) {
+          sidebar.classList.remove('is-open');
+          sidebar.classList.remove('is-collapsed');
+          layout.classList.remove('sidebar-collapsed');
+          toggle.setAttribute('aria-expanded', 'true');
+          toggle.setAttribute('aria-label', 'Fechar menu');
+          return;
+        }
+
+        sidebar.classList.remove('is-collapsed');
+        layout.classList.remove('sidebar-collapsed');
+        sidebar.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Abrir menu');
+      });
+
+      updateToggleUi();
     });
   </script>
   <!-- Confirmation modal markup (used by confirm.js) -->
