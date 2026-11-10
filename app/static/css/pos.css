@@ -669,3 +669,356 @@
     grid-column: 2;
   }
 }
+
+/* ============================================================
+   UX MÍNIMA DE PAGAMENTOS PDV (FLAT, BORDAS RETAS, ZERO RADIUS)
+   ============================================================ */
+
+/* Garantia global de border-radius: 0 !important para todos os elementos visuais de pagamento */
+.area-pagamento-admin,
+.area-pagamento-admin *,
+.modal-pix-overlay,
+.modal-pix-overlay * {
+  border-radius: 0 !important;
+}
+
+.pagamento-header-saldos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin-bottom: 12px;
+  background: #cbd5e1;
+  border: 1px solid #94a3b8;
+}
+
+.saldo-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: #ffffff;
+  padding: 8px 4px;
+}
+
+.saldo-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #475569;
+}
+
+.saldo-valor {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.saldo-valor.text-success {
+  color: #166534;
+}
+
+.saldo-valor.text-danger {
+  color: #991b1b;
+}
+
+/* Botoes de selecao rapida - Flat e retos */
+.metodos-botoes-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.btn-metodo-flat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #0f172a;
+  background: #f1f5f9;
+  border: 1px solid #94a3b8;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+  user-select: none;
+  outline: none;
+}
+
+.btn-metodo-flat:hover:not(:disabled) {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.btn-metodo-flat:active:not(:disabled) {
+  background: #334155;
+  color: #ffffff;
+}
+
+.btn-metodo-flat:disabled,
+.btn-metodo-flat.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+  color: #64748b;
+}
+
+/* Componentes de botoes personalizados flat */
+.btn-custom-flat {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  user-select: none;
+  outline: none;
+  transition: background 120ms ease;
+}
+
+.btn-primary-flat {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
+}
+
+.btn-primary-flat:hover:not(:disabled) {
+  background: #334155;
+  border-color: #334155;
+}
+
+.btn-secondary-flat {
+  background: #ffffff;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.btn-secondary-flat:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #64748b;
+}
+
+.btn-remover-pagamento-flat {
+  background: #ffffff;
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 6px;
+  cursor: pointer;
+}
+
+.btn-remover-pagamento-flat:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Lista de pagamentos adicionados */
+.pagamentos-adicionados-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.sem-pagamentos-msg {
+  text-align: center;
+  padding: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+}
+
+.pagamento-item-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #0f172a;
+  border-left: 4px solid #0f172a;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+}
+
+.detalhe-extra-item {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+/* Painel de detalhes inline (para dinheiro e cartoes) */
+.painel-metodo-detalhes {
+  background: #ffffff;
+  border: 1px solid #0f172a;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.painel-detalhes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 6px;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.btn-fechar-painel {
+  background: transparent;
+  border: none;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.btn-fechar-painel:hover {
+  color: #0f172a;
+}
+
+.painel-acoes-linha {
+  display: flex;
+  gap: 6px;
+}
+
+.painel-acoes-linha button {
+  flex: 1;
+}
+
+.texto-parcelas-preview {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #475569;
+  line-height: 1.3;
+}
+
+/* Modal / Popup Pix */
+.modal-pix-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.modal-pix-caixa {
+  background: #ffffff;
+  border: 2px solid #0f172a;
+  width: 100%;
+  max-width: 480px;
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.modal-pix-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.modal-pix-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  color: #0f172a;
+}
+
+.btn-fechar-modal-pix {
+  background: transparent;
+  border: 1px solid #0f172a;
+  color: #0f172a;
+  font-weight: 900;
+  font-size: 0.85rem;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+.btn-fechar-modal-pix:hover {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.pix-valor-destaque {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  margin-bottom: 12px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.pix-qrcode-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+
+.pix-qrcode-area img {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto;
+}
+
+#pix-qrcode-loading {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.pix-copia-cola-box {
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.pix-copia-cola-box input {
+  font-size: 0.75rem;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.btn-copiar-centralizado {
+  margin: 0 auto;
+  display: inline-flex;
+}
+
+.modal-pix-footer {
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+}
+
+.modal-pix-footer button {
+  flex: 1;
+}
+
+

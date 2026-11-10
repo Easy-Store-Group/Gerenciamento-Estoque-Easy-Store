@@ -31,6 +31,11 @@ from app.auth import (
     get_admin,
     get_admin_ou_operador,
 )
+from app.services.payment_engine import PaymentEngine, calcular_parcelas_credito
+from app.services.pix_service import gerar_payload_pix, gerar_qrcode_pix_base64
+from app.models.payment_schemas import PaymentMethod
+
+
 
 router = APIRouter(prefix="/pdv", tags=["PDV"])
 
@@ -293,6 +298,45 @@ def tela_pdv(
             "desconto_associado": DESCONTO_ASSOCIADO,
         }
     )
+
+
+# ============================================================
+# API HELPER PIX & PARCELAS
+# ============================================================
+
+@router.get("/api/pix-qrcode")
+def api_pix_qrcode(valor: float, usuario=Depends(get_admin_ou_operador)):
+    """Retorna o código copia e cola e a imagem base64 do QR Code Pix."""
+    try:
+        from decimal import Decimal
+        val_dec = Decimal(str(valor)).quantize(Decimal("0.01"))
+        if val_dec <= Decimal("0.00"):
+            return {"erro": "Valor deve ser maior que zero."}
+        payload = gerar_payload_pix(val_dec)
+        qrcode_b64 = gerar_qrcode_pix_base64(payload)
+        return {
+            "payload": payload,
+            "qrcode_b64": qrcode_b64,
+            "valor": float(val_dec)
+        }
+    except Exception as exc:
+        return {"erro": str(exc)}
+
+
+@router.get("/api/calcular-parcelas")
+def api_calcular_parcelas(valor: float, parcelas: int = 1, usuario=Depends(get_admin_ou_operador)):
+    """Retorna o detalhamento exato de parcelas para Cartão de Crédito."""
+    try:
+        from decimal import Decimal
+        val_dec = Decimal(str(valor)).quantize(Decimal("0.01"))
+        detalhes = calcular_parcelas_credito(val_dec, parcelas)
+        return {
+            "valor": float(val_dec),
+            "parcelas": parcelas,
+            "detalhes": [{"number": d.number, "amount": float(d.amount)} for d in detalhes]
+        }
+    except Exception as exc:
+        return {"erro": str(exc)}
 
 
 # ============================================================

@@ -1,4 +1,4 @@
-﻿{% extends "admin/base.html" %}
+{% extends "admin/base.html" %}
 
 {% set title = "PDV - Ponto de Venda" %}
 {% set page_title = "Ponto de Venda" %}
@@ -254,173 +254,122 @@
 
 
                 <!-- =====================================================
-                     FORMAS DE PAGAMENTO
+                     FORMAS DE PAGAMENTO (UX MÍNIMA - MÁX. 2 MÉTODOS)
                      SOMENTE PARA ADMINISTRADORES
                      ===================================================== -->
 
                 {% if role == 'admin' %}
 
-                <div
-                    class="area-pagamento-admin"
-                    id="area-pagamento-admin"
-                >
-
-                    <div class="pagamento-titulo">
-                        <span>Forma de pagamento</span>
-                    </div>
-
-
-                    <div class="campo-pagamento">
-
-                        <label for="forma_pagamento">
-                            Pagamento
-                        </label>
-
-                        <select
-                            name="forma_pagamento"
-                            id="forma_pagamento"
-                            class="form-control"
-                        >
-
-                            <option value="dinheiro">
-                                Dinheiro
-                            </option>
-
-                            <option value="pix">
-                                Pix
-                            </option>
-
-                            <option value="cartao_credito">
-                                Cartão de Crédito
-                            </option>
-
-                            <option value="cartao_debito">
-                                Cartão de Débito
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <!-- VALOR RECEBIDO -->
-
-                    <div
-                        class="campo-pagamento"
-                        id="campo-valor-recebido"
-                    >
-
-                        <label for="valor_recebido">
-                            Valor recebido
-                        </label>
-
-                        <input
-                            type="number"
-                            name="valor_recebido"
-                            id="valor_recebido"
-                            class="form-control"
-                            min="0"
-                            step="0.01"
-                            placeholder="R$ 0,00"
-                        >
-
-                    </div>
-
-
-                    <!-- TROCO -->
-
-                    <div
-                        class="linha-pagamento-troco"
-                        id="linha-troco"
-                    >
-
-                        <span>
-                            Troco:
-                        </span>
-
-                        <strong id="valor-troco">
-                            R$ 0,00
-                        </strong>
-
-                    </div>
-
-                    <div class="campo-pagamento">
-
-                        <label for="combo_pagamento">
-                            <input
-                                type="checkbox"
-                                id="combo_pagamento"
-                                name="combo_pagamento"
-                                value="1"
-                            >
-                            Combinar dois métodos
-                        </label>
-
-                    </div>
-
-                    <div id="pagamento-combinado" style="display:none;">
-                        <div class="campo-pagamento">
-                            <label for="forma_pagamento_1">
-                                Método 1
-                            </label>
-
-                            <select
-                                name="forma_pagamento_1"
-                                id="forma_pagamento_1"
-                                class="form-control"
-                            >
-                                <option value="">Selecione</option>
-                                <option value="dinheiro">Dinheiro</option>
-                                <option value="pix">Pix</option>
-                                <option value="cartao_credito">Cartão de Crédito</option>
-                                <option value="cartao_debito">Cartão de Débito</option>
-                            </select>
+                <div class="area-pagamento-admin" id="area-pagamento-admin">
+                    <!-- Barra superior retangular com saldos -->
+                    <div class="pagamento-header-saldos">
+                        <div class="saldo-card">
+                            <span class="saldo-label">TOTAL</span>
+                            <span class="saldo-valor" id="display-saldo-total">R$ 0,00</span>
                         </div>
-
-                        <div class="campo-pagamento" id="campo-valor-pagamento-1" style="display:none;">
-                            <label for="valor_pagamento_1">Valor do método 1</label>
-                            <input
-                                type="number"
-                                name="valor_pagamento_1"
-                                id="valor_pagamento_1"
-                                class="form-control"
-                                min="0"
-                                step="0.01"
-                                placeholder="R$ 0,00"
-                            >
+                        <div class="saldo-card">
+                            <span class="saldo-label">PAGO</span>
+                            <span class="saldo-valor text-success" id="display-saldo-pago">R$ 0,00</span>
                         </div>
-
-                        <div class="campo-pagamento">
-                            <label for="forma_pagamento_2">
-                                Método 2
-                            </label>
-
-                            <select
-                                name="forma_pagamento_2"
-                                id="forma_pagamento_2"
-                                class="form-control"
-                            >
-                                <option value="">Selecione</option>
-                                <option value="dinheiro">Dinheiro</option>
-                                <option value="pix">Pix</option>
-                                <option value="cartao_credito">Cartão de Crédito</option>
-                                <option value="cartao_debito">Cartão de Débito</option>
-                            </select>
-                        </div>
-
-                        <div class="campo-pagamento" id="campo-valor-pagamento-2" style="display:none;">
-                            <label for="valor_pagamento_2">Valor do método 2</label>
-                            <input
-                                type="number"
-                                name="valor_pagamento_2"
-                                id="valor_pagamento_2"
-                                class="form-control"
-                                min="0"
-                                step="0.01"
-                                placeholder="R$ 0,00"
-                            >
+                        <div class="saldo-card">
+                            <span class="saldo-label">RESTANTE</span>
+                            <span class="saldo-valor text-danger" id="display-saldo-restante">R$ 0,00</span>
                         </div>
                     </div>
+
+                    <!-- Botoes de selecao rapida de metodo (flat, reto, sem emojis, textos curtos) -->
+                    <div class="metodos-botoes-container" id="botoes-metodos">
+                        <button type="button" class="btn-metodo-flat" data-method="dinheiro">
+                            DINHEIRO
+                        </button>
+                        <button type="button" class="btn-metodo-flat" data-method="pix">
+                            PIX
+                        </button>
+                        <button type="button" class="btn-metodo-flat" data-method="cartao_credito">
+                            CREDITO
+                        </button>
+                        <button type="button" class="btn-metodo-flat" data-method="cartao_debito">
+                            DEBITO
+                        </button>
+                    </div>
+
+                    <!-- Lista de Pagamentos Adicionados (Maximo 2) -->
+                    <div class="pagamentos-adicionados-lista" id="lista-pagamentos-adicionados"></div>
+
+                    <!-- Configuracao do Metodo Selecionado na Tela Principal (Dinheiro, Debito, Credito) -->
+                    <div class="painel-metodo-detalhes" id="painel-metodo-detalhes" style="display:none;">
+                        <div class="painel-detalhes-header">
+                            <strong id="metodo-selecionado-titulo">PAGAMENTO</strong>
+                            <button type="button" class="btn-fechar-painel" id="btn-cancelar-metodo">FECHAR</button>
+                        </div>
+
+                        <div class="campo-pagamento mt-2">
+                            <label for="input-valor-metodo">VALOR (R$):</label>
+                            <input type="number" id="input-valor-metodo" class="form-control" step="0.01" min="0.01" placeholder="0.00">
+                        </div>
+
+                        <!-- Seletor de Parcelas (Exclusivo Cartao de Credito) -->
+                        <div class="campo-pagamento mt-2" id="box-credito-parcelas" style="display:none;">
+                            <label for="select-credito-parcelas">PARCELAS (1X A 12X):</label>
+                            <select id="select-credito-parcelas" class="form-control"></select>
+                            <div id="detalhes-parcelas-texto" class="texto-parcelas-preview mt-1"></div>
+                        </div>
+
+                        <div class="painel-acoes-linha mt-3">
+                            <button type="button" class="btn-custom-flat btn-primary-flat" id="btn-confirmar-adicionar-metodo">
+                                CONFIRMAR
+                            </button>
+                            <button type="button" class="btn-custom-flat btn-secondary-flat" id="btn-descartar-metodo">
+                                CANCELAR
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Modal / Popup Pix com Bordas Retas e QR Code Ampliado -->
+                    <div id="modal-pix" class="modal-pix-overlay" style="display:none;">
+                        <div class="modal-pix-caixa">
+                            <div class="modal-pix-header">
+                                <h3>PIX</h3>
+                                <button type="button" class="btn-fechar-modal-pix" id="btn-fechar-modal-pix-topo">X</button>
+                            </div>
+                            <div class="modal-pix-body">
+                                <div class="pix-valor-destaque">
+                                    <span>VALOR:</span>
+                                    <strong id="modal-pix-valor">R$ 0,00</strong>
+                                </div>
+
+                                <div class="pix-qrcode-area">
+                                    <img id="pix-qrcode-img" src="" alt="QR Code Pix" style="display:none;">
+                                    <div id="pix-qrcode-loading">GERANDO QR CODE...</div>
+                                </div>
+
+                                <div class="pix-copia-cola-box text-center">
+                                    <input type="text" id="pix-copia-cola-input" class="form-control text-center mb-2" readonly>
+                                    <div class="d-flex justify-content-center">
+                                        <button type="button" class="btn-custom-flat btn-secondary-flat btn-copiar-centralizado" id="btn-copiar-pix">
+                                            COPIAR CODIGO
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-pix-footer">
+                                <button type="button" class="btn-custom-flat btn-primary-flat" id="btn-confirmar-recebimento-pix">
+                                    CONFIRMAR RECEBIMENTO
+                                </button>
+                                <button type="button" class="btn-custom-flat btn-secondary-flat" id="btn-cancelar-pix-modal">
+                                    CANCELAR
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Campos ocultos para submissao no formulario -->
+                    <input type="hidden" name="forma_pagamento" id="forma_pagamento" value="">
+                    <input type="hidden" name="valor_recebido" id="valor_recebido" value="">
+                    <input type="hidden" name="forma_pagamento_1" id="forma_pagamento_1" value="">
+                    <input type="hidden" name="valor_pagamento_1" id="valor_pagamento_1" value="">
+                    <input type="hidden" name="forma_pagamento_2" id="forma_pagamento_2" value="">
+                    <input type="hidden" name="valor_pagamento_2" id="valor_pagamento_2" value="">
                 </div>
 
                 {% endif %}
@@ -452,256 +401,411 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
+    const botoesMetodos = document.querySelectorAll(".btn-metodo-flat");
+    const containerBotoes = document.getElementById("botoes-metodos");
+    const listaPagamentosEl = document.getElementById("lista-pagamentos-adicionados");
 
-    const formaPagamento =
-        document.getElementById("forma_pagamento");
+    // Painel de configuração inline (Dinheiro, Cartão Crédito, Cartão Débito)
+    const painelDetalhes = document.getElementById("painel-metodo-detalhes");
+    const tituloMetodo = document.getElementById("metodo-selecionado-titulo");
+    const btnCancelarMetodo = document.getElementById("btn-cancelar-metodo");
+    const btnDescartarMetodo = document.getElementById("btn-descartar-metodo");
+    const btnConfirmarMetodo = document.getElementById("btn-confirmar-adicionar-metodo");
+    const inputValorMetodo = document.getElementById("input-valor-metodo");
 
-    const campoValorRecebido =
-        document.getElementById("campo-valor-recebido");
+    const boxCredito = document.getElementById("box-credito-parcelas");
+    const selectParcelas = document.getElementById("select-credito-parcelas");
+    const textoParcelas = document.getElementById("detalhes-parcelas-texto");
 
-    const valorRecebido =
-        document.getElementById("valor_recebido");
+    // Modal / Popup Pix
+    const modalPix = document.getElementById("modal-pix");
+    const modalPixValor = document.getElementById("modal-pix-valor");
+    const pixImg = document.getElementById("pix-qrcode-img");
+    const pixLoading = document.getElementById("pix-qrcode-loading");
+    const pixInput = document.getElementById("pix-copia-cola-input");
+    const btnCopiarPix = document.getElementById("btn-copiar-pix");
+    const btnConfirmarPix = document.getElementById("btn-confirmar-recebimento-pix");
+    const btnCancelarPixModal = document.getElementById("btn-cancelar-pix-modal");
+    const btnFecharPixTopo = document.getElementById("btn-fechar-modal-pix-topo");
 
-    const valorTroco =
-        document.getElementById("valor-troco");
+    const displayTotal = document.getElementById("display-saldo-total");
+    const displayPago = document.getElementById("display-saldo-pago");
+    const displayRestante = document.getElementById("display-saldo-restante");
 
+    // Hidden inputs
+    const inputFormaPagamento = document.getElementById("forma_pagamento");
+    const inputValorRecebido = document.getElementById("valor_recebido");
+    const inputForma1 = document.getElementById("forma_pagamento_1");
+    const inputValor1 = document.getElementById("valor_pagamento_1");
+    const inputForma2 = document.getElementById("forma_pagamento_2");
+    const inputValor2 = document.getElementById("valor_pagamento_2");
 
-    const comboPagamento = document.getElementById("combo_pagamento");
-    const pagamentoCombinado = document.getElementById("pagamento-combinado");
-    const formaPagamento1 = document.getElementById("forma_pagamento_1");
-    const valorPagamento1 = document.getElementById("valor_pagamento_1");
-    const formaPagamento2 = document.getElementById("forma_pagamento_2");
-    const valorPagamento2 = document.getElementById("valor_pagamento_2");
+    const btnFinalizar = document.querySelector('button[type="submit"]');
 
+    // Estado local de pagamentos
+    let pagamentos = []; // [{ method, amount, installments, installments_detail, pix_payload, pix_confirmed }]
+    let metodoEmEdicao = null;
+    let valorPixPendente = 0;
 
-    function obterTotal() {
+    const nomesMetodos = {
+        dinheiro: "DINHEIRO",
+        pix: "PIX",
+        cartao_credito: "CREDITO",
+        cartao_debito: "DEBITO"
+    };
 
-        const elemento =
-            document.getElementById("resumo-total");
-
-        if (!elemento) {
-            return 0;
-        }
-
-        const texto =
-            elemento.textContent
-                .replace("R$", "")
-                .replace(/\./g, "")
-                .replace(",", ".")
-                .trim();
-
+    function obterTotalVenda() {
+        const elemento = document.getElementById("resumo-total");
+        if (!elemento) return 0;
+        const texto = elemento.textContent
+            .replace("R$", "")
+            .replace(/\./g, "")
+            .replace(",", ".")
+            .trim();
         const total = parseFloat(texto);
-
-        return isNaN(total) ? 0 : total;
+        return isNaN(total) ? 0 : Math.round(total * 100) / 100;
     }
 
+    function obterTotalPago() {
+        const soma = pagamentos.reduce((acc, p) => acc + p.amount, 0);
+        return Math.round(soma * 100) / 100;
+    }
 
-    function atualizarPagamento() {
+    function obterSaldoRestante() {
+        const total = obterTotalVenda();
+        const pago = obterTotalPago();
+        return Math.max(0, Math.round((total - pago) * 100) / 100);
+    }
 
-        if (!formaPagamento) {
+    function formatarMoeda(val) {
+        return "R$ " + (val || 0).toFixed(2).replace(".", ",");
+    }
+
+    function atualizarDisplays() {
+        const total = obterTotalVenda();
+        const pago = obterTotalPago();
+        const restante = obterSaldoRestante();
+
+        if (displayTotal) displayTotal.textContent = formatarMoeda(total);
+        if (displayPago) displayPago.textContent = formatarMoeda(pago);
+        if (displayRestante) displayRestante.textContent = formatarMoeda(restante);
+
+        // Bloqueio do botão finalizar se RESTANTE > 0 ou sem pagamentos
+        if (btnFinalizar) {
+            const podeFinalizar = (total > 0 && restante === 0 && pagamentos.length > 0);
+            btnFinalizar.disabled = !podeFinalizar;
+            if (!podeFinalizar) {
+                btnFinalizar.classList.add("is-disabled");
+            } else {
+                btnFinalizar.classList.remove("is-disabled");
+            }
+        }
+
+        // Desabilitação automática dos botões de seleção de método (máx. 2 métodos ou saldo zerado ou método já utilizado)
+        const bloqueiaNovosMetodos = pagamentos.length >= 2 || restante <= 0;
+        botoesMetodos.forEach(btn => {
+            const method = btn.dataset.method;
+            const metodoJaUsado = pagamentos.some(p => p.method === method);
+            const desabilitar = bloqueiaNovosMetodos || metodoJaUsado;
+
+            btn.disabled = desabilitar;
+            if (desabilitar) {
+                btn.classList.add("disabled");
+            } else {
+                btn.classList.remove("disabled");
+            }
+        });
+
+        // Atualiza inputs ocultos para envio no form
+        if (pagamentos.length === 1) {
+            inputFormaPagamento.value = pagamentos[0].method;
+            inputValorRecebido.value = pagamentos[0].amount.toFixed(2);
+            inputForma1.value = "";
+            inputValor1.value = "";
+            inputForma2.value = "";
+            inputValor2.value = "";
+        } else if (pagamentos.length === 2) {
+            inputFormaPagamento.value = "";
+            inputValorRecebido.value = "";
+            inputForma1.value = pagamentos[0].method;
+            inputValor1.value = pagamentos[0].amount.toFixed(2);
+            inputForma2.value = pagamentos[1].method;
+            inputValor2.value = pagamentos[1].amount.toFixed(2);
+        } else {
+            inputFormaPagamento.value = "";
+            inputValorRecebido.value = "";
+            inputForma1.value = "";
+            inputValor1.value = "";
+            inputForma2.value = "";
+            inputValor2.value = "";
+        }
+
+        renderListaPagamentos();
+    }
+
+    function renderListaPagamentos() {
+        if (!listaPagamentosEl) return;
+        if (pagamentos.length === 0) {
+            listaPagamentosEl.innerHTML = '<div class="sem-pagamentos-msg">NENHUM PAGAMENTO REGISTRADO</div>';
             return;
         }
 
-        const forma =
-            formaPagamento.value;
-
-
-        /*
-         * Somente dinheiro precisa
-         * de valor recebido e troco.
-         */
-
-        if (forma === "dinheiro") {
-
-            if (campoValorRecebido) {
-                campoValorRecebido.style.display = "";
+        listaPagamentosEl.innerHTML = pagamentos.map((p, idx) => {
+            let infoExtra = "";
+            if (p.method === "cartao_credito" && p.installments > 1) {
+                infoExtra = `<small class="detalhe-extra-item">(${p.installments}X DE ${formatarMoeda(p.installments_detail?.[0]?.amount || (p.amount / p.installments))})</small>`;
+            }
+            if (p.method === "pix") {
+                infoExtra = `<small class="detalhe-extra-item text-success">[RECEBIMENTO CONFIRMADO MANUALMENTE]</small>`;
             }
 
-            calcularTroco();
-
-        } else {
-
-            if (campoValorRecebido) {
-                campoValorRecebido.style.display = "none";
-            }
-
-            if (valorRecebido) {
-                valorRecebido.value = "";
-            }
-
-            if (valorTroco) {
-                valorTroco.textContent = "R$ 0,00";
-            }
-
-        }
-
+            return `
+                <div class="pagamento-item-card">
+                    <div>
+                        <strong>${nomesMetodos[p.method] || p.method}</strong>: ${formatarMoeda(p.amount)}
+                        ${infoExtra}
+                    </div>
+                    <button type="button" class="btn-remover-pagamento-flat" onclick="window.removerPagamento(${idx})" title="Remover">REMOVER</button>
+                </div>
+            `;
+        }).join("");
     }
 
+    window.removerPagamento = function(index) {
+        pagamentos.splice(index, 1);
+        fecharPainelMetodo();
+        fecharModalPix();
+        atualizarDisplays();
+    };
 
-    function calcularTroco() {
-
-        const total =
-            obterTotal();
-
-        const recebido =
-            parseFloat(valorRecebido?.value || 0);
-
-        let troco =
-            recebido - total;
-
-        if (troco < 0 || isNaN(troco)) {
-            troco = 0;
+    function abrirPainelMetodo(method) {
+        const restante = obterSaldoRestante();
+        if (pagamentos.length >= 2) {
+            alert("Limite de no maximo 2 metodos de pagamento combinados por venda.");
+            return;
         }
-
-        if (valorTroco) {
-
-            valorTroco.textContent =
-                "R$ " +
-                troco.toFixed(2)
-                    .replace(".", ",");
-
+        if (pagamentos.some(p => p.method === method)) {
+            alert("Metodo ja utilizado nesta venda. Selecione um metodo distinto.");
+            return;
         }
-
-    }
-
-
-    function atualizarModoPagamento() {
-        const combinar = comboPagamento && comboPagamento.checked;
-
-        if (pagamentoCombinado) {
-            pagamentoCombinado.style.display = combinar ? "" : "none";
-        }
-
-        if (formaPagamento) {
-            formaPagamento.disabled = combinar;
-            if (combinar) {
-                formaPagamento.value = "dinheiro";
-            }
-        }
-
-        if (campoValorRecebido) {
-            campoValorRecebido.style.display = combinar ? "none" : "";
-        }
-
-        if (valorRecebido) {
-            valorRecebido.value = "";
-        }
-
-        const mostrarCampo = (campo, select) => {
-            const mostra = Boolean(select && select.value);
-            if (campo) {
-                campo.style.display = mostra ? "" : "none";
-            }
-        };
-
-        mostrarCampo(document.getElementById("campo-valor-pagamento-1"), formaPagamento1);
-        mostrarCampo(document.getElementById("campo-valor-pagamento-2"), formaPagamento2);
-
-        if (combinar) {
-            const total = obterTotal();
-            const valor1 = parseFloat(valorPagamento1?.value || 0);
-            const valor2 = parseFloat(valorPagamento2?.value || 0);
-            const valorTotal = (valor1 || 0) + (valor2 || 0);
-            const troco = Math.max(valorTotal - total, 0);
-            if (valorTroco) {
-                valorTroco.textContent = "R$ " + troco.toFixed(2).replace(".", ",");
-            }
-        } else {
-            calcularTroco();
-        }
-    }
-
-
-    function atualizarCamposCombinaçao() {
-        if (!comboPagamento || !comboPagamento.checked) {
+        if (restante <= 0) {
+            alert("O total da compra ja foi quitado.");
             return;
         }
 
-        const total = obterTotal();
-        const valor1 = parseFloat(valorPagamento1?.value || 0);
-        const valor2 = parseFloat(valorPagamento2?.value || 0);
-        const totalPago = (valor1 || 0) + (valor2 || 0);
-        const troco = Math.max(totalPago - total, 0);
+        if (method === "pix") {
+            // Pix obrigatoriamente abre dentro de uma janela popup/modal
+            fecharPainelMetodo();
+            abrirModalPix(restante);
+            return;
+        }
 
-        if (valorTroco) {
-            valorTroco.textContent = "R$ " + troco.toFixed(2).replace(".", ",");
+        metodoEmEdicao = method;
+        tituloMetodo.textContent = `CONFIGURAR ${nomesMetodos[method] || method}`;
+        painelDetalhes.style.display = "block";
+
+        // Preenche automaticamente o campo de valor com o saldo pendente
+        inputValorMetodo.value = restante.toFixed(2);
+        inputValorMetodo.max = restante.toFixed(2);
+
+        // Se for Cartão de Crédito, exibe o menu seletor de parcelas (1x a 12x)
+        if (method === "cartao_credito") {
+            boxCredito.style.display = "block";
+            preencherOpcoesParcelas(restante);
+        } else {
+            boxCredito.style.display = "none";
         }
     }
 
-
-    if (formaPagamento) {
-
-        formaPagamento.addEventListener(
-            "change",
-            atualizarPagamento
-        );
-
+    function fecharPainelMetodo() {
+        painelDetalhes.style.display = "none";
+        metodoEmEdicao = null;
+        boxCredito.style.display = "none";
+        inputValorMetodo.value = "";
     }
 
+    async function preencherOpcoesParcelas(valor) {
+        selectParcelas.innerHTML = "";
+        const val = parseFloat(valor) || 0;
+        if (val <= 0) return;
 
-    if (valorRecebido) {
-
-        valorRecebido.addEventListener(
-            "input",
-            calcularTroco
-        );
-
+        try {
+            for (let i = 1; i <= 12; i++) {
+                const subRes = await fetch(`/pdv/api/calcular-parcelas?valor=${val}&parcelas=${i}`);
+                const data = await subRes.json();
+                if (data.detalhes && data.detalhes.length > 0) {
+                    const primeira = data.detalhes[0].amount;
+                    const opt = document.createElement("option");
+                    opt.value = i;
+                    opt.textContent = `${i}X DE ${formatarMoeda(primeira)} (TOTAL: ${formatarMoeda(val)})`;
+                    selectParcelas.appendChild(opt);
+                }
+            }
+            atualizarTextoParcelas();
+        } catch (e) {
+            for (let i = 1; i <= 12; i++) {
+                const opt = document.createElement("option");
+                opt.value = i;
+                opt.textContent = `${i}X DE ${formatarMoeda(val / i)}`;
+                selectParcelas.appendChild(opt);
+            }
+        }
     }
 
+    async function atualizarTextoParcelas() {
+        const parcelas = parseInt(selectParcelas.value) || 1;
+        const val = parseFloat(inputValorMetodo.value) || 0;
+        if (val <= 0) return;
 
-    if (comboPagamento) {
-        comboPagamento.addEventListener("change", atualizarModoPagamento);
+        try {
+            const res = await fetch(`/pdv/api/calcular-parcelas?valor=${val}&parcelas=${parcelas}`);
+            const data = await res.json();
+            if (data.detalhes) {
+                const detalheStr = data.detalhes.map(d => `${d.number}a: ${formatarMoeda(d.amount)}`).join(" | ");
+                textoParcelas.textContent = `PARCELAS: ${detalheStr}`;
+            }
+        } catch (e) {
+            textoParcelas.textContent = "";
+        }
     }
 
-    [formaPagamento1, formaPagamento2].forEach(select => {
-        if (select) {
-            select.addEventListener("change", () => {
-                document.getElementById("campo-valor-pagamento-1").style.display = formaPagamento1 && formaPagamento1.value ? "" : "none";
-                document.getElementById("campo-valor-pagamento-2").style.display = formaPagamento2 && formaPagamento2.value ? "" : "none";
-                atualizarCamposCombinaçao();
+    selectParcelas.addEventListener("change", atualizarTextoParcelas);
+
+    inputValorMetodo.addEventListener("input", () => {
+        const val = parseFloat(inputValorMetodo.value) || 0;
+        if (metodoEmEdicao === "cartao_credito") {
+            preencherOpcoesParcelas(val);
+        }
+    });
+
+    // ==========================================
+    // MODAL / POPUP PIX
+    // ==========================================
+    async function abrirModalPix(valor) {
+        valorPixPendente = valor;
+        modalPixValor.textContent = formatarMoeda(valor);
+        pixLoading.style.display = "block";
+        pixImg.style.display = "none";
+        pixInput.value = "";
+        modalPix.style.display = "flex";
+
+        try {
+            const res = await fetch(`/pdv/api/pix-qrcode?valor=${valor}`);
+            const data = await res.json();
+            if (data.qrcode_b64) {
+                pixImg.src = data.qrcode_b64;
+                pixImg.style.display = "inline-block";
+                pixInput.value = data.payload || "";
+                pixLoading.style.display = "none";
+            } else {
+                pixLoading.textContent = "ERRO AO GERAR QR CODE.";
+            }
+        } catch (e) {
+            pixLoading.textContent = "ERRO AO CARREGAR QR CODE.";
+        }
+    }
+
+    function fecharModalPix() {
+        modalPix.style.display = "none";
+        pixImg.src = "";
+        pixInput.value = "";
+        valorPixPendente = 0;
+    }
+
+    btnFecharPixTopo.addEventListener("click", fecharModalPix);
+    btnCancelarPixModal.addEventListener("click", fecharModalPix);
+
+    btnCopiarPix.addEventListener("click", () => {
+        if (pixInput.value) {
+            navigator.clipboard.writeText(pixInput.value).then(() => {
+                alert("Codigo Copia e Cola copiado com sucesso!");
             });
         }
     });
 
-    [valorPagamento1, valorPagamento2].forEach(input => {
-        if (input) {
-            input.addEventListener("input", atualizarCamposCombinaçao);
-        }
+    btnConfirmarPix.addEventListener("click", () => {
+        if (valorPixPendente <= 0) return;
+
+        pagamentos.push({
+            method: "pix",
+            amount: Math.round(valorPixPendente * 100) / 100,
+            installments: 1,
+            installments_detail: [],
+            pix_payload: pixInput.value || null,
+            pix_confirmed: true,
+        });
+
+        fecharModalPix();
+        atualizarDisplays();
     });
 
+    // ==========================================
+    // CONFIRMAÇÃO DO MÉTODO NA TELA
+    // ==========================================
+    botoesMetodos.forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (btn.disabled) return;
+            const method = btn.dataset.method;
+            abrirPainelMetodo(method);
+        });
+    });
 
-    /*
-     * Atualiza o troco quando o total da venda
-     * mudar.
-     */
+    btnCancelarMetodo.addEventListener("click", fecharPainelMetodo);
+    if (btnDescartarMetodo) btnDescartarMetodo.addEventListener("click", fecharPainelMetodo);
 
-    const resumoTotal =
-        document.getElementById("resumo-total");
+    btnConfirmarMetodo.addEventListener("click", async () => {
+        if (!metodoEmEdicao) return;
 
-    if (resumoTotal) {
+        const val = parseFloat(inputValorMetodo.value);
+        const restante = obterSaldoRestante();
 
-        const observer =
-            new MutationObserver(function () {
-                calcularTroco();
-            });
+        if (isNaN(val) || val <= 0) {
+            alert("Informe um valor valido maior que zero.");
+            return;
+        }
 
-        observer.observe(
-            resumoTotal,
-            {
-                childList: true,
-                subtree: true,
-                characterData: true
+        if (val > (restante + 0.001)) {
+            alert(`O valor informado nao pode exceder o saldo restante de ${formatarMoeda(restante)}.`);
+            return;
+        }
+
+        const parcelasCount = (metodoEmEdicao === "cartao_credito") ? (parseInt(selectParcelas.value) || 1) : 1;
+        let parcelasDetail = [];
+
+        if (metodoEmEdicao === "cartao_credito") {
+            try {
+                const res = await fetch(`/pdv/api/calcular-parcelas?valor=${val}&parcelas=${parcelasCount}`);
+                const data = await res.json();
+                parcelasDetail = data.detalhes || [];
+            } catch (e) {
+                parcelasDetail = [];
             }
-        );
+        }
 
+        pagamentos.push({
+            method: metodoEmEdicao,
+            amount: Math.round(val * 100) / 100,
+            installments: parcelasCount,
+            installments_detail: parcelasDetail,
+            pix_payload: null,
+            pix_confirmed: false,
+        });
+
+        fecharPainelMetodo();
+        atualizarDisplays();
+    });
+
+    // Observer para recalcular quando produtos forem adicionados ou removidos do carrinho
+    const resumoTotalEl = document.getElementById("resumo-total");
+    if (resumoTotalEl) {
+        const observer = new MutationObserver(() => {
+            atualizarDisplays();
+        });
+        observer.observe(resumoTotalEl, { childList: true, subtree: true, characterData: true });
     }
 
-
-    atualizarPagamento();
-    if (comboPagamento) {
-        atualizarModoPagamento();
-    }
-
+    // Inicialização
+    atualizarDisplays();
 });
 </script>
 
