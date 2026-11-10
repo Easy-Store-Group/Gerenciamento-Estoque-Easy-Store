@@ -625,12 +625,9 @@ def finalizar_venda(
         except ValueError as exc:
             return _redirect_pdv(db, f"/pdv?erro={exc}")
 
-        if pagamentos_admin and len(pagamentos_admin) == 1:
-            metodo = pagamentos_admin[0]
-            if metodo["forma"] == "dinheiro":
-                troco = round(float(metodo["troco"] or 0.0), 2)
-            else:
-                troco = 0.0
+        if pagamentos_admin:
+            # Calcula o troco total da operação (quando há dinheiro)
+            troco = round(sum(float(metodo.get("troco") or 0.0) for metodo in pagamentos_admin), 2)
 
     # ========================================================
     # PERSISTE TUDO EM UMA ÚNICA TRANSAÇÃO

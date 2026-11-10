@@ -76,6 +76,25 @@
         <span>Total pago</span>
         <strong>R$ {{ "%.2f"|format(venda.total_liquido) }}</strong>
       </div>
+
+      <!-- Detalhamento das Formas de Pagamento Registradas no Banco -->
+      {% if venda.pagamentos %}
+      <div class="pagamentos-comprovante-box">
+        <span class="pagamentos-comprovante-titulo">Formas de Pagamento:</span>
+        {% for pag in venda.pagamentos %}
+        <div class="total-row pagamento-detalhe-row">
+          <span>{{ pag.forma|upper }}</span>
+          <strong>R$ {{ "%.2f"|format(pag.valor) }}</strong>
+        </div>
+        {% if pag.troco and pag.troco > 0 %}
+        <div class="total-row troco-detalhe-row">
+          <span>Troco devolvido</span>
+          <span>R$ {{ "%.2f"|format(pag.troco) }}</span>
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+      {% endif %}
     </div>
 
   </div>
@@ -103,6 +122,10 @@
 .total-row { display:flex; justify-content:space-between; font-size:.875rem; }
 .desconto-row { color:#059669; }
 .total-final { font-size:1.1rem; font-weight:700; margin-top:6px; padding-top:8px; border-top:1px solid #e5e7eb; }
+.pagamentos-comprovante-box { margin-top:12px; padding-top:10px; border-top:1px dashed #cbd5e1; display:flex; flex-direction:column; gap:4px; }
+.pagamentos-comprovante-titulo { font-size:.78rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px; }
+.pagamento-detalhe-row span { font-weight:700; color:#1e293b; }
+.troco-detalhe-row { font-size:.8rem; color:#0284c7; }
 .comprovante-actions { display:flex; gap:10px; }
 @media print {
   .no-print, .sidebar, .topbar, header { display:none !important; }

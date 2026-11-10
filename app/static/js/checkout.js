@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Atualizar texto
         const originalText = btnCheckout.textContent.trim();
-        btnCheckout.textContent = originalText || 'Finalizar Venda';
+        btnCheckout.textContent = originalText || 'Confirmar Pagamento';
         
         // Adicionar eventos
         btnCheckout.addEventListener('click', handleCheckoutClick);
