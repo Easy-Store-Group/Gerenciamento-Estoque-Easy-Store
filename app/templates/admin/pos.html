@@ -705,26 +705,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Integração Pix
     async function abrirModalPix(valor) {
-        if (valor <= 0) return;
-        modalPixValor.textContent = formatarMoeda(valor);
+        const valorNumerico = Number(valor);
+        if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) return;
+
+        modalPixValor.textContent = formatarMoeda(valorNumerico);
         pixLoading.style.display = "block";
+        pixLoading.textContent = "GERANDO QR CODE...";
         pixImg.style.display = "none";
+        pixImg.src = "";
         pixInput.value = "";
         modalPix.style.display = "flex";
 
         try {
-            const res = await fetch(`/pdv/api/pix-qrcode?valor=${valor}`);
-            const data = await res.json();
-            if (data.qrcode_b64) {
-                pixImg.src = data.qrcode_b64;
-                pixImg.style.display = "inline-block";
-                pixInput.value = data.payload || "";
-                pixLoading.style.display = "none";
-            } else {
-                pixLoading.textContent = "ERRO AO GERAR QR CODE.";
+            const res = await fetch(`/pdv/api/pix-qrcode?valor=${valorNumerico.toFixed(2)}`, {
+                method: "GET",
+                credentials: "same-origin",
+                headers: {
+                    Accept: "application/json"
+                }
+            });
+
+            const contentType = (res.headers.get("content-type") || "").toLowerCase();
+            const data = contentType.includes("application/json") ? await res.json() : {};
+
+            if (!res.ok) {
+                const mensagem = data?.mensagem || data?.detail || data?.error || "Não foi possível gerar o QR Code do PIX.";
+                throw new Error(mensagem);
             }
+
+            if (!data || !data.qrcode_b64) {
+                throw new Error("Resposta inválida da API do PIX.");
+            }
+
+            pixImg.src = data.qrcode_b64;
+            pixImg.style.display = "inline-block";
+            pixInput.value = data.payload || "";
+            pixLoading.style.display = "none";
         } catch (e) {
-            pixLoading.textContent = "ERRO AO CARREGAR QR CODE.";
+            pixLoading.textContent = e?.message || "ERRO AO CARREGAR QR CODE.";
+            pixImg.style.display = "none";
+            pixImg.src = "";
+            pixInput.value = "";
         }
     }
 

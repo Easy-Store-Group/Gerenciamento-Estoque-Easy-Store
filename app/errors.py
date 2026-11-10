@@ -41,7 +41,8 @@ class OperacaoInvalidaError(Exception):
 
 def _is_api_request(request: Request) -> bool:
     try:
-        return request.url.path.startswith("/api/")
+        path = request.url.path.lower()
+        return "/api/" in path or "/pdv/" in path
     except Exception:
         return False
 

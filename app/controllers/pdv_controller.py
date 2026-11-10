@@ -122,10 +122,12 @@ def _pagamentos_do_admin(
     valor_pagamento_1: float | None = None,
     forma_pagamento_2: str | None = None,
     valor_pagamento_2: float | None = None,
+    parcelas_forma_1: int | None = None,
+    parcelas_forma_2: int | None = None,
 ):
     """Normaliza os pagamentos válidos para o admin.
 
-    Suporta pagamento único e combinação de dois métodos.
+    Suporta pagamento único, combinação de dois métodos e parcelamento em crédito.
     """
 
     total_liquido = round(float(total_liquido), 2)
@@ -134,9 +136,9 @@ def _pagamentos_do_admin(
         pagamentos = []
         formas_usadas = set()
 
-        for forma, valor in (
-            (forma_pagamento_1, valor_pagamento_1),
-            (forma_pagamento_2, valor_pagamento_2),
+        for forma, valor, parcelas in (
+            (forma_pagamento_1, valor_pagamento_1, parcelas_forma_1),
+            (forma_pagamento_2, valor_pagamento_2, parcelas_forma_2),
         ):
             if forma in (None, ""):
                 continue
@@ -153,9 +155,27 @@ def _pagamentos_do_admin(
             if valor_float is None or valor_float <= 0:
                 raise ValueError("valor_pagamento_invalido")
 
+            if forma == "cartao_credito":
+                parcelas_validas = int(parcelas or 1)
+                if parcelas_validas < 1 or parcelas_validas > 12:
+                    raise ValueError("parcelas_invalidas")
+
+                parcela_valor = round(valor_float / parcelas_validas, 2)
+                pagamentos.append({
+                    "forma": forma,
+                    "valor": round(valor_float, 2),
+                    "parcelado": True,
+                    "numero_parcelas": parcelas_validas,
+                    "valor_parcela": parcela_valor,
+                })
+                continue
+
             pagamentos.append({
                 "forma": forma,
                 "valor": round(valor_float, 2),
+                "parcelado": False,
+                "numero_parcelas": 1,
+                "valor_parcela": round(valor_float, 2),
             })
 
         if not pagamentos:
@@ -182,6 +202,9 @@ def _pagamentos_do_admin(
                     "valor": round(item["valor"], 2),
                     "valor_recebido": round(item["valor"], 2),
                     "troco": troco,
+                    "parcelado": False,
+                    "numero_parcelas": 1,
+                    "valor_parcela": round(item["valor"], 2),
                 })
             else:
                 pagamentos_validos.append({
@@ -189,6 +212,9 @@ def _pagamentos_do_admin(
                     "valor": round(item["valor"], 2),
                     "valor_recebido": None,
                     "troco": None,
+                    "parcelado": bool(item.get("parcelado")),
+                    "numero_parcelas": item.get("numero_parcelas") or 1,
+                    "valor_parcela": item.get("valor_parcela") or round(item["valor"], 2),
                 })
 
         return pagamentos_validos
@@ -200,6 +226,21 @@ def _pagamentos_do_admin(
         raise ValueError("forma_pagamento_invalida")
 
     valor_float = _coerce_float(valor_recebido)
+
+    if forma_pagamento == "cartao_credito":
+        parcelas_validas = int(parcelas_forma_1 or 1)
+        if parcelas_validas < 1 or parcelas_validas > 12:
+            raise ValueError("parcelas_invalidas")
+        parcela_valor = round(valor_float if valor_float is not None else total_liquido / parcelas_validas, 2)
+        return [{
+            "forma": forma_pagamento,
+            "valor": round(total_liquido, 2),
+            "valor_recebido": None,
+            "troco": None,
+            "parcelado": True,
+            "numero_parcelas": parcelas_validas,
+            "valor_parcela": parcela_valor,
+        }]
 
     if forma_pagamento == "dinheiro":
         if valor_float is None:
@@ -215,6 +256,9 @@ def _pagamentos_do_admin(
             "valor": round(total_liquido, 2),
             "valor_recebido": round(valor_float, 2),
             "troco": troco,
+            "parcelado": False,
+            "numero_parcelas": 1,
+            "valor_parcela": round(total_liquido, 2),
         }]
 
     return [{
@@ -222,6 +266,9 @@ def _pagamentos_do_admin(
         "valor": round(total_liquido, 2),
         "valor_recebido": None,
         "troco": None,
+        "parcelado": False,
+        "numero_parcelas": 1,
+        "valor_parcela": round(total_liquido, 2),
     }]
 
 
@@ -381,6 +428,10 @@ def finalizar_venda(
 
     valor_pagamento_2: float | None = Form(None),
 
+    parcelas_forma_1: int | None = Form(None),
+
+    parcelas_forma_2: int | None = Form(None),
+
     db: Session = Depends(get_db),
 
     usuario=Depends(get_admin_ou_operador)
@@ -411,6 +462,8 @@ def finalizar_venda(
                 valor_pagamento_1=valor_pagamento_1,
                 forma_pagamento_2=forma_pagamento_2,
                 valor_pagamento_2=valor_pagamento_2,
+                parcelas_forma_1=parcelas_forma_1,
+                parcelas_forma_2=parcelas_forma_2,
             )
         except ValueError as exc:
             return _redirect_pdv(db, f"/pdv?erro={exc}")
@@ -621,6 +674,8 @@ def finalizar_venda(
                 valor_pagamento_1=valor_pagamento_1,
                 forma_pagamento_2=forma_pagamento_2,
                 valor_pagamento_2=valor_pagamento_2,
+                parcelas_forma_1=parcelas_forma_1,
+                parcelas_forma_2=parcelas_forma_2,
             )
         except ValueError as exc:
             return _redirect_pdv(db, f"/pdv?erro={exc}")
