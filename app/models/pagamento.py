@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, Float, String, ForeignKey
+from sqlalchemy import Column, Integer, Float, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 
 from app.database import Base
@@ -22,6 +22,12 @@ class Pagamento(Base):
     valor_recebido = Column(Float, nullable=True)
 
     troco = Column(Float, nullable=True)
+
+    parcelado = Column(Boolean, nullable=False, default=False)
+
+    numero_parcelas = Column(Integer, nullable=True, default=1)
+
+    valor_parcela = Column(Float, nullable=True)
 
     venda = relationship(
         "Venda",
