@@ -1045,8 +1045,18 @@ button:disabled,
   cursor: default;
 }
 
+.slot-parcelas {
+  min-width: 0;
+  width: 100%;
+}
+
 .slot-parcelas select {
+  box-sizing: border-box;
+  display: block;
   height: 34px;
+  max-width: 100%;
+  min-width: 0;
+  padding: 6px 8px;
   font-size: 0.75rem;
   font-weight: 700;
 }
