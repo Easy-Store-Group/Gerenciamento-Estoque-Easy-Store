@@ -855,6 +855,9 @@ def finalizar_venda(
                     valor=pagamento_data["valor"],
                     valor_recebido=pagamento_data["valor_recebido"],
                     troco=pagamento_data["troco"],
+                    parcelado=bool(pagamento_data.get("parcelado", False)),
+                    numero_parcelas=int(pagamento_data.get("numero_parcelas") or 1),
+                    valor_parcela=pagamento_data.get("valor_parcela"),
                 )
                 db.add(pagamento)
 
@@ -865,10 +868,9 @@ def finalizar_venda(
 
         db.commit()
 
-
     except Exception:
-
         db.rollback()
+        logger.exception("Erro ao salvar venda PDV. Dados do carrinho: %s", carrinho_json)
 
         return RedirectResponse(
             url="/pdv?erro=salvar",
