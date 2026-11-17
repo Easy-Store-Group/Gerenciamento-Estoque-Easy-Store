@@ -83,9 +83,15 @@
         <span class="pagamentos-comprovante-titulo">Formas de Pagamento:</span>
         {% for pag in venda.pagamentos %}
         <div class="total-row pagamento-detalhe-row">
-          <span>{{ pag.forma|upper }}</span>
+          <span>{% if pag.forma == 'cartao_credito' %}Cartão de crédito{% else %}{{ pag.forma|upper }}{% endif %}</span>
           <strong>R$ {{ "%.2f"|format(pag.valor) }}</strong>
         </div>
+        {% if pag.forma == 'cartao_credito' and pag.parcelado and (pag.numero_parcelas or 1) > 1 %}
+        <div class="total-row parcela-resumo-row">
+          <span>Parcelamento</span>
+          <strong>{{ pag.numero_parcelas }}x</strong>
+        </div>
+        {% endif %}
         {% if pag.troco and pag.troco > 0 %}
         <div class="total-row troco-detalhe-row">
           <span>Troco devolvido</span>
@@ -125,6 +131,7 @@
 .pagamentos-comprovante-box { margin-top:12px; padding-top:10px; border-top:1px dashed #cbd5e1; display:flex; flex-direction:column; gap:4px; }
 .pagamentos-comprovante-titulo { font-size:.78rem; font-weight:800; color:#475569; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px; }
 .pagamento-detalhe-row span { font-weight:700; color:#1e293b; }
+.parcela-resumo-row { padding-left:12px; font-size:.82rem; }
 .troco-detalhe-row { font-size:.8rem; color:#0284c7; }
 .comprovante-actions { display:flex; gap:10px; }
 @media print {

@@ -13,6 +13,7 @@
 import json
 import logging
 import math
+from decimal import Decimal
 from urllib.parse import quote
 
 logger = logging.getLogger("pdv.pix")
@@ -28,7 +29,7 @@ from app.models.venda import Venda, ItemVenda
 from app.models.produto import Produto
 from app.models.cliente import Cliente
 from app.models.movimentacao import Movimentacao, Tipo_de_movimentacao
-from app.models.pagamento import Pagamento
+from app.models.pagamento import Pagamento, PagamentoParcela
 
 from app.auth import (
     get_admin,
@@ -169,7 +170,7 @@ def _pagamentos_do_admin(
                 pagamentos.append({
                     "forma": forma,
                     "valor": round(valor_float, 2),
-                    "parcelado": True,
+                    "parcelado": parcelas_validas > 1,
                     "numero_parcelas": parcelas_validas,
                     "valor_parcela": parcela_valor,
                 })
@@ -236,13 +237,13 @@ def _pagamentos_do_admin(
         parcelas_validas = int(parcelas_forma_1 or 1)
         if parcelas_validas < 1 or parcelas_validas > 12:
             raise ValueError("parcelas_invalidas")
-        parcela_valor = round(valor_float if valor_float is not None else total_liquido / parcelas_validas, 2)
+        parcela_valor = round(total_liquido / parcelas_validas, 2)
         return [{
             "forma": forma_pagamento,
             "valor": round(total_liquido, 2),
             "valor_recebido": None,
             "troco": None,
-            "parcelado": True,
+            "parcelado": parcelas_validas > 1,
             "numero_parcelas": parcelas_validas,
             "valor_parcela": parcela_valor,
         }]
@@ -528,20 +529,6 @@ def finalizar_venda(
 
     if eh_admin:
         pagamentos_admin = []
-        try:
-            pagamentos_admin = _pagamentos_do_admin(
-                forma_pagamento=forma_pagamento,
-                valor_recebido=valor_recebido,
-                total_liquido=0.0,
-                forma_pagamento_1=forma_pagamento_1,
-                valor_pagamento_1=valor_pagamento_1,
-                forma_pagamento_2=forma_pagamento_2,
-                valor_pagamento_2=valor_pagamento_2,
-                parcelas_forma_1=parcelas_forma_1,
-                parcelas_forma_2=parcelas_forma_2,
-            )
-        except ValueError as exc:
-            return _redirect_pdv(db, f"/pdv?erro={exc}")
     else:
         # Operador não possui forma de pagamento.
         forma_pagamento = None
@@ -859,6 +846,15 @@ def finalizar_venda(
                     numero_parcelas=int(pagamento_data.get("numero_parcelas") or 1),
                     valor_parcela=pagamento_data.get("valor_parcela"),
                 )
+                if pagamento.forma == "cartao_credito" and pagamento.parcelado:
+                    detalhes_parcelas = calcular_parcelas_credito(
+                        Decimal(str(pagamento.valor)),
+                        pagamento.numero_parcelas,
+                    )
+                    pagamento.parcelas_detalhe = [
+                        PagamentoParcela(numero=detalhe.number, valor=detalhe.amount)
+                        for detalhe in detalhes_parcelas
+                    ]
                 db.add(pagamento)
 
 
