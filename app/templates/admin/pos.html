@@ -668,7 +668,7 @@ document.addEventListener("DOMContentLoaded", function () {
         atualizarParcelamentoSeNecessario(val1, val2);
 
         // Exibe botão de QR Code Pix se Pix estiver em uso
-        const usaPix = (selectForma1.value === "pix" && val1 > 0) || (selectForma2.value === "pix" && val2 > 0);
+        const usaPix = (selectForma1.value === "pix" && val1 > 0) || (modoCombinado && selectForma2.value === "pix" && val2 > 0);
         if (boxBotaoPix) {
             boxBotaoPix.style.display = usaPix ? "block" : "none";
         }
