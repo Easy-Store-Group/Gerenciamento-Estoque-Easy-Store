@@ -1180,4 +1180,106 @@ button:disabled,
   outline-offset: 2px;
 }
 
+/* ============================================================
+   MELHORIAS DE UI DO PDV: STATUS PIX & CANCELAMENTO
+   ============================================================ */
+
+.carrinho-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.carrinho-header-acoes {
+  display: flex;
+  gap: 6px;
+}
+
+.btn-cancelar-venda-topo {
+  background: transparent;
+  border: 1px solid #fee2e2;
+  color: #ef4444;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--pos-transition);
+}
+
+.btn-cancelar-venda-topo:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.pix-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all var(--pos-transition);
+}
+
+.pix-status-banner.operacional {
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+}
+
+.pix-status-banner.indisponivel {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+.pix-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  flex-shrink: 0;
+}
+
+.pix-status-banner.operacional .pix-status-dot {
+  background: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.pix-status-banner.indisponivel .pix-status-dot {
+  background: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.pix-status-texto {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-retestar-pix {
+  background: #ffffff;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: inherit;
+  cursor: pointer;
+  transition: opacity var(--pos-transition);
+}
+
+.btn-retestar-pix:hover {
+  opacity: 0.8;
+}
+
+.btn-retestar-pix:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 

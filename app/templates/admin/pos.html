@@ -261,6 +261,13 @@
                 {% if role == 'admin' %}
 
                 <div class="area-pagamento-admin" id="area-pagamento-admin">
+                    <!-- Status de Conexão do Serviço PIX -->
+                    <div id="pix-status-banner" class="pix-status-banner operacional mb-2">
+                        <span class="pix-status-dot"></span>
+                        <span id="pix-status-texto" class="pix-status-texto">Verificando serviço PIX...</span>
+                        <button type="button" id="btn-retestar-pix" class="btn-retestar-pix" title="Testar conexão com o serviço PIX">Verificar</button>
+                    </div>
+
                     <!-- Barra de Topo com Saldos e Botão de Alternância (proibido o termo 'RESTANTE') -->
                     <div class="pagamento-header-saldos" id="header-saldos-container">
                         <div class="saldo-card">
@@ -418,9 +425,9 @@
 </div>
 
 
-<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=6"></script>
+<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=7"></script>
 
-<script src="{{ request.url_for('static', path='js/checkout.js') }}?v=6"></script>
+<script src="{{ request.url_for('static', path='js/checkout.js') }}?v=7"></script>
 
 
 {% if role == 'admin' %}
@@ -443,6 +450,94 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const boxBotaoPix = document.getElementById("box-botao-abrir-pix");
     const btnVerPix = document.getElementById("btn-ver-qrcode-pix");
+
+    // Status PIX
+    const pixStatusBanner = document.getElementById("pix-status-banner");
+    const pixStatusTexto = document.getElementById("pix-status-texto");
+    const btnRetestarPix = document.getElementById("btn-retestar-pix");
+    let pixDisponivelGlobal = true;
+    let checandoPix = false;
+
+    async function checarStatusPix(notificarSucesso = false) {
+        if (checandoPix) return;
+        checandoPix = true;
+        if (pixStatusTexto) pixStatusTexto.textContent = "Verificando serviço PIX...";
+        if (btnRetestarPix) btnRetestarPix.disabled = true;
+
+        try {
+            const res = await fetch("/pdv/api/pix-status", {
+                method: "GET",
+                credentials: "same-origin",
+                headers: { "Accept": "application/json" }
+            });
+            const data = await res.json();
+            pixDisponivelGlobal = !!data.disponivel;
+
+            if (pixDisponivelGlobal) {
+                pixStatusBanner.className = "pix-status-banner operacional mb-2";
+                pixStatusTexto.textContent = "PIX operacional e conectado";
+                pixStatusBanner.title = data.motivo || "Serviço PIX conectado com sucesso.";
+                habilitarOpcaoPixNosSelects(true);
+                if (notificarSucesso && typeof mostrarAlerta === "function") {
+                    mostrarAlerta("Conexão com o serviço PIX restabelecida!", "success");
+                }
+            } else {
+                pixStatusBanner.className = "pix-status-banner indisponivel mb-2";
+                const motivoMsg = data.motivo || "PIX temporariamente indisponível. Não foi possível estabelecer conexão com o serviço de pagamento. Escolha outra forma de pagamento ou tente novamente mais tarde.";
+                pixStatusTexto.textContent = "PIX indisponível";
+                pixStatusBanner.title = motivoMsg;
+                habilitarOpcaoPixNosSelects(false);
+
+                // Se PIX estiver selecionado em alguma forma, muda para dinheiro
+                if (selectForma1.value === "pix") {
+                    selectForma1.value = "dinheiro";
+                }
+                if (selectForma2.value === "pix") {
+                    selectForma2.value = "cartao_credito";
+                }
+                recalcularPagamentos("pix_indisponivel");
+
+                if (typeof mostrarAlerta === "function") {
+                    mostrarAlerta("PIX temporariamente indisponível. Não foi possível estabelecer conexão com o serviço de pagamento. Escolha outra forma de pagamento ou tente novamente mais tarde.", "warning");
+                }
+            }
+        } catch (err) {
+            pixDisponivelGlobal = false;
+            pixStatusBanner.className = "pix-status-banner indisponivel mb-2";
+            pixStatusTexto.textContent = "PIX com falha de conexão";
+            pixStatusBanner.title = "Não foi possível contatar o serviço de verificação do PIX.";
+            habilitarOpcaoPixNosSelects(false);
+            if (selectForma1.value === "pix") selectForma1.value = "dinheiro";
+            if (selectForma2.value === "pix") selectForma2.value = "cartao_credito";
+            recalcularPagamentos("pix_erro");
+        } finally {
+            checandoPix = false;
+            if (btnRetestarPix) btnRetestarPix.disabled = false;
+        }
+    }
+
+    function habilitarOpcaoPixNosSelects(habilitar) {
+        [selectForma1, selectForma2].forEach(select => {
+            if (!select) return;
+            const optPix = select.querySelector('option[value="pix"]');
+            if (optPix) {
+                optPix.disabled = !habilitar;
+                optPix.textContent = habilitar ? "PIX" : "PIX (INDISPONÍVEL)";
+            }
+        });
+        if (btnVerPix) {
+            btnVerPix.disabled = !habilitar;
+            if (!habilitar) {
+                btnVerPix.title = "PIX temporariamente indisponível";
+            } else {
+                btnVerPix.title = "Gerar QR Code PIX";
+            }
+        }
+    }
+
+    if (btnRetestarPix) {
+        btnRetestarPix.addEventListener("click", () => checarStatusPix(true));
+    }
 
     // Modal Pix
     const modalPix = document.getElementById("modal-pix");
@@ -578,6 +673,22 @@ document.addEventListener("DOMContentLoaded", function () {
             boxBotaoPix.style.display = usaPix ? "block" : "none";
         }
 
+        // Se PIX não estiver em uso ou se o valor mudou, fecha ou invalida modal PIX aberto
+        if (!usaPix && modalPix && modalPix.style.display === "flex") {
+            fecharModalPix();
+        } else if (modalPix && modalPix.style.display === "flex") {
+            let valPixAtual = 0;
+            if (selectForma1.value === "pix") valPixAtual += val1;
+            if (selectForma2.value === "pix") valPixAtual += val2;
+            if (modalPixValor && modalPixValor.dataset.valorCobrado && modalPixValor.dataset.valorCobrado !== valPixAtual.toFixed(2)) {
+                // Valor mudou enquanto modal estava aberto: fecha modal para não cobrar valor desatualizado
+                fecharModalPix();
+                if (typeof mostrarAlerta === "function") {
+                    mostrarAlerta("O valor do carrinho foi alterado. Gere um novo QR Code para o valor atualizado.", "info");
+                }
+            }
+        }
+
         // Atualiza campos hidden para persistência no backend
         atualizarHiddenInputs(total, val1, val2);
     }
@@ -704,11 +815,42 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     // Integração Pix
+    let requisicaoPixEmAndamento = false;
+
     async function abrirModalPix(valor) {
+        // Validações no Front-end:
+        // Não gerar se PIX não estiver selecionado em nenhuma das formas ativas
+        const val1 = parseFloat(inputValorForma1.value) || 0;
+        const val2 = parseFloat(inputValorForma2.value) || 0;
+        const forma1Pix = selectForma1.value === "pix" && val1 > 0;
+        const forma2Pix = modoCombinado && selectForma2.value === "pix" && val2 > 0;
+
+        if (!forma1Pix && !forma2Pix) {
+            if (typeof mostrarAlerta === "function") {
+                mostrarAlerta("Selecione PIX como forma de pagamento para gerar o QR Code.", "info");
+            }
+            return;
+        }
+
+        if (!pixDisponivelGlobal) {
+            if (typeof mostrarAlerta === "function") {
+                mostrarAlerta("PIX temporariamente indisponível. Não foi possível estabelecer conexão com o serviço de pagamento. Escolha outra forma de pagamento ou tente novamente mais tarde.", "warning");
+            }
+            return;
+        }
+
+        if (requisicaoPixEmAndamento) {
+            return; // Prevenção de requisições duplicadas
+        }
+
         const valorNumerico = Number(valor);
         if (!Number.isFinite(valorNumerico) || valorNumerico <= 0) return;
 
+        requisicaoPixEmAndamento = true;
+        if (btnVerPix) btnVerPix.disabled = true;
+
         modalPixValor.textContent = formatarMoeda(valorNumerico);
+        modalPixValor.dataset.valorCobrado = valorNumerico.toFixed(2);
         pixLoading.style.display = "block";
         pixLoading.textContent = "GERANDO QR CODE...";
         pixImg.style.display = "none";
@@ -717,7 +859,7 @@ document.addEventListener("DOMContentLoaded", function () {
         modalPix.style.display = "flex";
 
         try {
-            const res = await fetch(`/pdv/api/pix-qrcode?valor=${valorNumerico.toFixed(2)}`, {
+            const res = await fetch(`/pdv/api/pix-qrcode?valor=${valorNumerico.toFixed(2)}&forma_pagamento=pix`, {
                 method: "GET",
                 credentials: "same-origin",
                 headers: {
@@ -728,8 +870,12 @@ document.addEventListener("DOMContentLoaded", function () {
             const contentType = (res.headers.get("content-type") || "").toLowerCase();
             const data = contentType.includes("application/json") ? await res.json() : {};
 
-            if (!res.ok) {
-                const mensagem = data?.mensagem || data?.detail || data?.error || "Não foi possível gerar o QR Code do PIX.";
+            if (!res.ok || data.erro) {
+                if (data.indisponivel) {
+                    pixDisponivelGlobal = false;
+                    checarStatusPix();
+                }
+                const mensagem = data?.erro || data?.mensagem || data?.detail || "Não foi possível gerar o QR Code do PIX.";
                 throw new Error(mensagem);
             }
 
@@ -746,6 +892,9 @@ document.addEventListener("DOMContentLoaded", function () {
             pixImg.style.display = "none";
             pixImg.src = "";
             pixInput.value = "";
+        } finally {
+            requisicaoPixEmAndamento = false;
+            if (btnVerPix && pixDisponivelGlobal) btnVerPix.disabled = false;
         }
     }
 
@@ -753,6 +902,9 @@ document.addEventListener("DOMContentLoaded", function () {
         modalPix.style.display = "none";
         pixImg.src = "";
         pixInput.value = "";
+        if (modalPixValor) modalPixValor.dataset.valorCobrado = "";
+        requisicaoPixEmAndamento = false;
+        if (btnVerPix && pixDisponivelGlobal) btnVerPix.disabled = false;
     }
 
     if (btnVerPix) {
@@ -799,8 +951,9 @@ document.addEventListener("DOMContentLoaded", function () {
         observer.observe(resumoTotalEl, { childList: true, subtree: true, characterData: true });
     }
 
-    // Inicialização automática: sugere o total integral na Forma 1
+    // Inicialização automática: sugere o total integral na Forma 1 e verifica status do PIX
     setTimeout(() => {
+        checarStatusPix(false);
         const totalInicial = obterTotalVenda();
         if (totalInicial > 0 && !inputValorForma1.value) {
             inputValorForma1.value = totalInicial.toFixed(2);

@@ -11,8 +11,11 @@
 # ============================================================
 
 import json
+import logging
 import math
 from urllib.parse import quote
+
+logger = logging.getLogger("pdv.pix")
 
 from fastapi import APIRouter, Depends, Request, Form
 from fastapi.responses import RedirectResponse
@@ -32,7 +35,9 @@ from app.auth import (
     get_admin_ou_operador,
 )
 from app.services.payment_engine import PaymentEngine, calcular_parcelas_credito
-from app.services.pix_service import gerar_payload_pix, gerar_qrcode_pix_base64
+from app.services.pix_service import gerar_payload_pix, gerar_qrcode_pix_base64, verificar_status_pix
+from app.models.variacao import ProdutoVariacao
+from app.services.estoque_service import recalcular_estoque_produto
 from app.models.payment_schemas import PaymentMethod
 
 
@@ -351,23 +356,75 @@ def tela_pdv(
 # API HELPER PIX & PARCELAS
 # ============================================================
 
+@router.get("/api/pix-status")
+def api_pix_status(usuario=Depends(get_admin_ou_operador)):
+    """Verifica a conectividade e disponibilidade do serviço de pagamento PIX."""
+    return verificar_status_pix()
+
+
 @router.get("/api/pix-qrcode")
-def api_pix_qrcode(valor: float, usuario=Depends(get_admin_ou_operador)):
-    """Retorna o código copia e cola e a imagem base64 do QR Code Pix."""
+def api_pix_qrcode(
+    valor: float,
+    forma_pagamento: str = "pix",
+    usuario=Depends(get_admin_ou_operador)
+):
+    """Retorna o código copia e cola e a imagem base64 do QR Code Pix sob demanda.
+    
+    Regras de Backend:
+    1. Valida se a forma solicitada é estritamente 'pix'.
+    2. Valida a disponibilidade e configuração da API PIX.
+    3. Trata erros, timeout e falhas de conexão de forma segura e sem dados sensíveis nos logs.
+    4. Não confia apenas nas verificações do Front-end.
+    """
+    if str(forma_pagamento).strip().lower() != "pix":
+        logger.warning("Tentativa de gerar QR Code Pix com forma de pagamento incompativel: %s", forma_pagamento)
+        return {
+            "erro": "A geração de QR Code só é permitida quando a forma de pagamento selecionada for PIX.",
+            "disponivel": False,
+            "codigo": "FORMA_INVALIDA"
+        }
+
+    status_pix = verificar_status_pix()
+    if not status_pix.get("disponivel"):
+        logger.warning("Requisicao de QR Code PIX recusada: servico indisponivel (%s)", status_pix.get("codigo"))
+        return {
+            "erro": status_pix.get(
+                "motivo",
+                "PIX temporariamente indisponível. Não foi possível estabelecer conexão com o serviço de pagamento. Escolha outra forma de pagamento ou tente novamente mais tarde."
+            ),
+            "indisponivel": True,
+            "disponivel": False,
+            "codigo": status_pix.get("codigo", "INDISPONIVEL")
+        }
+
     try:
         from decimal import Decimal
         val_dec = Decimal(str(valor)).quantize(Decimal("0.01"))
         if val_dec <= Decimal("0.00"):
-            return {"erro": "Valor deve ser maior que zero."}
+            return {
+                "erro": "Valor para geração do PIX deve ser maior que zero.",
+                "disponivel": False,
+                "codigo": "VALOR_INVALIDO"
+            }
+        
         payload = gerar_payload_pix(val_dec)
         qrcode_b64 = gerar_qrcode_pix_base64(payload)
+        
+        logger.info("QR Code PIX gerado com sucesso sob demanda. Valor: %.2f", float(val_dec))
         return {
             "payload": payload,
             "qrcode_b64": qrcode_b64,
-            "valor": float(val_dec)
+            "valor": float(val_dec),
+            "disponivel": True,
+            "status": "pendente"
         }
     except Exception as exc:
-        return {"erro": str(exc)}
+        logger.error("Excecao na composicao do QR Code PIX: %s", str(exc), exc_info=False)
+        return {
+            "erro": f"Erro interno ao gerar QR Code PIX: {str(exc)}",
+            "disponivel": False,
+            "codigo": "ERRO_GERACAO"
+        }
 
 
 @router.get("/api/calcular-parcelas")
@@ -397,6 +454,15 @@ def finalizar_venda_get(request: Request):
         url="/pdv?erro=metodo_invalido",
         status_code=302,
     )
+
+
+from fastapi.params import Form as FormParam
+
+
+def _clean_form_val(val):
+    if val is None or isinstance(val, FormParam):
+        return None
+    return val
 
 
 @router.post("/finalizar")
@@ -436,6 +502,15 @@ def finalizar_venda(
 
     usuario=Depends(get_admin_ou_operador)
 ):
+
+    forma_pagamento = _clean_form_val(forma_pagamento)
+    valor_recebido = _clean_form_val(valor_recebido)
+    forma_pagamento_1 = _clean_form_val(forma_pagamento_1)
+    valor_pagamento_1 = _clean_form_val(valor_pagamento_1)
+    forma_pagamento_2 = _clean_form_val(forma_pagamento_2)
+    valor_pagamento_2 = _clean_form_val(valor_pagamento_2)
+    parcelas_forma_1 = _clean_form_val(parcelas_forma_1)
+    parcelas_forma_2 = _clean_form_val(parcelas_forma_2)
 
     # ========================================================
     # IDENTIFICA SE É ADMIN
@@ -543,98 +618,100 @@ def finalizar_venda(
 
     itens_validados = []
 
-
+    # Agrupa itens do carrinho para prevenir produtos repetidos e garantir verificação atômica
+    itens_agrupados = {}
     for item in itens:
-
         if not isinstance(item, dict):
-
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=item_invalido"
-            )
-
+            return _redirect_pdv(db, "/pdv?erro=item_invalido")
 
         produto_id = _extrair_produto_id(item)
-
-
         if produto_id is None:
-
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=item_invalido"
-            )
-
+            return _redirect_pdv(db, "/pdv?erro=item_invalido")
 
         try:
-
-            qtd = int(
-                item.get(
-                    "quantidade",
-                    0
-                )
-            )
-
-        except (
-            TypeError,
-            ValueError
-        ):
-
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=quantidade"
-            )
-
+            qtd = int(item.get("quantidade", 0))
+        except (TypeError, ValueError):
+            return _redirect_pdv(db, "/pdv?erro=quantidade")
 
         if qtd <= 0:
+            return _redirect_pdv(db, "/pdv?erro=quantidade")
 
-            return _redirect_pdv(
-                db,
-                "/pdv?erro=quantidade"
-            )
+        variacao_id = item.get("variacao_id")
+        try:
+            variacao_id = int(variacao_id) if variacao_id is not None and str(variacao_id).strip() != "" else None
+        except (TypeError, ValueError):
+            variacao_id = None
 
+        chave = (produto_id, variacao_id)
+        itens_agrupados[chave] = itens_agrupados.get(chave, 0) + qtd
 
-        produto = (
+    # Validação e travamento de concorrência com with_for_update() ordenado por ID (previne deadlocks)
+    produtos_ids_ordenados = sorted(set(pid for pid, _ in itens_agrupados.keys()))
+    produtos_lock = {}
+    for pid in produtos_ids_ordenados:
+        p_obj = (
             db.query(Produto)
-            .filter(
-                Produto.id == produto_id,
-                Produto.ativo == True
-            )
+            .filter(Produto.id == pid, Produto.ativo == True)
             .with_for_update()
             .first()
         )
+        if not p_obj:
+            return _redirect_pdv(db, f"/pdv?erro=produto_inexistente&id={pid}")
+        produtos_lock[pid] = p_obj
 
-
-        if not produto:
-
-            return _redirect_pdv(
-                db,
-                f"/pdv?erro=produto_inexistente&id={produto_id}"
+    # Verifica também variações se existirem
+    variacoes_lock = {}
+    for (pid, vid), qtd_total in itens_agrupados.items():
+        if vid is not None:
+            v_obj = (
+                db.query(ProdutoVariacao)
+                .filter(ProdutoVariacao.id == vid, ProdutoVariacao.produto_id == pid, ProdutoVariacao.ativa == True)
+                .with_for_update()
+                .first()
             )
+            if not v_obj:
+                return _redirect_pdv(db, f"/pdv?erro=produto_inexistente&id={pid}")
+            variacoes_lock[vid] = v_obj
 
+    # Valida estoque acumulado por produto e por variação
+    estoque_demandado_produto = {}
+    for (pid, vid), qtd in itens_agrupados.items():
+        estoque_demandado_produto[pid] = estoque_demandado_produto.get(pid, 0) + qtd
 
-        if produto.estoque_atual < qtd:
+        if vid is not None:
+            v_obj = variacoes_lock[vid]
+            if v_obj.estoque_atual < qtd:
+                return _redirect_pdv(db, f"/pdv?erro=estoque&produto={quote(produtos_lock[pid].nome)}")
 
-            return _redirect_pdv(
-                db,
-                f"/pdv?erro=estoque&produto={quote(produto.nome)}"
-            )
+    for pid, qtd_demandada in estoque_demandado_produto.items():
+        p_obj = produtos_lock[pid]
+        if p_obj.estoque_atual < qtd_demandada:
+            return _redirect_pdv(db, f"/pdv?erro=estoque&produto={quote(p_obj.nome)}")
 
+    # Constrói itens validados e totais com precisão
+    for (pid, vid), qtd in itens_agrupados.items():
+        p_obj = produtos_lock[pid]
+        v_obj = variacoes_lock.get(vid)
 
-        subtotal = (
-            produto.preco * qtd
-        )
+        preco_unit = v_obj.preco if (v_obj and v_obj.preco is not None) else p_obj.preco
+        nome_exibicao = p_obj.nome
+        if v_obj:
+            detalhe = []
+            if v_obj.cor: detalhe.append(v_obj.cor.nome)
+            if v_obj.tamanho: detalhe.append(v_obj.tamanho.nome)
+            if detalhe:
+                nome_exibicao = f"{p_obj.nome} [{ ' - '.join(detalhe) }]"
 
+        subtotal = round(preco_unit * qtd, 2)
         total_bruto += subtotal
 
-
-        itens_validados.append(
-            {
-                "produto": produto,
-                "quantidade": qtd,
-                "preco": produto.preco,
-                "produto_nome": produto.nome,
-            }
-        )
+        itens_validados.append({
+            "produto": p_obj,
+            "variacao": v_obj,
+            "quantidade": qtd,
+            "preco": preco_unit,
+            "produto_nome": nome_exibicao,
+        })
 
 
     # ========================================================
@@ -681,6 +758,13 @@ def finalizar_venda(
             return _redirect_pdv(db, f"/pdv?erro={exc}")
 
         if pagamentos_admin:
+            # Validação obrigatória da API PIX se PIX estiver entre os métodos escolhidos
+            usa_pix = any(p.get("forma") == "pix" for p in pagamentos_admin)
+            if usa_pix:
+                status_pix = verificar_status_pix()
+                if not status_pix.get("disponivel"):
+                    return _redirect_pdv(db, "/pdv?erro=pix_indisponivel")
+
             # Calcula o troco total da operação (quando há dinheiro)
             troco = round(sum(float(metodo.get("troco") or 0.0) for metodo in pagamentos_admin), 2)
 
@@ -727,41 +811,31 @@ def finalizar_venda(
             db.add(
                 ItemVenda(
                     venda_id=venda.id,
-
                     produto_id=item["produto"].id,
-
                     produto_nome=item["produto_nome"],
-
                     quantidade=item["quantidade"],
-
                     preco_unitario=item["preco"],
                 )
             )
 
+            # Baixa definitiva de estoque apenas na conclusão da venda
+            item["produto"].estoque_atual -= item["quantidade"]
 
-            # Baixa estoque
-
-            item["produto"].estoque_atual -= (
-                item["quantidade"]
-            )
-
+            # Se for uma variação, baixa também o estoque da variação e recalcula
+            if item.get("variacao"):
+                item["variacao"].estoque_atual -= item["quantidade"]
 
             # ------------------------------------------------
-            # MOVIMENTAÇÃO DE ESTOQUE
+            # MOVIMENTAÇÃO DE ESTOQUE (Rastreabilidade)
             # ------------------------------------------------
 
             db.add(
                 Movimentacao(
                     tipo=Tipo_de_movimentacao.SAIDA,
-
                     quantidade=item["quantidade"],
-
                     preco_unitario=item["preco"],
-
-                    observacao=f"Venda PDV #{venda.id}",
-
+                    observacao=f"Venda PDV #{venda.id} - {item['produto_nome']}",
                     produto_id=item["produto"].id,
-
                     usuario_id=usuario.get("id"),
                 )
             )
