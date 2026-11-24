@@ -787,3 +787,15 @@ def test_fluxo_pdv_separa_modal_de_processamento():
     assert 'data-loading="local"' in template
     trecho_abertura = pdv[pdv.index("function abrirConfirmacaoPagamento"):inicio_finalizar]
     assert "EasyStoreLoading.begin" not in trecho_abertura
+
+
+def test_pdv_preserva_carrinho_em_erro_e_limpa_somente_no_comprovante():
+    from pathlib import Path
+
+    pdv = Path("app/static/js/pdv.js").read_text(encoding="utf-8")
+
+    assert "sessionStorage.setItem(PDV_CART_STORAGE_KEY" in pdv
+    assert "sessionStorage.getItem(PDV_CART_STORAGE_KEY" in pdv
+    assert "limparCarrinhoPersistidoPDV()" in pdv
+    assert "respostaUrl.pathname.includes('/pdv/venda/')" in pdv
+    assert "throw new Error(erro ? `Pagamento não concluído" in pdv
