@@ -16,8 +16,9 @@ body.easystore-loading-active {
   display: grid;
   place-items: center;
   background: var(--loading-overlay-light);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  filter: none;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -40,11 +41,11 @@ body.easystore-loading-active {
 
 .easystore-loading__content {
   display: flex;
-  min-width: 220px;
+  min-width: 240px;
   max-width: calc(100vw - 48px);
   flex-direction: column;
   align-items: center;
-  gap: 18px;
+  gap: 20px;
   transform: translateY(4px);
   transition: transform 180ms ease;
 }
@@ -55,8 +56,8 @@ body.easystore-loading-active {
 
 .easystore-loading__spinner {
   position: relative;
-  width: 42px;
-  height: 42px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: 2px solid rgba(37, 99, 235, 0.16);
   border-top-color: var(--loading-brand);
@@ -68,8 +69,8 @@ body.easystore-loading-active {
 .easystore-loading__spinner::after {
   content: "";
   position: absolute;
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   top: 3px;
   left: 50%;
   border-radius: 50%;

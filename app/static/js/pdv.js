@@ -156,6 +156,7 @@ function inicializarPDV() {
         }
     });
 
+    restaurarCarrinhoPDV();
     atualizarCarrinho();
 }
 async function carregarVariacoesPDV(produto) {
@@ -369,9 +370,6 @@ function atualizarQuantidade(chaveItem, novaQuantidade) {
 }
 
 function atualizarCarrinho() {
-    pixConfirmadoVenda = false;
-    chaveIdempotenciaVenda = null;
-
     if (carrinho.length === 0) {
         containerCarrinho.innerHTML = '';
     } else {
@@ -391,6 +389,7 @@ function atualizarCarrinho() {
     }
 
     atualizarTotais();
+    salvarCarrinhoPDV();
 }
 
 function atualizarTotais() {
@@ -634,7 +633,15 @@ async function finalizarVenda() {
 
         if (!response.ok) throw new Error('Falha ao processar venda');
 
+        const respostaUrl = new URL(response.url, window.location.href);
+        if (!respostaUrl.pathname.includes('/pdv/venda/')) {
+            const erro = respostaUrl.searchParams.get('erro');
+            throw new Error(erro ? `Pagamento não concluído: ${erro}` : 'Pagamento não concluído');
+        }
+
         estadoPagamentoPDV = 'success';
+        carrinho = [];
+        limparCarrinhoPersistidoPDV();
         window.location.href = response.url;
     } catch (error) {
         mostrarAlerta("Erro ao finalizar venda. Verifique sua conexão e tente novamente.", "warning");
@@ -647,5 +654,49 @@ async function finalizarVenda() {
         if (loadingId && window.EasyStoreLoading) {
             window.EasyStoreLoading.end(loadingId);
         }
+    }
+}
+
+const PDV_CART_STORAGE_KEY = 'easystore.pdv.carrinho.v1';
+
+function salvarCarrinhoPDV() {
+    try {
+        sessionStorage.setItem(PDV_CART_STORAGE_KEY, JSON.stringify(carrinho));
+    } catch (error) {
+        console.warn('Não foi possível preservar o carrinho no navegador.', error);
+    }
+}
+
+function restaurarCarrinhoPDV() {
+    try {
+        const salvo = sessionStorage.getItem(PDV_CART_STORAGE_KEY);
+        if (!salvo) return;
+        const itens = JSON.parse(salvo);
+        if (!Array.isArray(itens)) return;
+
+        carrinho = itens.filter((item) =>
+            item &&
+            Number.isInteger(Number(item.produto_id)) &&
+            Number(item.quantidade) > 0
+        ).map((item) => ({
+            chave: String(item.chave || item.produto_id),
+            produto_id: Number(item.produto_id),
+            variacao_id: item.variacao_id == null ? null : Number(item.variacao_id),
+            nome: String(item.nome || 'Produto'),
+            preco: Number(item.preco) || 0,
+            estoque: Number(item.estoque) || 0,
+            quantidade: Number(item.quantidade) || 1,
+        }));
+    } catch (error) {
+        console.warn('Não foi possível restaurar o carrinho salvo.', error);
+        sessionStorage.removeItem(PDV_CART_STORAGE_KEY);
+    }
+}
+
+function limparCarrinhoPersistidoPDV() {
+    try {
+        sessionStorage.removeItem(PDV_CART_STORAGE_KEY);
+    } catch (error) {
+        console.warn('Não foi possível limpar o carrinho persistido.', error);
     }
 }
