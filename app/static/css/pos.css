@@ -1356,4 +1356,224 @@ button:disabled,
   cursor: not-allowed;
 }
 
+/* Confirmação de pagamento do PDV */
+.modal-confirmacao-pagamento {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.62);
+  overflow-y: auto;
+}
+
+.modal-confirmacao-pagamento.is-open {
+  display: flex;
+}
+
+.modal-confirmacao-caixa {
+  width: min(92vw, 520px);
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.24);
+}
+
+.modal-confirmacao-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 12px;
+}
+
+.modal-confirmacao-header h3 {
+  margin: 3px 0 0;
+  color: #0f172a;
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.modal-confirmacao-kicker {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.btn-fechar-confirmacao-pagamento {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: transparent;
+  color: #475569;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.btn-fechar-confirmacao-pagamento:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.modal-confirmacao-body {
+  display: grid;
+  gap: 12px;
+  padding: 14px 0;
+}
+
+.confirmacao-total-destaque {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.confirmacao-total-destaque strong {
+  color: #0f172a;
+  font-size: clamp(1.55rem, 7vw, 2.15rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.confirmacao-resumo-valores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.confirmacao-resumo-valores div {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.confirmacao-resumo-valores div + div {
+  border-left: 1px solid #e2e8f0;
+}
+
+.confirmacao-resumo-valores strong {
+  color: #0f172a;
+  font-size: 0.92rem;
+}
+
+.confirmacao-metodos-section {
+  display: grid;
+  gap: 8px;
+}
+
+.confirmacao-metodos-titulo {
+  color: #334155;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.confirmacao-metodos-lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.confirmacao-metodo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1.5px solid #2563eb;
+  border-radius: 8px;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.09);
+}
+
+.confirmacao-metodo span {
+  min-width: 0;
+  color: #334155;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.confirmacao-metodo strong {
+  color: #0f172a;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.confirmacao-operador-aviso {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.modal-confirmacao-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 12px;
+}
+
+.modal-confirmacao-footer button {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .modal-confirmacao-caixa {
+    width: 100%;
+    padding: 14px;
+  }
+
+  .confirmacao-resumo-valores,
+  .confirmacao-metodos-lista,
+  .modal-confirmacao-footer {
+    grid-template-columns: 1fr;
+  }
+
+  .confirmacao-resumo-valores div + div {
+    border-left: 0;
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
+body.modal-confirmacao-aberto {
+  overflow: hidden;
+}
+
+.modal-confirmacao-footer button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
 

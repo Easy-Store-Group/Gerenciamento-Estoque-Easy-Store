@@ -69,6 +69,14 @@ class Venda(Base):
         server_default=func.now()
     )
 
+    # Chave de idempotência para evitar processamento duplicado
+    chave_idempotencia = Column(
+        String(64),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
     # ========================================================
     # RELACIONAMENTOS
     # ========================================================

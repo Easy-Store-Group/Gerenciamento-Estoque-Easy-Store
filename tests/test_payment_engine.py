@@ -236,6 +236,7 @@ def test_conclusao_da_venda_com_saldo_restante_zerado():
         valor_pagamento_1=50.0,
         forma_pagamento_2="pix",
         valor_pagamento_2=50.0,
+        pix_confirmado="true",
         db=db,
         usuario={"role": "admin", "id": 1},
     )

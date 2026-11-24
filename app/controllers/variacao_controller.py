@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from pydantic import BaseModel
 import os
 import shutil
@@ -281,7 +281,10 @@ def listar_variacoes_produto(produto_id: int, db: Session = Depends(get_db)):
     if not produto:
         raise HTTPException(status_code=404, detail="Produto não encontrado")
     
-    variacoes = db.query(ProdutoVariacao).filter(
+    variacoes = db.query(ProdutoVariacao).options(
+        joinedload(ProdutoVariacao.cor),
+        joinedload(ProdutoVariacao.tamanho_obj),
+    ).filter(
         ProdutoVariacao.produto_id == produto_id,
         ProdutoVariacao.ativa == True
     ).all()
@@ -291,12 +294,10 @@ def listar_variacoes_produto(produto_id: int, db: Session = Depends(get_db)):
         resultado.append({
             "id": v.id,
             "produto_id": v.produto_id,
-            "cor": {"id": v.cor.id, "nome": v.cor.nome, "codigo_hex": v.cor.codigo_hex} if v.cor else None,
+            "cor": {"id": v.cor.id, "nome": v.cor.nome} if v.cor else None,
             "tamanho": {"id": v.tamanho_obj.id, "nome": v.tamanho_obj.nome} if v.tamanho_obj else None,
             "estoque_atual": v.estoque_atual,
             "preco": float(v.preco or 0),
-            "ativa": v.ativa,
-            "imagem": v.imagem
         })
     
     return resultado
@@ -316,8 +317,6 @@ def obter_variacao(variacao_id: int, db: Session = Depends(get_db)):
         "tamanho": {"id": variacao.tamanho_obj.id, "nome": variacao.tamanho_obj.nome} if variacao.tamanho_obj else None,
         "estoque_atual": variacao.estoque_atual,
         "preco": float(variacao.preco or 0),
-        "ativa": variacao.ativa,
-        "imagem": variacao.imagem
     }
 
 

@@ -44,6 +44,16 @@ def ensure_schema_compatibility():
         with engine.begin() as conn:
             conn.execute(text(f"ALTER TABLE pagamentos ADD COLUMN {column_name} {column_type}"))
 
+    if inspector.has_table("vendas"):
+        venda_columns = {column["name"] for column in inspector.get_columns("vendas")}
+        if "chave_idempotencia" not in venda_columns:
+            with engine.begin() as conn:
+                conn.execute(text("ALTER TABLE vendas ADD COLUMN chave_idempotencia VARCHAR(64)"))
+                try:
+                    conn.execute(text("CREATE UNIQUE INDEX uq_vendas_chave_idempotencia ON vendas (chave_idempotencia) WHERE chave_idempotencia IS NOT NULL"))
+                except Exception:
+                    pass
+
 
 ensure_schema_compatibility()
 
