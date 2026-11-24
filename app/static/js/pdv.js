@@ -411,20 +411,28 @@ async function finalizarVenda() {
         btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processando venda...';
     }
 
+    const loadingId = window.EasyStoreLoading
+        ? window.EasyStoreLoading.begin({ context: "sync", blocking: true })
+        : null;
+
     try {
         const response = await fetch(formFinalizar.action, {
-            method: 'POST',
+            method: "POST",
             body: formData,
-            credentials: 'same-origin',
-            redirect: 'follow',
+            credentials: "same-origin",
+            redirect: "follow",
         });
 
         window.location.href = response.url;
     } catch (error) {
-        mostrarAlerta('Erro ao finalizar venda. Verifique sua conexão e tente novamente.', 'warning');
+        mostrarAlerta("Erro ao finalizar venda. Verifique sua conexão e tente novamente.", "warning");
         if (btn) {
             btn.disabled = false;
             if (btn.dataset.originalHtml) btn.innerHTML = btn.dataset.originalHtml;
+        }
+    } finally {
+        if (loadingId && window.EasyStoreLoading) {
+            window.EasyStoreLoading.end(loadingId);
         }
     }
 }

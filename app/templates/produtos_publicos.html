@@ -34,6 +34,8 @@
       };
     </script>
     <link rel="stylesheet" href="{{ request.url_for('static', path='css/produtos_publicos.css') }}?v=6">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/global-loading.css') }}?v=1">
+    <script src="{{ request.url_for('static', path='js/global-loading.js') }}?v=1" defer></script>
   </head>
   <body class="text-slate-900 antialiased pt-16 bg-white">
     {% set role = usuario.role if usuario is not mapping else usuario.get('role') if usuario else None %}

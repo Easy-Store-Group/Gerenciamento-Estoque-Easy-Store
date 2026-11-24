@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
     <link rel="stylesheet" href="{{ request.url_for('static', path='css/login.css') }}?v=5">
+    <link rel="stylesheet" href="{{ request.url_for('static', path='css/global-loading.css') }}?v=1">
     <title>Entrar | Easy Store</title>
 </head>
 
@@ -65,5 +66,6 @@
   </main>
 
   <script src="{{ request.url_for('static', path='js/login.js') }}?v=5" defer></script>
+  <script src="{{ request.url_for('static', path='js/global-loading.js') }}?v=1" defer></script>
 </body>
 </html>

@@ -6,6 +6,8 @@
   <link rel="icon" type="image/png" href="{{ request.url_for('static', path='img/logo.png') }}">
   <title>{% block title %}Minha área{% endblock %} - EasyStore</title>
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/cliente.css') }}?v=5">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/global-loading.css') }}?v=1">
+  <script src="{{ request.url_for('static', path='js/global-loading.js') }}?v=1" defer></script>
 </head>
 <body>
   <header class="cliente-header">
