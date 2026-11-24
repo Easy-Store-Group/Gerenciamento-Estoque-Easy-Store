@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from fastapi.responses import RedirectResponse
 from starlette.requests import Request
+import json
 
 from app.database import Base
 from app.models.payment_schemas import PaymentMethod, PaymentItem, SalePaymentSummary
@@ -240,6 +241,7 @@ def test_finalizacao_e_persistencia_completa_da_venda():
         valor_pagamento_1=40.0,
         forma_pagamento_2="pix",
         valor_pagamento_2=60.0,
+        pix_confirmado="true",
         db=db,
         usuario={"role": "admin", "id": 1},
     )
@@ -458,6 +460,7 @@ def test_finalizar_venda_persiste_valores_e_parcelas_do_credito(
             carrinho_json='[{"produto_id": %s, "quantidade": 1}]' % produto.id,
             cliente_id=0,
             observacao="Teste de persistência de parcelas",
+            pix_confirmado="true" if any(v == "pix" for v in dados_pagamento.values()) else "false",
             db=db,
             usuario={"role": "admin", "id": usuario.id},
             **dados_pagamento,
@@ -525,6 +528,7 @@ def test_parcelas_persistem_e_comprovante_reconsulta_venda(monkeypatch):
             forma_pagamento_2="cartao_credito",
             valor_pagamento_2=600.0,
             parcelas_forma_2=3,
+            pix_confirmado="true",
             db=db,
             usuario={"role": "admin", "id": usuario.id},
         )
@@ -618,3 +622,168 @@ def test_parcelas_persistem_e_comprovante_reconsulta_venda(monkeypatch):
         db.close()
         Base.metadata.drop_all(bind=engine)
         engine.dispose()
+
+
+@pytest.mark.parametrize(
+    ("forma", "valor_recebido", "parcelas"),
+    [
+        ("dinheiro", 1000.0, None),
+        ("pix", None, None),
+        ("cartao_credito", 1000.0, 1),
+        ("cartao_credito", 1000.0, 12),
+        ("cartao_debito", None, None),
+    ],
+)
+def test_todas_as_formas_individuais_reais(forma, valor_recebido, parcelas):
+    resultado = _pagamentos_do_admin(
+        forma_pagamento=forma,
+        valor_recebido=valor_recebido,
+        total_liquido=1000.0,
+        parcelas_forma_1=parcelas,
+    )
+    assert len(resultado) == 1
+    assert resultado[0]["forma"] == forma
+    assert round(resultado[0]["valor"], 2) == 1000.0
+
+
+@pytest.mark.parametrize(
+    ("forma1", "forma2", "valor1", "valor2"),
+    [
+        ("dinheiro", "pix", 400.0, 600.0),
+        ("dinheiro", "cartao_credito", 400.0, 600.0),
+        ("dinheiro", "cartao_debito", 400.0, 600.0),
+        ("pix", "cartao_credito", 400.0, 600.0),
+        ("pix", "cartao_debito", 400.0, 600.0),
+        ("cartao_credito", "cartao_debito", 600.0, 400.0),
+    ],
+)
+def test_combinacoes_reais_permitidas(forma1, forma2, valor1, valor2):
+    resultado = _pagamentos_do_admin(
+        forma_pagamento=None,
+        valor_recebido=None,
+        total_liquido=1000.0,
+        forma_pagamento_1=forma1,
+        valor_pagamento_1=valor1,
+        forma_pagamento_2=forma2,
+        valor_pagamento_2=valor2,
+        parcelas_forma_1=3 if forma1 == "cartao_credito" else None,
+        parcelas_forma_2=3 if forma2 == "cartao_credito" else None,
+    )
+    assert len(resultado) == 2
+    assert round(sum(p["valor"] for p in resultado), 2) == 1000.0
+
+
+def test_rejeita_soma_insuficiente_em_pagamento_combinado():
+    with pytest.raises(ValueError, match="valor_insuficiente"):
+        _pagamentos_do_admin(
+            forma_pagamento=None,
+            valor_recebido=None,
+            total_liquido=1000.0,
+            forma_pagamento_1="dinheiro",
+            valor_pagamento_1=300.0,
+            forma_pagamento_2="pix",
+            valor_pagamento_2=600.0,
+        )
+
+
+def test_rejeita_soma_excedente_sem_dinheiro():
+    with pytest.raises(ValueError, match="valor_insuficiente"):
+        _pagamentos_do_admin(
+            forma_pagamento=None,
+            valor_recebido=None,
+            total_liquido=1000.0,
+            forma_pagamento_1="pix",
+            valor_pagamento_1=600.0,
+            forma_pagamento_2="cartao_debito",
+            valor_pagamento_2=500.0,
+        )
+
+
+def test_finalizacao_rejeita_pix_sem_confirmacao():
+    import app.controllers.pdv_controller as pdv_controller
+
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(bind=engine)
+    db = sessionmaker(autocommit=False, autoflush=False, bind=engine)()
+    try:
+        usuario = Usuario(nome="Admin PIX", email="admin-pix@example.test", senha_hash="x", role="admin")
+        produto = Produto(nome="PIX", preco=100.0, plataforma="PC", estoque_atual=5, ativo=True)
+        db.add_all([usuario, produto])
+        db.commit()
+
+        response = pdv_controller.finalizar_venda(
+            request=MagicMock(),
+            carrinho_json=json.dumps([{"produto_id": produto.id, "quantidade": 1}]),
+            cliente_id=0,
+            observacao="",
+            forma_pagamento="pix",
+            valor_recebido=100.0,
+            chave_idempotencia="pix-pendente",
+            pix_confirmado="false",
+            db=db,
+            usuario={"role": "admin", "id": usuario.id},
+        )
+        assert response.headers["location"] == "/pdv?erro=pix_nao_confirmado"
+        assert db.query(Venda).count() == 0
+        assert db.query(Pagamento).count() == 0
+        assert db.query(Produto).filter(Produto.id == produto.id).one().estoque_atual == 5
+    finally:
+        db.close()
+        Base.metadata.drop_all(bind=engine)
+        engine.dispose()
+
+
+def test_idempotencia_redireciona_sem_duplicar_venda(monkeypatch):
+    import app.controllers.pdv_controller as pdv_controller
+
+    monkeypatch.setattr(pdv_controller, "verificar_status_pix", lambda: {"disponivel": True})
+    engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
+    Base.metadata.create_all(bind=engine)
+    db = sessionmaker(autocommit=False, autoflush=False, bind=engine)()
+    try:
+        usuario = Usuario(nome="Admin Idempotente", email="admin-idempotente@example.test", senha_hash="x", role="admin")
+        produto = Produto(nome="Dinheiro", preco=100.0, plataforma="PC", estoque_atual=5, ativo=True)
+        db.add_all([usuario, produto])
+        db.commit()
+
+        args = dict(
+            request=MagicMock(),
+            carrinho_json=json.dumps([{"produto_id": produto.id, "quantidade": 1}]),
+            cliente_id=0,
+            observacao="",
+            forma_pagamento="dinheiro",
+            valor_recebido=100.0,
+            chave_idempotencia="venda-unica-001",
+            pix_confirmado="false",
+            db=db,
+            usuario={"role": "admin", "id": usuario.id},
+        )
+        primeira = pdv_controller.finalizar_venda(**args)
+        segunda = pdv_controller.finalizar_venda(**args)
+
+        venda_id = int(primeira.headers["location"].split("/pdv/venda/")[1].split("?")[0])
+        assert segunda.headers["location"] == f"/pdv/venda/{venda_id}?sucesso=ok"
+        assert db.query(Venda).filter(Venda.chave_idempotencia == "venda-unica-001").count() == 1
+        assert db.query(Pagamento).filter(Pagamento.venda_id == venda_id).count() == 1
+        assert db.query(Produto).filter(Produto.id == produto.id).one().estoque_atual == 4
+    finally:
+        db.close()
+        Base.metadata.drop_all(bind=engine)
+        engine.dispose()
+
+
+def test_fluxo_pdv_separa_modal_de_processamento():
+    from pathlib import Path
+
+    pdv = Path("app/static/js/pdv.js").read_text(encoding="utf-8")
+    template = Path("app/templates/admin/pos.html").read_text(encoding="utf-8")
+
+    inicio_confirmar = pdv.index("confirmar.addEventListener")
+    inicio_finalizar = pdv.index("async function finalizarVenda")
+    trecho_confirmado = pdv[inicio_confirmar:inicio_finalizar]
+
+    assert "estadoPagamentoPDV = 'processing'" in trecho_confirmado
+    assert "await finalizarVenda()" in trecho_confirmado
+    assert 'data-loading="local"' in template
+    trecho_abertura = pdv[pdv.index("function abrirConfirmacaoPagamento"):inicio_finalizar]
+    assert "EasyStoreLoading.begin" not in trecho_abertura

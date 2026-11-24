@@ -86,7 +86,6 @@
                             alt="{{ produto.nome }}"
                             class="prod-img"
                             loading="lazy"
-                            onerror="this.onerror=null;this.src='{{ request.url_for('static', path='img/logo.png') }}';"
                         >
                     </div>
 
@@ -137,7 +136,7 @@
             </div>
 
 
-            <form id="form-finalizar" action="/pdv/finalizar" method="POST">
+            <form id="form-finalizar" action="/pdv/finalizar" method="POST" data-loading="local">
 
                 <input
                     type="hidden"
@@ -425,7 +424,46 @@
 </div>
 
 
-<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=7"></script>
+<div id="modal-confirmacao-pagamento" class="modal-confirmacao-pagamento" aria-hidden="true">
+    <div class="modal-confirmacao-caixa" role="dialog" aria-modal="true" aria-labelledby="titulo-confirmacao-pagamento">
+        <header class="modal-confirmacao-header">
+            <div>
+                <span class="modal-confirmacao-kicker">Finalização da venda</span>
+                <h3 id="titulo-confirmacao-pagamento">Deseja confirmar o pagamento?</h3>
+            </div>
+            <button type="button" id="btn-fechar-confirmacao-pagamento" class="btn-fechar-confirmacao-pagamento" aria-label="Voltar à venda">×</button>
+        </header>
+
+        <div class="modal-confirmacao-body">
+            <div class="confirmacao-total-destaque">
+                <span>Valor final a pagar</span>
+                <strong id="confirmacao-total">R$ 0,00</strong>
+            </div>
+
+            <div class="confirmacao-resumo-valores">
+                <div><span>Subtotal</span><strong id="confirmacao-subtotal">R$ 0,00</strong></div>
+                <div><span>Descontos</span><strong id="confirmacao-desconto">R$ 0,00</strong></div>
+            </div>
+
+            <div class="confirmacao-metodos-section">
+                <span class="confirmacao-metodos-titulo">Métodos de pagamento</span>
+                <div id="confirmacao-metodos" class="confirmacao-metodos-lista" aria-live="polite"></div>
+            </div>
+
+            {% if role != 'admin' %}
+            <p class="confirmacao-operador-aviso">A forma de pagamento será registrada conforme a configuração atual do caixa.</p>
+            {% endif %}
+        </div>
+
+        <footer class="modal-confirmacao-footer">
+            <button type="button" id="btn-voltar-confirmacao-pagamento" class="btn-custom-flat btn-secondary-flat">Voltar à venda</button>
+            <button type="button" id="btn-confirmar-pagamento-modal" class="btn-custom-flat btn-primary-flat">Confirmar pagamento</button>
+        </footer>
+    </div>
+</div>
+
+
+<script src="{{ request.url_for('static', path='js/pdv.js') }}?v=8"></script>
 
 <script src="{{ request.url_for('static', path='js/checkout.js') }}?v=7"></script>
 
@@ -457,6 +495,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const btnRetestarPix = document.getElementById("btn-retestar-pix");
     let pixDisponivelGlobal = true;
     let checandoPix = false;
+    let pixStatusCache = null;
+    let pixStatusEmAndamento = null;
 
     async function checarStatusPix(notificarSucesso = false) {
         if (checandoPix) return;
@@ -464,23 +504,54 @@ document.addEventListener("DOMContentLoaded", function () {
         if (pixStatusTexto) pixStatusTexto.textContent = "Verificando serviço PIX...";
         if (btnRetestarPix) btnRetestarPix.disabled = true;
 
+        if (notificarSucesso === false && pixStatusCache && pixStatusCache.expiraEm > Date.now()) {
+            pixDisponivelGlobal = pixStatusCache.disponivel;
+            if (pixDisponivelGlobal) {
+                pixStatusBanner.className = "pix-status-banner operacional mb-2";
+                pixStatusTexto.textContent = "PIX operacional e conectado";
+                habilitarOpcaoPixNosSelects(true);
+            } else {
+                pixStatusBanner.className = "pix-status-banner indisponivel mb-2";
+                pixStatusTexto.textContent = "PIX indisponível";
+                habilitarOpcaoPixNosSelects(false);
+            }
+            checandoPix = false;
+            if (btnRetestarPix) btnRetestarPix.disabled = false;
+            return;
+        }
+
+        if (pixStatusEmAndamento) {
+            try {
+                await pixStatusEmAndamento;
+            } finally {
+                checandoPix = false;
+                if (btnRetestarPix) btnRetestarPix.disabled = false;
+            }
+            return;
+        }
+
+        pixStatusEmAndamento = fetch("/pdv/api/pix-status", {
+            method: "GET",
+            credentials: "same-origin",
+            headers: { "Accept": "application/json" }
+        }).finally(() => {
+            pixStatusEmAndamento = null;
+        });
+
         try {
-            const res = await fetch("/pdv/api/pix-status", {
-                method: "GET",
-                credentials: "same-origin",
-                headers: { "Accept": "application/json" }
-            });
+            const res = await pixStatusEmAndamento;
             const data = await res.json();
             pixDisponivelGlobal = !!data.disponivel;
+            pixStatusCache = {
+                disponivel: pixDisponivelGlobal,
+                expiraEm: Date.now() + 15000,
+            };
 
             if (pixDisponivelGlobal) {
                 pixStatusBanner.className = "pix-status-banner operacional mb-2";
                 pixStatusTexto.textContent = "PIX operacional e conectado";
                 pixStatusBanner.title = data.motivo || "Serviço PIX conectado com sucesso.";
                 habilitarOpcaoPixNosSelects(true);
-                if (notificarSucesso && typeof mostrarAlerta === "function") {
-                    mostrarAlerta("Conexão com o serviço PIX restabelecida!", "success");
-                }
             } else {
                 pixStatusBanner.className = "pix-status-banner indisponivel mb-2";
                 const motivoMsg = data.motivo || "PIX temporariamente indisponível. Não foi possível estabelecer conexão com o serviço de pagamento. Escolha outra forma de pagamento ou tente novamente mais tarde.";
@@ -780,8 +851,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // Eventos de digitação (input em tempo real para cálculo instantâneo)
+    let debounceRecalculo;
     inputValorForma1.addEventListener("input", function() {
-        recalcularPagamentos("input1");
+        if (debounceRecalculo) clearTimeout(debounceRecalculo);
+        debounceRecalculo = setTimeout(() => recalcularPagamentos("input1"), 80);
     });
 
     selectForma1.addEventListener("change", function() {
@@ -816,6 +889,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Integração Pix
     let requisicaoPixEmAndamento = false;
+    let pixQrAbortController = null;
+    const pixQrCache = new Map();
 
     async function abrirModalPix(valor) {
         // Validações no Front-end:
@@ -849,6 +924,21 @@ document.addEventListener("DOMContentLoaded", function () {
         requisicaoPixEmAndamento = true;
         if (btnVerPix) btnVerPix.disabled = true;
 
+        const chaveQr = valorNumerico.toFixed(2);
+        const qrCacheado = pixQrCache.get(chaveQr);
+        if (qrCacheado && qrCacheado.expiraEm > Date.now()) {
+            modalPixValor.textContent = formatarMoeda(valorNumerico);
+            modalPixValor.dataset.valorCobrado = chaveQr;
+            pixLoading.style.display = "none";
+            pixImg.src = qrCacheado.qrcode_b64;
+            pixImg.style.display = "inline-block";
+            pixInput.value = qrCacheado.payload || "";
+            modalPix.style.display = "flex";
+            requisicaoPixEmAndamento = false;
+            if (btnVerPix) btnVerPix.disabled = false;
+            return;
+        }
+
         modalPixValor.textContent = formatarMoeda(valorNumerico);
         modalPixValor.dataset.valorCobrado = valorNumerico.toFixed(2);
         pixLoading.style.display = "block";
@@ -858,13 +948,19 @@ document.addEventListener("DOMContentLoaded", function () {
         pixInput.value = "";
         modalPix.style.display = "flex";
 
+        // Abortador para requisições obsoletas
+        if (pixQrAbortController) pixQrAbortController.abort();
+        pixQrAbortController = new AbortController();
+        const { signal: abortSignal } = pixQrAbortController;
+
         try {
             const res = await fetch(`/pdv/api/pix-qrcode?valor=${valorNumerico.toFixed(2)}&forma_pagamento=pix`, {
                 method: "GET",
                 credentials: "same-origin",
                 headers: {
                     Accept: "application/json"
-                }
+                },
+                signal: pixQrAbortController.signal,
             });
 
             const contentType = (res.headers.get("content-type") || "").toLowerCase();
@@ -883,11 +979,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 throw new Error("Resposta inválida da API do PIX.");
             }
 
+            // Cache do QR Code por valor
+            pixQrCache.set(chaveQr, {
+                payload: data.payload || "",
+                qrcode_b64: data.qrcode_b64,
+                expiraEm: Date.now() + 60000,
+            });
+
             pixImg.src = data.qrcode_b64;
             pixImg.style.display = "inline-block";
             pixInput.value = data.payload || "";
             pixLoading.style.display = "none";
         } catch (e) {
+            if (e && e.name === "AbortError") return;
             pixLoading.textContent = e?.message || "ERRO AO CARREGAR QR CODE.";
             pixImg.style.display = "none";
             pixImg.src = "";
@@ -918,7 +1022,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (btnFecharPixTopo) btnFecharPixTopo.addEventListener("click", fecharModalPix);
     if (btnCancelarPixModal) btnCancelarPixModal.addEventListener("click", fecharModalPix);
-    if (btnConfirmarPix) btnConfirmarPix.addEventListener("click", fecharModalPix);
+    if (btnConfirmarPix) btnConfirmarPix.addEventListener("click", function() {
+        pixConfirmadoVenda = true;
+        fecharModalPix();
+    });
 
     if (btnCopiarPix) {
         btnCopiarPix.addEventListener("click", () => {

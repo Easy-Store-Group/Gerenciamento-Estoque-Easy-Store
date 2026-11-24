@@ -19,7 +19,7 @@ from urllib.parse import quote
 logger = logging.getLogger("pdv.pix")
 
 from fastapi import APIRouter, Depends, Request, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -360,7 +360,16 @@ def tela_pdv(
 @router.get("/api/pix-status")
 def api_pix_status(usuario=Depends(get_admin_ou_operador)):
     """Verifica a conectividade e disponibilidade do serviço de pagamento PIX."""
-    return verificar_status_pix()
+    status_pix = verificar_status_pix()
+    resposta = {
+        "disponivel": bool(status_pix.get("disponivel")),
+        "motivo": status_pix.get("motivo"),
+        "codigo": status_pix.get("codigo"),
+    }
+    return JSONResponse(
+        content=resposta,
+        headers={"Cache-Control": "private, max-age=15, must-revalidate"},
+    )
 
 
 @router.get("/api/pix-qrcode")
@@ -499,6 +508,10 @@ def finalizar_venda(
 
     parcelas_forma_2: int | None = Form(None),
 
+    chave_idempotencia: str | None = Form(None),
+
+    pix_confirmado: str | None = Form(None),
+
     db: Session = Depends(get_db),
 
     usuario=Depends(get_admin_ou_operador)
@@ -512,6 +525,20 @@ def finalizar_venda(
     valor_pagamento_2 = _clean_form_val(valor_pagamento_2)
     parcelas_forma_1 = _clean_form_val(parcelas_forma_1)
     parcelas_forma_2 = _clean_form_val(parcelas_forma_2)
+    chave_idempotencia = _clean_form_val(chave_idempotencia)
+    pix_confirmado = _clean_form_val(pix_confirmado)
+
+    if chave_idempotencia:
+        venda_existente = db.query(Venda).filter(Venda.chave_idempotencia == chave_idempotencia).first()
+        if venda_existente:
+            return RedirectResponse(
+                url=f"/pdv/venda/{venda_existente.id}?sucesso=ok",
+                status_code=302,
+            )
+
+    usa_pix = forma_pagamento == "pix" or forma_pagamento_1 == "pix" or forma_pagamento_2 == "pix"
+    if usa_pix and str(pix_confirmado).lower() != "true":
+        return _redirect_pdv(db, "/pdv?erro=pix_nao_confirmado")
 
     # ========================================================
     # IDENTIFICA SE É ADMIN
@@ -780,6 +807,8 @@ def finalizar_venda(
             total_liquido=total_liquido,
 
             observacao=observacao or None,
+
+            chave_idempotencia=chave_idempotencia,
         )
 
 

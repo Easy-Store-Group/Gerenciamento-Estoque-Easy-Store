@@ -106,6 +106,8 @@
       return;
     }
 
+    const showDelay = options.showNow ? 0 : CONFIG.showDelay;
+
     if (showTimer) window.clearTimeout(showTimer);
     showTimer = window.setTimeout(() => {
       showTimer = null;
@@ -123,7 +125,7 @@
       safetyTimer = window.setTimeout(() => {
         forceEnd();
       }, CONFIG.maxDuration);
-    }, CONFIG.showDelay);
+    }, showDelay);
   }
 
   function hide() {
@@ -189,7 +191,7 @@
     }
 
     const first = operations.values().next().value;
-    show({ context: first.context, blocking: first.blocking });
+    show({ context: first.context, blocking: first.blocking, showNow: first.showNow });
   }
 
   function begin(options = {}) {
@@ -198,6 +200,7 @@
     operations.set(id, {
       context: options.context || "page",
       blocking: options.blocking !== false,
+      showNow: options.showNow === true,
     });
     refresh();
     return id;
