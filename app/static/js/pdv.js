@@ -432,6 +432,14 @@ function exibirErroDaUrl() {
     const erro = params.get('erro');
     if (!erro) return;
 
+    mostrarErroFinalizacao(erro, params);
+
+    const url = new URL(window.location.href);
+    url.search = '';
+    window.history.replaceState({}, '', url);
+}
+
+function mostrarErroFinalizacao(erro, params = new URLSearchParams()) {
     const mensagens = {
         json: 'Carrinho inválido. Tente adicionar os produtos novamente.',
         vazio: 'O carrinho está vazio. Adicione produtos antes de finalizar.',
@@ -451,10 +459,6 @@ function exibirErroDaUrl() {
     };
 
     mostrarAlerta(mensagens[erro] || 'Ocorreu um erro ao finalizar a venda.', 'warning');
-
-    const url = new URL(window.location.href);
-    url.search = '';
-    window.history.replaceState({}, '', url);
 }
 
 function mostrarAlerta(mensagem, tipo = 'success') {
@@ -631,20 +635,30 @@ async function finalizarVenda() {
             redirect: "follow",
         });
 
-        if (!response.ok) throw new Error('Falha ao processar venda');
-
         const respostaUrl = new URL(response.url, window.location.href);
         if (!respostaUrl.pathname.includes('/pdv/venda/')) {
             const erro = respostaUrl.searchParams.get('erro');
-            throw new Error(erro ? `Pagamento não concluído: ${erro}` : 'Pagamento não concluído');
+            if (erro) {
+                mostrarErroFinalizacao(erro, respostaUrl.searchParams);
+                throw new Error(`Finalização recusada: ${erro}`);
+            }
+            if (!response.ok) throw new Error(`Falha HTTP ${response.status} ao processar venda`);
+            throw new Error('Resposta inesperada ao processar venda');
         }
+
+        if (!response.ok) throw new Error(`Falha HTTP ${response.status} ao processar venda`);
 
         estadoPagamentoPDV = 'success';
         carrinho = [];
         limparCarrinhoPersistidoPDV();
         window.location.href = response.url;
     } catch (error) {
-        mostrarAlerta("Erro ao finalizar venda. Verifique sua conexão e tente novamente.", "warning");
+        if (!error.message.startsWith('Finalização recusada:')) {
+            const mensagem = error instanceof TypeError
+                ? 'Não foi possível conectar ao sistema. O carrinho foi preservado; tente novamente.'
+                : 'O sistema não confirmou a finalização. O carrinho foi preservado; tente novamente.';
+            mostrarAlerta(mensagem, "warning");
+        }
         estadoPagamentoPDV = 'error';
         if (btn) {
             btn.disabled = false;

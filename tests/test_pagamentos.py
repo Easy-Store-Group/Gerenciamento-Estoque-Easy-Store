@@ -798,4 +798,5 @@ def test_pdv_preserva_carrinho_em_erro_e_limpa_somente_no_comprovante():
     assert "sessionStorage.getItem(PDV_CART_STORAGE_KEY" in pdv
     assert "limparCarrinhoPersistidoPDV()" in pdv
     assert "respostaUrl.pathname.includes('/pdv/venda/')" in pdv
-    assert "throw new Error(erro ? `Pagamento não concluído" in pdv
+    assert "mostrarErroFinalizacao(erro, respostaUrl.searchParams)" in pdv
+    assert "O carrinho foi preservado; tente novamente." in pdv
