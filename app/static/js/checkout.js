@@ -43,12 +43,7 @@ function handleCheckoutClick(event) {
 }
 
 function agendarLoading(btn) {
-    btn.classList.add('loading');
-    
-    // Simular processamento
-    setTimeout(() => {
-        btn.classList.remove('loading');
-    }, 1500);
+    btn.classList.add("loading");
 }
 
 function updateCheckoutButtonState() {

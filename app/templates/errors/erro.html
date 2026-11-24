@@ -7,6 +7,8 @@
   <title>{{ codigo }} — {{ titulo }} | EasyStore</title>
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/style.css') }}">
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/errors.css') }}">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/global-loading.css') }}?v=1">
+  <script src="{{ request.url_for('static', path='js/global-loading.js') }}?v=1" defer></script>
 </head>
 <body class="auth-required-page error-page">
   <main class="auth-required error-layout">

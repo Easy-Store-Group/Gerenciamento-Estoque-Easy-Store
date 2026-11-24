@@ -11,6 +11,7 @@
   <link rel="stylesheet" href="{{ request.url_for('static', path=css_path) }}?v={{ '10' if css_path == 'css/pos.css' else '7' }}">
   {% endif %}
   <link rel="stylesheet" href="{{ request.url_for('static', path='css/admin-theme.css') }}?v=2">
+  <link rel="stylesheet" href="{{ request.url_for('static', path='css/global-loading.css') }}?v=1">
 </head>
 <body>
   <button type="button" class="sidebar-toggle" aria-label="Abrir menu" aria-expanded="false">
@@ -198,5 +199,6 @@
   </div>
 
   <script src="{{ request.url_for('static', path='js/confirm.js') }}?v=2"></script>
+  <script src="{{ request.url_for('static', path='js/global-loading.js') }}?v=1" defer></script>
 </body>
 </html>
